@@ -1,4 +1,7 @@
 // app.js
+// 引入API请求库
+const api = require('./utils/api');
+
 App({
   onLaunch: function () {
     // 展示本地存储能力
@@ -20,34 +23,38 @@ App({
       this.globalData.isLoggedIn = true
       this.globalData.userInfo = userInfo
       
-      // 可以在这里验证token的有效性
-      // this.verifyToken(token)
+      // 验证token的有效性并获取最新用户信息
+      this.verifyToken(token)
     }
   },
 
   // 验证Token的有效性
   verifyToken: function (token) {
-    wx.request({
-      url: this.globalData.baseAPI + '/api/user/profile',
-      method: 'GET',
-      header: {
-        'Authorization': 'Bearer ' + token
-      },
-      success: (res) => {
-        if (res.data.success) {
-          // Token有效，更新用户信息
-          this.globalData.userInfo = res.data.data
-          wx.setStorageSync('userInfo', res.data.data)
-        } else {
-          // Token无效，清除登录状态
-          this.clearLoginStatus()
-        }
-      },
-      fail: () => {
-        // 请求失败，可能是网络问题
-        console.error('验证Token失败')
-      }
+    // 显示加载提示
+    wx.showLoading({
+      title: '自动登录中',
+      mask: true
     })
+    
+    // 使用封装的API请求函数调用用户资料接口
+    api.get('/api/user/profile')
+      .then(res => {
+        // 隐藏加载提示
+        wx.hideLoading()
+        
+        // Token有效，更新用户信息
+        this.globalData.userInfo = res.data
+        wx.setStorageSync('userInfo', res.data)
+        console.log('自动登录成功，用户信息已更新')
+      })
+      .catch(err => {
+        // 隐藏加载提示
+        wx.hideLoading()
+        
+        // Token无效或请求失败，清除登录状态
+        console.error('验证Token失败:', err)
+        this.clearLoginStatus()
+      })
   },
 
   // 清除登录状态
