@@ -17,18 +17,18 @@ class AuthService {
       // MVP阶段使用模拟的openid
       // 实际项目中应使用code换取openid
       // 通过微信API: https://api.weixin.qq.com/sns/jscode2session
-      const openid = `simulated_openid_${code}`;
+      const wechat_openid = `simulated_openid_${code}`;
       
       // 查找用户是否已存在
-      let user = await userModel.findByOpenid(openid);
+      let user = await userModel.findByOpenid(wechat_openid);
       
       // 不存在则创建新用户
       if (!user) {
         const { nickName, avatarUrl } = userInfo;
         user = await userModel.create({
-          openid,
+          wechat_openid,
           nickname: nickName || '宠友',
-          avatar: avatarUrl || '',
+          avatar_url: avatarUrl || '',
           role: 'pet_owner' // 默认角色为宠物主
         });
       }
@@ -41,8 +41,9 @@ class AuthService {
         user: {
           id: user.id,
           nickname: user.nickname,
-          avatar: user.avatar,
-          role: user.role
+          avatar: user.avatar_url,
+          role: user.role,
+          hasProfile: !!user.hasProfile
         }
       };
     } catch (error) {

@@ -8,14 +8,14 @@ const bcrypt = require('bcrypt');
 class UserModel {
   /**
    * 通过微信OpenID查找用户
-   * @param {string} openid - 微信OpenID
+   * @param {string} wechat_openid - 微信OpenID
    * @returns {Promise<Object|null>} 用户对象或null
    */
-  async findByOpenid(openid) {
+  async findByOpenid(wechat_openid) {
     try {
       const [rows] = await pool.execute(
-        'SELECT * FROM users WHERE openid = ?',
-        [openid]
+        'SELECT * FROM users WHERE wechat_openid = ?',
+        [wechat_openid]
       );
       return rows.length > 0 ? rows[0] : null;
     } catch (error) {
@@ -32,10 +32,23 @@ class UserModel {
   async findById(id) {
     try {
       const [rows] = await pool.execute(
-        'SELECT id, username, nickname, avatar, role, phone, email, created_at, updated_at FROM users WHERE id = ?',
+        'SELECT id, nickname, avatar_url, role, gender, status, identity_status, created_at, updated_at FROM users WHERE id = ?',
         [id]
       );
-      return rows.length > 0 ? rows[0] : null;
+      
+      if (rows.length > 0) {
+        // 检查用户是否有帮溜员资料
+        if (rows[0].role === 'sitter') {
+          const [profileRows] = await pool.execute(
+            'SELECT * FROM sitter_profiles WHERE user_id = ?',
+            [id]
+          );
+          rows[0].hasProfile = profileRows.length > 0;
+        }
+        return rows[0];
+      }
+      
+      return null;
     } catch (error) {
       console.error('查找用户失败:', error);
       throw error;
@@ -49,11 +62,11 @@ class UserModel {
    */
   async create(userData) {
     try {
-      const { openid, nickname, avatar, role = 'pet_owner' } = userData;
+      const { wechat_openid, nickname, avatar_url, role = 'pet_owner' } = userData;
       
       const [result] = await pool.execute(
-        'INSERT INTO users (openid, nickname, avatar, role, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())',
-        [openid, nickname, avatar, role]
+        'INSERT INTO users (wechat_openid, nickname, avatar_url, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, "active", NOW(), NOW())',
+        [wechat_openid, nickname, avatar_url, role]
       );
       
       const userId = result.insertId;
@@ -72,7 +85,7 @@ class UserModel {
    */
   async update(id, userData) {
     try {
-      const allowedFields = ['nickname', 'avatar', 'phone', 'email'];
+      const allowedFields = ['nickname', 'avatar_url', 'gender', 'role'];
       const updates = [];
       const values = [];
 
@@ -121,7 +134,7 @@ class UserModel {
       }
 
       const admin = rows[0];
-      const passwordMatch = await bcrypt.compare(password, admin.password);
+      const passwordMatch = await bcrypt.compare(password, admin.password_hash);
 
       if (!passwordMatch) {
         return null;
@@ -130,7 +143,7 @@ class UserModel {
       return {
         id: admin.id,
         username: admin.username,
-        role: 'admin'
+        role: admin.role || 'admin'
       };
     } catch (error) {
       console.error('验证管理员登录失败:', error);

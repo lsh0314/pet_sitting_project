@@ -13,17 +13,17 @@ class AuthController {
    */
   async wechatLogin(req, res) {
     try {
-      const { code, userInfo } = req.body;
+      const { code } = req.body;
       
       if (!code) {
-        return error(res, '缺少微信code', 400);
+        return error(res, '缺少微信code', 400, { errorCode: 'INVALID_PARAM' });
       }
       
-      const result = await authService.wechatLogin(code, userInfo);
-      return success(res, result, '登录成功');
+      const result = await authService.wechatLogin(code, req.body);
+      return success(res, result);
     } catch (err) {
       console.error('微信登录失败:', err);
-      return error(res, '登录失败', 500, err);
+      return error(res, '登录失败', 500, { errorCode: 'SERVER_ERROR' });
     }
   }
   
@@ -37,14 +37,14 @@ class AuthController {
       const { username, password } = req.body;
       
       if (!username || !password) {
-        return error(res, '用户名和密码不能为空', 400);
+        return error(res, '用户名和密码不能为空', 400, { errorCode: 'INVALID_PARAM' });
       }
       
       const result = await authService.adminLogin(username, password);
-      return success(res, result, '登录成功');
+      return success(res, result);
     } catch (err) {
       console.error('管理员登录失败:', err);
-      return error(res, err.message || '登录失败', 401, err);
+      return error(res, err.message || '登录失败', 401, { errorCode: 'UNAUTHORIZED' });
     }
   }
 }
