@@ -1,0 +1,64 @@
+<view class="container">
+  <!-- 顶部标题栏 -->
+  <view class="header">
+    <view class="logo-area">
+      <view class="logo-text">宠物派</view>
+    </view>
+    <view class="rating-area">
+      <text class="star-icon">☆</text>
+      <text class="rating-text">5.0</text>
+    </view>
+  </view>
+  
+  <!-- 卡通人物区域 -->
+  <view class="mascot-area">
+    <image class="mascot-image" src="/static/images/mascot.png" mode="aspectFit"></image>
+  </view>
+  
+  <!-- 服务选择区域 -->
+  <view class="service-select-container">
+    <view class="service-row">
+      <view class="service-item" bindtap="navigateToService" data-type="cat">
+        <image class="service-icon" src="/static/images/cat.png" mode="aspectFit"></image>
+        <view class="service-name">上门喂猫</view>
+        <view class="service-btn">预订</view>
+      </view>
+      
+      <view class="service-item" bindtap="navigateToService" data-type="dog">
+        <image class="service-icon" src="/static/images/dog.png" mode="aspectFit"></image>
+        <view class="service-name">上门遛狗</view>
+        <view class="service-btn">预订</view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 服务统计区域 -->
+  <view class="stats-container">
+    <image class="stats-icon" src="/static/images/pet-icon.png" mode="aspectFit"></image>
+    <view class="stats-info">
+      <view class="stats-text">已累计服务宠物</view>
+      <view class="stats-number">截止2025.05</view>
+    </view>
+  </view>
+  
+  <!-- 功能区域 -->
+  <view class="features-container">
+    <view class="feature-item" bindtap="navigateToFeature" data-feature="subscribe">
+      <image class="feature-icon" src="/static/images/subscribe.png" mode="aspectFit"></image>
+      <view class="feature-title">关注公众号</view>
+      <view class="feature-desc">订阅最新活动</view>
+    </view>
+    
+    <view class="feature-item" bindtap="navigateToFeature" data-feature="coupon">
+      <image class="feature-icon" src="/static/images/coupon.png" mode="aspectFit"></image>
+      <view class="feature-title">储值优惠</view>
+      <view class="feature-desc">最高赠¥500</view>
+    </view>
+    
+    <view class="feature-item" bindtap="navigateToFeature" data-feature="adoption">
+      <image class="feature-icon" src="/static/images/adoption.png" mode="aspectFit"></image>
+      <view class="feature-title">宠物领养</view>
+      <view class="feature-desc">领养代替购买</view>
+    </view>
+  </view>
+</view> 

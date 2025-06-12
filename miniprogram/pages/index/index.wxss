@@ -1,0 +1,305 @@
+/* 页面容器 */
+.container {
+  padding: 0;
+  background-color: #fde74c;
+  min-height: 100vh;
+}
+
+/* 顶部标题栏 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 30rpx;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+}
+
+.logo-text {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.rating-area {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 30rpx;
+  padding: 6rpx 20rpx;
+}
+
+.star-icon {
+  color: #333;
+  font-size: 32rpx;
+  margin-right: 8rpx;
+}
+
+.rating-text {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 卡通人物区域 */
+.mascot-area {
+  display: flex;
+  justify-content: center;
+  margin: 20rpx 0;
+}
+
+.mascot-image {
+  width: 300rpx;
+  height: 300rpx;
+}
+
+/* 服务选择区域 */
+.service-select-container {
+  background-color: #fff;
+  border-radius: 20rpx 20rpx 0 0;
+  padding: 30rpx;
+  margin-top: 20rpx;
+}
+
+.service-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.service-item {
+  width: 48%;
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.service-icon {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 16rpx;
+}
+
+.service-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.service-btn {
+  font-size: 24rpx;
+  color: #fff;
+  background-color: #ff7b7b;
+  border-radius: 30rpx;
+  padding: 6rpx 20rpx;
+}
+
+/* 服务统计区域 */
+.stats-container {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  padding: 30rpx;
+}
+
+.stats-icon {
+  width: 100rpx;
+  height: 100rpx;
+  margin-right: 20rpx;
+}
+
+.stats-info {
+  flex: 1;
+}
+
+.stats-text {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 6rpx;
+}
+
+.stats-number {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 功能区域 */
+.features-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: #fff;
+  padding: 30rpx;
+}
+
+.feature-item {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.feature-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 10rpx;
+}
+
+.feature-title {
+  font-size: 26rpx;
+  color: #333;
+  margin-bottom: 6rpx;
+}
+
+.feature-desc {
+  font-size: 22rpx;
+  color: #999;
+}
+
+/* 帮溜员列表 */
+.sitter-list {
+  padding: 20rpx;
+}
+
+.sitter-item {
+  display: flex;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  background-color: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.sitter-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-right: 20rpx;
+  background-color: #f5f5f5;
+}
+
+.sitter-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.sitter-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.sitter-rating {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+  font-size: 24rpx;
+  color: #ffbe00;
+}
+
+.sitter-orders {
+  margin-left: 20rpx;
+  color: #999;
+}
+
+.sitter-bio {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.sitter-service-tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.service-tag {
+  font-size: 22rpx;
+  color: #1296db;
+  background-color: rgba(18, 150, 219, 0.1);
+  padding: 6rpx 16rpx;
+  border-radius: 30rpx;
+  margin-right: 16rpx;
+  margin-bottom: 10rpx;
+}
+
+/* 加载更多 */
+.loading-more {
+  text-align: center;
+  padding: 20rpx 0;
+  color: #999;
+  font-size: 24rpx;
+}
+
+/* 加载中状态 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.loading-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 20rpx;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid #1296db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 错误状态 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+}
+
+.error-container text {
+  margin: 20rpx 0;
+  color: #666;
+}
+
+.btn-retry {
+  margin-top: 20rpx;
+  background-color: #1296db;
+  color: #fff;
+  border: none;
+  font-size: 28rpx;
+  padding: 8rpx 30rpx;
+}
+
+/* 空状态 */
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+  color: #999;
+}

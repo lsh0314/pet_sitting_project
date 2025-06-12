@@ -1,0 +1,68 @@
+<view class="container">
+  <!-- 帮溜员信息 -->
+  <view class="sitter-info-container" wx:if="{{!loading && sitterInfo}}">
+    <view class="sitter-header">
+      <image class="sitter-avatar" src="{{sitterInfo.avatar || '/static/images/default-avatar.png'}}"></image>
+      <view class="sitter-basic">
+        <view class="sitter-name">{{sitterInfo.nickname}}</view>
+        <view class="sitter-rating">
+          <text class="iconfont icon-star"></text>
+          <text>{{sitterInfo.rating || '5.0'}}</text>
+          <text class="sitter-orders">完成 {{sitterInfo.totalServices || 0}} 单</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="sitter-content">
+      <!-- 个人简介 -->
+      <view class="section">
+        <view class="section-title">个人简介</view>
+        <view class="section-content">
+          <text class="bio">{{sitterInfo.bio || '这位帮溜员很懒，还没有填写简介~'}}</text>
+        </view>
+      </view>
+      
+      <!-- 服务区域 -->
+      <view class="section">
+        <view class="section-title">服务区域</view>
+        <view class="section-content">
+          <text>{{sitterInfo.serviceArea || '暂无服务区域信息'}}</text>
+        </view>
+      </view>
+      
+      <!-- 服务项目和价格 -->
+      <view class="section">
+        <view class="section-title">服务项目</view>
+        <view class="section-content">
+          <view class="service-list">
+            <view class="service-item" wx:for="{{sitterInfo.services}}" wx:key="type">
+              <view class="service-name">
+                {{item.type === 'walk' ? '遛狗' : 
+                  item.type === 'feed' ? '喂食' : '寄养'}}
+              </view>
+              <view class="service-price">¥{{item.price}}/次</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 底部操作栏 -->
+    <view class="footer-action">
+      <button class="btn-primary btn-order" bindtap="onTapOrder">向TA下单</button>
+    </view>
+  </view>
+  
+  <!-- 加载中状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-icon"></view>
+    <text>正在加载...</text>
+  </view>
+  
+  <!-- 错误状态 -->
+  <view class="error-container" wx:if="{{error}}">
+    <icon type="warn" size="64"></icon>
+    <text>加载失败，请重试</text>
+    <button class="btn-retry" bindtap="onTapRetry">重新加载</button>
+  </view>
+</view> 

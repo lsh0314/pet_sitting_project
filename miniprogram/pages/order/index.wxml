@@ -1,0 +1,87 @@
+<view class="container">
+  <!-- 标题栏 -->
+  <view class="header">
+    <view class="header-title">我的订单</view>
+    <view class="header-more">•••</view>
+  </view>
+  
+  <!-- 标签页 -->
+  <view class="tab-container">
+    <view 
+      class="tab-item {{currentTab === index ? 'active' : ''}}" 
+      wx:for="{{tabs}}" 
+      wx:key="index" 
+      bindtap="switchTab" 
+      data-tab="{{index}}"
+    >
+      {{item}}
+    </view>
+  </view>
+  
+  <!-- 订单列表 -->
+  <view class="order-list" wx:if="{{orders.length > 0}}">
+    <view class="order-item" wx:for="{{orders}}" wx:key="id">
+      <view class="order-header">
+        <view class="order-id">订单号: {{item.id}}</view>
+        <view class="order-status">{{item.statusText}}</view>
+      </view>
+      <view class="order-content">
+        <view class="order-info">
+          <view class="info-item">
+            <text class="label">服务类型:</text>
+            <text class="value">{{item.serviceTypeText}}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">服务时间:</text>
+            <text class="value">{{item.serviceDate}} {{item.startTime}}-{{item.endTime}}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">服务地点:</text>
+            <text class="value">{{item.address}}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">订单金额:</text>
+            <text class="value price">¥{{item.price}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="order-footer">
+        <view class="action-btns">
+          <!-- 根据不同状态显示不同按钮 -->
+          <button 
+            class="btn-default" 
+            wx:if="{{item.status === 'pending'}}"
+            data-id="{{item.id}}"
+            bindtap="cancelOrder"
+          >取消订单</button>
+          
+          <button 
+            class="btn-primary" 
+            wx:if="{{item.status === 'accepted'}}"
+            data-id="{{item.id}}"
+            bindtap="payOrder"
+          >去支付</button>
+          
+          <!-- 查看详情按钮 -->
+          <button 
+            class="btn-default" 
+            data-id="{{item.id}}"
+            bindtap="viewOrderDetail"
+          >查看详情</button>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 空状态 -->
+  <view class="empty-container" wx:if="{{!loading && orders.length === 0}}">
+    <image class="empty-icon" src="/static/images/empty-cat.png"></image>
+    <view class="empty-text">喵~暂时还没有订单</view>
+  </view>
+  
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-icon"></view>
+    <view class="loading-text">加载中...</view>
+  </view>
+</view> 

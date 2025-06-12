@@ -1,0 +1,132 @@
+<view class="container">
+  <!-- 标题 -->
+  <view class="page-title">创建订单</view>
+  
+  <!-- 帮溜员信息 -->
+  <view class="sitter-card card" wx:if="{{sitterInfo}}">
+    <image class="sitter-avatar" src="{{sitterInfo.avatar || '/static/images/default-avatar.png'}}"></image>
+    <view class="sitter-info">
+      <view class="sitter-name">{{sitterInfo.nickname}}</view>
+      <view class="sitter-rating">
+        <text class="iconfont icon-star"></text>
+        <text>{{sitterInfo.rating || '5.0'}}</text>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 订单表单 -->
+  <view class="order-form">
+    <!-- 选择宠物 -->
+    <view class="form-section">
+      <view class="section-title">选择宠物</view>
+      <view class="pet-list">
+        <view 
+          class="pet-item {{selectedPetId === item.id ? 'selected' : ''}}" 
+          wx:for="{{pets}}" 
+          wx:key="id" 
+          bindtap="onSelectPet" 
+          data-id="{{item.id}}"
+        >
+          <image class="pet-avatar" src="{{item.photo || '/static/images/default-pet.png'}}"></image>
+          <view class="pet-name">{{item.name}}</view>
+        </view>
+        
+        <!-- 添加宠物按钮 -->
+        <navigator url="/pages/pet/create" class="pet-item add-pet">
+          <view class="add-icon">+</view>
+          <view class="pet-name">添加宠物</view>
+        </navigator>
+      </view>
+    </view>
+    
+    <!-- 选择服务类型 -->
+    <view class="form-section">
+      <view class="section-title">服务类型</view>
+      <view class="service-types">
+        <view 
+          class="service-type-item {{serviceType === 'walk' ? 'selected' : ''}}" 
+          bindtap="onSelectServiceType" 
+          data-type="walk"
+        >
+          <image class="service-icon" src="/static/images/walk.png"></image>
+          <view class="service-name">遛狗</view>
+        </view>
+        <view 
+          class="service-type-item {{serviceType === 'feed' ? 'selected' : ''}}" 
+          bindtap="onSelectServiceType" 
+          data-type="feed"
+        >
+          <image class="service-icon" src="/static/images/feed.png"></image>
+          <view class="service-name">喂食</view>
+        </view>
+        <view 
+          class="service-type-item {{serviceType === 'boarding' ? 'selected' : ''}}" 
+          bindtap="onSelectServiceType" 
+          data-type="boarding"
+        >
+          <image class="service-icon" src="/static/images/boarding.png"></image>
+          <view class="service-name">寄养</view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 服务时间 -->
+    <view class="form-section">
+      <view class="section-title">服务时间</view>
+      <view class="time-selectors">
+        <picker mode="date" value="{{serviceDate}}" bindchange="bindDateChange">
+          <view class="picker-item">
+            <view class="picker-label">日期</view>
+            <view class="picker-value">{{serviceDate}}</view>
+          </view>
+        </picker>
+        
+        <picker mode="time" value="{{startTime}}" bindchange="bindStartTimeChange">
+          <view class="picker-item">
+            <view class="picker-label">开始时间</view>
+            <view class="picker-value">{{startTime}}</view>
+          </view>
+        </picker>
+        
+        <picker mode="time" value="{{endTime}}" bindchange="bindEndTimeChange">
+          <view class="picker-item">
+            <view class="picker-label">结束时间</view>
+            <view class="picker-value">{{endTime}}</view>
+          </view>
+        </picker>
+      </view>
+    </view>
+    
+    <!-- 服务地址 -->
+    <view class="form-section">
+      <view class="section-title">服务地址</view>
+      <input 
+        class="address-input" 
+        placeholder="请输入详细地址" 
+        value="{{address}}" 
+        bindinput="inputAddress"
+      />
+    </view>
+    
+    <!-- 备注 -->
+    <view class="form-section">
+      <view class="section-title">备注</view>
+      <textarea 
+        class="remarks-textarea" 
+        placeholder="有什么需要特别注意的，可以在这里告诉帮溜员" 
+        value="{{remarks}}" 
+        bindinput="inputRemarks"
+      ></textarea>
+    </view>
+  </view>
+  
+  <!-- 提交按钮 -->
+  <view class="submit-btn-container">
+    <button 
+      class="btn-primary btn-submit" 
+      bindtap="submitOrder" 
+      loading="{{submitting}}" 
+      disabled="{{submitting}}"
+    >提交订单</button>
+  </view>
+</view> 

@@ -1,0 +1,43 @@
+<view class="auth-container">
+  <view class="logo-container">
+    <image class="logo" src="/static/images/logo.png" mode="aspectFit"></image>
+    <view class="app-name">宠物帮溜</view>
+    <view class="app-slogan">让爱宠的生活更美好</view>
+  </view>
+  
+  <view class="login-container">
+    <button 
+      wx:if="{{canIUseGetUserProfile}}"
+      class="login-button"
+      loading="{{isLoggingIn}}"
+      bindtap="getUserProfile"
+      disabled="{{isLoggingIn}}"
+    >
+      <view class="button-content">
+        <image class="wechat-icon" src="/static/images/wechat.png" mode="aspectFit"></image>
+        <text>微信账号登录</text>
+      </view>
+    </button>
+    
+    <button 
+      wx:else
+      class="login-button"
+      loading="{{isLoggingIn}}"
+      open-type="getUserInfo" 
+      bindgetuserinfo="getUserInfo"
+      disabled="{{isLoggingIn}}"
+    >
+      <view class="button-content">
+        <image class="wechat-icon" src="/static/images/wechat.png" mode="aspectFit"></image>
+        <text>微信账号登录</text>
+      </view>
+    </button>
+    
+    <view class="tips">
+      <text>登录即代表同意</text>
+      <text class="link">《宠物帮溜用户协议》</text>
+      <text>和</text>
+      <text class="link">《隐私政策》</text>
+    </view>
+  </view>
+</view> 

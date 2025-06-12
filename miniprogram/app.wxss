@@ -1,0 +1,149 @@
+/**app.wxss**/
+page {
+  height: 100%;
+  font-size: 28rpx;
+  line-height: 1.6;
+  background: #f8f8f8;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica,
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+}
+
+.container {
+  padding: 30rpx;
+  box-sizing: border-box;
+}
+
+/* 常用布局 */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+/* 常用边距 */
+.m-10 {
+  margin: 10rpx;
+}
+
+.mt-10 {
+  margin-top: 10rpx;
+}
+
+.mt-20 {
+  margin-top: 20rpx;
+}
+
+.mt-30 {
+  margin-top: 30rpx;
+}
+
+.mb-10 {
+  margin-bottom: 10rpx;
+}
+
+.mb-20 {
+  margin-bottom: 20rpx;
+}
+
+.mb-30 {
+  margin-bottom: 30rpx;
+}
+
+.p-20 {
+  padding: 20rpx;
+}
+
+.p-30 {
+  padding: 30rpx;
+}
+
+/* 常用颜色 */
+.text-primary {
+  color: #1296db;
+}
+
+.text-secondary {
+  color: #666;
+}
+
+.text-muted {
+  color: #999;
+}
+
+.text-danger {
+  color: #e64340;
+}
+
+.text-success {
+  color: #09bb07;
+}
+
+.text-warning {
+  color: #ffbe00;
+}
+
+.bg-white {
+  background: #fff;
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background: #1296db;
+  color: #fff;
+  border: none;
+}
+
+.btn-default {
+  background: #f7f7f7;
+  color: #333;
+  border: 1rpx solid #ddd;
+}
+
+/* 常用卡片样式 */
+.card {
+  background: #fff;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  margin-bottom: 20rpx;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 20rpx 30rpx;
+  border-bottom: 1rpx solid #eee;
+  font-size: 30rpx;
+  font-weight: bold;
+}
+
+.card-body {
+  padding: 30rpx;
+}
+
+.card-footer {
+  padding: 20rpx 30rpx;
+  border-top: 1rpx solid #eee;
+}

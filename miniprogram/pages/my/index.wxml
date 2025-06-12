@@ -1,0 +1,66 @@
+<view class="container">
+  <!-- 用户信息区域 -->
+  <view class="user-info-container">
+    <view class="storage-tag" wx:if="{{hasBalance}}">储值最高赠¥500</view>
+    <view class="edit-profile-btn" wx:if="{{isLoggedIn}}" bindtap="navigateToEditProfile">编辑资料</view>
+    
+    <image class="avatar" src="{{userInfo.avatarUrl || '/static/images/default-avatar.png'}}"></image>
+    
+    <view class="nickname" wx:if="{{isLoggedIn}}">{{userInfo.nickname || '未设置用户名'}}</view>
+    <button class="login-btn" wx:else bindtap="navigateToLogin">登录/注册</button>
+  </view>
+  
+  <!-- 宠物区域 -->
+  <view class="pet-container">
+    <view class="section-title">我的宠物</view>
+    <view class="pet-list">
+      <view class="pet-item" wx:for="{{pets}}" wx:key="id" bindtap="navigateToPetDetail" data-id="{{item.id}}">
+        <image class="pet-avatar" src="{{item.avatar || '/static/images/default-pet.png'}}"></image>
+        <view class="pet-name">{{item.name}}</view>
+      </view>
+      
+      <view class="pet-item add-pet" bindtap="navigateToAddPet">
+        <view class="add-icon">+</view>
+        <view class="pet-name">添加宠物</view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 功能菜单区域 -->
+  <view class="menu-container">
+    <view class="menu-item" bindtap="navigateToSitterApply">
+      <image class="menu-icon" src="/static/images/icon-sitter.png"></image>
+      <view class="menu-name">申请伴宠专员</view>
+      <view class="menu-arrow"></view>
+    </view>
+    
+    <view class="menu-item" bindtap="navigateToPetAdoption">
+      <image class="menu-icon" src="/static/images/icon-adoption.png"></image>
+      <view class="menu-name">宠物领养</view>
+      <view class="menu-arrow"></view>
+    </view>
+    
+    <view class="menu-item" bindtap="navigateToSubscribe">
+      <image class="menu-icon" src="/static/images/icon-subscribe.png"></image>
+      <view class="menu-name">关注公众号</view>
+      <view class="menu-arrow"></view>
+    </view>
+    
+    <view class="menu-item" bindtap="navigateToSchedule">
+      <image class="menu-icon" src="/static/images/icon-schedule.png"></image>
+      <view class="menu-name">排班工具</view>
+      <view class="menu-arrow"></view>
+    </view>
+  </view>
+  
+  <!-- 退出登录 -->
+  <view class="logout-container" wx:if="{{isLoggedIn}}">
+    <button class="logout-btn" bindtap="logout">退出登录</button>
+  </view>
+  
+  <!-- 底部信息 -->
+  <view class="footer-info">
+    <view class="service-time">工作时间：周一至周日 8:00 - 20:00</view>
+    <view class="service-brand">——宠物派 标准化宠物服务平台——</view>
+  </view>
+</view> 
