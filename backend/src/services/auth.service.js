@@ -84,6 +84,40 @@ class AuthService {
   }
   
   /**
+   * 开发环境测试用户登录
+   * @param {string} openid - 微信openid
+   * @returns {Promise<Object>} 包含token和用户信息的对象
+   * @dev 仅用于开发环境
+   */
+  async devLogin(openid) {
+    try {
+      // 查找用户是否存在
+      const user = await userModel.findByOpenid(openid);
+      
+      if (!user) {
+        throw new Error('测试用户不存在，请检查openid');
+      }
+      
+      // 生成JWT令牌
+      const token = this.generateToken(user);
+      
+      return {
+        token,
+        user: {
+          id: user.id,
+          nickname: user.nickname,
+          avatar: user.avatar_url,
+          role: user.role,
+          hasProfile: !!user.hasProfile
+        }
+      };
+    } catch (error) {
+      console.error('开发环境测试用户登录失败:', error);
+      throw error;
+    }
+  }
+  
+  /**
    * 生成JWT令牌
    * @param {Object} user - 用户对象
    * @returns {string} JWT令牌

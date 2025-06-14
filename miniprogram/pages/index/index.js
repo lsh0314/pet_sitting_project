@@ -68,14 +68,26 @@ Page({
     this.setData({ loading: true, error: false });
     
     // 调用接口获取帮溜员列表
-    api.get('/api/sitters', { page: this.data.currentPage }, false)
+    api.get('/api/sitter', { page: this.data.currentPage }, false)
       .then(res => {
-        // 请求成功
-        const newSitters = res.data.items || [];
+        console.log('获取帮溜员列表成功:', res);
+        // 处理不同的响应格式
+        let newSitters = [];
+        if (res.success && res.data) {
+          // 格式: { success: true, data: [...] }
+          newSitters = res.data;
+        } else if (res.data) {
+          // 格式: { data: [...] }
+          newSitters = res.data;
+        } else if (Array.isArray(res)) {
+          // 格式: [...]
+          newSitters = res;
+        }
+        
         const hasMore = newSitters.length === 10; // 假设每页10条
         
         this.setData({
-          sitters: [...this.data.sitters, ...newSitters],
+          sitters: this.data.currentPage === 1 ? newSitters : [...this.data.sitters, ...newSitters],
           loading: false,
           hasMore
         });

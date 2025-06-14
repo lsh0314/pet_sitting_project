@@ -32,6 +32,62 @@
     </view>
   </view>
   
+  <!-- 帮溜员列表 -->
+  <view class="sitter-list-container">
+    <view class="list-header">
+      <text class="list-title">推荐帮溜员</text>
+      <text class="list-subtitle">专业可靠的宠物照顾者</text>
+    </view>
+    
+    <!-- 帮溜员列表 -->
+    <view class="sitter-list">
+      <!-- 加载中状态 -->
+      <view class="loading-container" wx:if="{{loading}}">
+        <view class="loading-icon"></view>
+        <text>加载中...</text>
+      </view>
+      
+      <!-- 错误状态 -->
+      <view class="error-container" wx:elif="{{error}}">
+        <text>加载失败</text>
+        <button class="btn-retry" bindtap="onTapRetry">重试</button>
+      </view>
+      
+      <!-- 空状态 -->
+      <view class="empty-container" wx:elif="{{sitters.length === 0 && !loading}}">
+        <text>暂无帮溜员</text>
+      </view>
+      
+      <!-- 帮溜员列表 -->
+      <block wx:else>
+        <view class="sitter-item" wx:for="{{sitters}}" wx:key="user_id" bindtap="onTapSitter" data-id="{{item.user_id}}">
+          <image class="sitter-avatar" src="{{item.avatar_url || '/static/images/default-avatar.png'}}" mode="aspectFill"></image>
+          <view class="sitter-info">
+            <view class="sitter-name">{{item.nickname || '帮溜员'}}</view>
+            <view class="sitter-rating">
+              <text>★ {{item.rating || '5.0'}}</text>
+              <text class="sitter-orders">已完成 {{item.total_services_completed || 0}} 单</text>
+            </view>
+            <view class="sitter-bio">{{item.bio || '这位帮溜员很懒，还没有填写简介'}}</view>
+            <view class="sitter-service-tags">
+              <text class="service-tag" wx:if="{{item.service_area}}">{{item.service_area}}</text>
+              <text class="service-tag">遛狗</text>
+              <text class="service-tag">喂猫</text>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 加载更多 -->
+        <view class="loading-more" wx:if="{{hasMore}}">
+          <text>上拉加载更多</text>
+        </view>
+        <view class="loading-more" wx:else>
+          <text>没有更多了</text>
+        </view>
+      </block>
+    </view>
+  </view>
+  
   <!-- 服务统计区域 -->
   <view class="stats-container">
     <image class="stats-icon" src="/static/images/pet-icon.png" mode="aspectFit"></image>

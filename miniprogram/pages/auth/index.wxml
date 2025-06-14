@@ -33,6 +33,24 @@
       </view>
     </button>
     
+    <!-- 开发环境测试用户选择 -->
+    <view wx:if="{{isDevEnv}}" class="dev-tools">
+      <button class="dev-button" bindtap="toggleTestUsers">
+        选择测试用户
+      </button>
+      
+      <view class="test-users-list" wx:if="{{showTestUsers}}">
+        <view class="test-user-item" 
+              wx:for="{{testUsers}}" 
+              wx:key="id"
+              data-id="{{item.id}}"
+              bindtap="selectTestUser">
+          <text class="test-user-name">{{item.name}}</text>
+          <text class="test-user-role">{{item.role === 'sitter' ? '帮溜员' : '宠物主'}}</text>
+        </view>
+      </view>
+    </view>
+    
     <view class="tips">
       <text>登录即代表同意</text>
       <text class="link">《宠物帮溜用户协议》</text>

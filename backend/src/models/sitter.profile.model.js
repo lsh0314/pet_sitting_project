@@ -80,9 +80,17 @@ class SitterProfile {
   static async findAll() {
     try {
       const [rows] = await pool.query(
-        `SELECT sp.*, u.nickname, u.avatar_url
+        `SELECT 
+          sp.user_id, 
+          sp.bio, 
+          sp.service_area, 
+          sp.rating, 
+          sp.total_services_completed,
+          u.nickname, 
+          u.avatar_url
          FROM sitter_profiles sp
          JOIN users u ON sp.user_id = u.id
+         WHERE u.role = 'sitter' AND u.status = 'active'
          ORDER BY sp.rating DESC, sp.total_services_completed DESC`
       );
       

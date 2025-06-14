@@ -124,7 +124,11 @@ class SitterController {
       // 获取所有帮溜员列表
       const sitters = await SitterProfile.findAll();
       
-      res.json(sitters);
+      res.json({
+        success: true,
+        data: sitters,
+        total: sitters.length
+      });
     } catch (error) {
       console.error('获取帮溜员列表失败:', error);
       res.status(500).json({

@@ -47,6 +47,33 @@ class AuthController {
       return error(res, err.message || '登录失败', 401, { errorCode: 'UNAUTHORIZED' });
     }
   }
+
+  /**
+   * 开发环境测试用户登录
+   * @param {Object} req - 请求对象
+   * @param {Object} res - 响应对象
+   * @dev 仅用于开发环境
+   */
+  async devLogin(req, res) {
+    try {
+      // 检查是否为开发环境
+      if (process.env.NODE_ENV !== 'development') {
+        return error(res, '此接口仅在开发环境可用', 403, { errorCode: 'FORBIDDEN' });
+      }
+
+      const { openid } = req.body;
+      
+      if (!openid) {
+        return error(res, '缺少openid参数', 400, { errorCode: 'INVALID_PARAM' });
+      }
+      
+      const result = await authService.devLogin(openid);
+      return success(res, result);
+    } catch (err) {
+      console.error('开发环境测试用户登录失败:', err);
+      return error(res, err.message || '登录失败', 500, { errorCode: 'SERVER_ERROR' });
+    }
+  }
 }
 
 module.exports = new AuthController(); 

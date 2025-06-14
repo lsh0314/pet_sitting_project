@@ -16,4 +16,12 @@ router.post('/wechat-login', authController.wechatLogin);
  */
 router.post('/admin-login', authController.adminLogin);
 
+/**
+ * @route POST /api/auth/dev-login
+ * @desc 开发环境测试用户登录
+ * @access Public
+ * @dev 仅用于开发环境
+ */
+router.post('/dev-login', authController.devLogin);
+
 module.exports = router; 

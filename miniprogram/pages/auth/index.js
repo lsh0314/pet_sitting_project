@@ -9,7 +9,16 @@ Page({
   data: {
     canIUseGetUserProfile: false, // 是否可以使用getUserProfile
     isLoggingIn: false, // 是否正在登录
-    redirect: '' // 跳转目标页
+    redirect: '', // 跳转目标页
+    isDevEnv: true, // 是否为开发环境
+    showTestUsers: false, // 是否显示测试用户列表
+    testUsers: [
+      { id: 1, name: '小明', openid: 'openid_1', role: 'sitter' },
+      { id: 2, name: '小红', openid: 'openid_2', role: 'sitter' },
+      { id: 3, name: '旺财', openid: 'openid_3', role: 'sitter' },
+      { id: 4, name: '小花', openid: 'openid_4', role: 'sitter' },
+      { id: 5, name: '大壮', openid: 'openid_5', role: 'sitter' }
+    ]
   },
 
   /**
@@ -159,5 +168,75 @@ Page({
         });
       }
     });
+  },
+
+  /**
+   * 切换测试用户列表显示状态
+   */
+  toggleTestUsers: function() {
+    this.setData({
+      showTestUsers: !this.data.showTestUsers
+    });
+  },
+
+  /**
+   * 选择测试用户登录
+   */
+  selectTestUser: function(e) {
+    const userId = e.currentTarget.dataset.id;
+    const user = this.data.testUsers.find(u => u.id === userId);
+    
+    if (!user) return;
+    
+    this.setData({
+      isLoggingIn: true
+    });
+    
+    // 调用开发环境专用的登录接口
+    api.post('/api/auth/dev-login', {
+      openid: user.openid
+    }, false)
+      .then(res => {
+        // 登录成功，保存token和用户信息
+        const { token, user } = res.data;
+        
+        wx.setStorageSync('token', token);
+        wx.setStorageSync('userInfo', user);
+        
+        // 更新全局状态
+        app.globalData.isLoggedIn = true;
+        app.globalData.userInfo = user;
+        
+        // 登录成功提示
+        wx.showToast({
+          title: '登录成功',
+          icon: 'success',
+          duration: 1500
+        });
+        
+        // 登录成功后跳转
+        setTimeout(() => {
+          if (this.data.redirect) {
+            wx.redirectTo({
+              url: this.data.redirect
+            });
+          } else {
+            wx.switchTab({
+              url: '/pages/index/index'
+            });
+          }
+        }, 1500);
+      })
+      .catch(err => {
+        console.error('测试用户登录失败:', err);
+        this.setData({
+          isLoggingIn: false
+        });
+        
+        wx.showToast({
+          title: '登录失败，请重试',
+          icon: 'none'
+        });
+      });
   }
 }) 

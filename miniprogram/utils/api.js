@@ -18,7 +18,7 @@ try {
 const request = (options) => {
   return new Promise((resolve, reject) => {
     // 获取baseAPI
-    let baseAPI = 'http://localhost:3000';
+    let baseAPI = 'http://127.0.0.1:3000';
     try {
       // 尝试获取app实例（如果之前没有获取到）
       if (!app) {
@@ -59,15 +59,8 @@ const request = (options) => {
       success: (res) => {
         // 请求成功
         if (res.statusCode === 200) {
-          if (res.data && res.data.success) {
-            // 业务逻辑成功
-            resolve(res.data);
-          } else {
-            // 业务逻辑失败
-            const errMsg = (res.data && res.data.message) || '请求失败';
-            showToast(errMsg);
-            reject(new Error(errMsg));
-          }
+          // 直接返回数据，不再检查success字段
+          resolve(res.data);
         } else if (res.statusCode === 401) {
           // 未授权，跳转到登录页
           navigateToLogin();
