@@ -123,6 +123,70 @@ Page({
     });
   },
 
+  // 跳转到帮溜员资料页面
+  navigateToSitterApply: function() {
+    if (!this.data.isLoggedIn) {
+      this.navigateToLogin();
+      return;
+    }
+    
+    wx.navigateTo({
+      url: '/pages/my/sitter/profile'
+    });
+  },
+
+  // 跳转到宠物领养页面（示例）
+  navigateToPetAdoption: function() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    });
+  },
+
+  // 跳转到关注公众号页面（示例）
+  navigateToSubscribe: function() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    });
+  },
+
+  // 跳转到排班工具页面（示例）
+  navigateToSchedule: function() {
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    });
+  },
+
+  // 退出登录
+  logout: function() {
+    wx.showModal({
+      title: '提示',
+      content: '确定要退出登录吗？',
+      success: (res) => {
+        if (res.confirm) {
+          // 清除本地存储的token和用户信息
+          wx.removeStorageSync('token');
+          app.globalData.isLoggedIn = false;
+          app.globalData.userInfo = null;
+          
+          // 更新页面状态
+          this.setData({
+            isLoggedIn: false,
+            userInfo: null,
+            pets: []
+          });
+          
+          wx.showToast({
+            title: '已退出登录',
+            icon: 'success'
+          });
+        }
+      }
+    });
+  },
+
   // 点击菜单项
   onTapMenuItem: function(e) {
     const id = e.currentTarget.dataset.id;
@@ -133,10 +197,10 @@ Page({
         // 跳转到个人资料页
         break;
       case 'pets':
-        // 跳转到我的宠物页
+        this.navigateToPets();
         break;
       case 'sitter_profile':
-        // 跳转到帮溜主页
+        this.navigateToSitterApply();
         break;
       case 'wallet':
         // 跳转到我的钱包页

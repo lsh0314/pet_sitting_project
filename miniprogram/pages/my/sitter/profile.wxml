@@ -1,0 +1,128 @@
+<view class="container">
+  <view class="header">
+    <view class="title">我的帮溜主页</view>
+    <view class="subtitle">完善您的资料，让宠物主更了解您</view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading"></view>
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-container" wx:if="{{error}}">
+    <view class="error-message">{{error}}</view>
+  </view>
+
+  <!-- 表单内容 -->
+  <view class="form-container" wx:if="{{!isLoading}}">
+    <!-- 个人简介 -->
+    <view class="form-section">
+      <view class="section-title">个人简介</view>
+      <textarea 
+        class="bio-input" 
+        placeholder="介绍一下您自己，例如：饲养经验、专业技能等" 
+        value="{{profileData.bio}}"
+        bindinput="onInputChange"
+        data-field="bio"
+        maxlength="500"
+      ></textarea>
+      <view class="char-count">{{profileData.bio.length}}/500</view>
+    </view>
+
+    <!-- 服务区域 -->
+    <view class="form-section">
+      <view class="section-title">服务区域</view>
+      <input 
+        class="area-input" 
+        placeholder="例如：北京市海淀区" 
+        value="{{profileData.service_area}}"
+        bindinput="onInputChange"
+        data-field="service_area"
+      />
+    </view>
+
+    <!-- 服务项目与价格 -->
+    <view class="form-section">
+      <view class="section-title">服务项目与价格</view>
+      <view class="service-list">
+        <view class="service-item" wx:for="{{services}}" wx:key="service_type">
+          <view class="service-check">
+            <checkbox 
+              checked="{{item.checked}}" 
+              bindchange="onServiceCheckChange" 
+              data-index="{{index}}"
+              color="#1296db"
+            />
+            <text class="service-name">{{item.name}}</text>
+          </view>
+          <view class="price-input-container">
+            <input 
+              class="price-input" 
+              type="digit" 
+              placeholder="价格" 
+              value="{{item.price}}"
+              bindinput="onServicePriceChange"
+              data-index="{{index}}"
+              disabled="{{!item.checked}}"
+            />
+            <text class="price-unit">元/次</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 可服务日期 -->
+    <view class="form-section">
+      <view class="section-title">可服务日期</view>
+      <view class="date-selector" bindtap="showDatePicker">
+        <view class="date-placeholder" wx:if="{{selectedDates.length === 0}}">
+          点击选择可服务日期
+        </view>
+        <view class="selected-dates" wx:else>
+          已选择 {{selectedDates.length}} 天
+        </view>
+        <view class="date-arrow">></view>
+      </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <button 
+      class="submit-btn" 
+      bindtap="submitForm" 
+      loading="{{isSubmitting}}" 
+      disabled="{{isSubmitting}}"
+    >
+      保存资料
+    </button>
+  </view>
+
+  <!-- 日期选择器弹窗 -->
+  <view class="date-picker-modal" wx:if="{{datePickerVisible}}">
+    <view class="date-picker-container">
+      <view class="date-picker-header">
+        <view class="date-picker-title">选择可服务日期</view>
+        <view class="date-picker-close" bindtap="closeDatePicker">×</view>
+      </view>
+      <view class="date-picker-content">
+        <!-- 使用预先生成的日期数组 -->
+        <view class="date-list">
+          <view 
+            class="date-item {{selectedDates.includes(date) ? 'selected' : ''}}"
+            bindtap="onDateSelect"
+            data-date="{{date}}"
+            wx:for="{{futureDates}}"
+            wx:for-item="date"
+            wx:key="*this"
+          >
+            {{date}}
+          </view>
+        </view>
+      </view>
+      <view class="date-picker-footer">
+        <button class="date-picker-btn" bindtap="closeDatePicker">确定</button>
+      </view>
+    </view>
+  </view>
+</view> 

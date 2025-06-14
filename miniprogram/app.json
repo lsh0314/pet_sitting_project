@@ -9,7 +9,8 @@
     "pages/auth/index",
     "pages/my/pets/index",
     "pages/my/pets/add",
-    "pages/my/pets/detail"
+    "pages/my/pets/detail",
+    "pages/my/sitter/profile"
   ],
   "window": {
     "backgroundTextStyle": "light",

@@ -22,6 +22,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', require('./src/api/auth.routes'));
 app.use('/api/user', require('./src/api/user.routes'));
 app.use('/api/pet', require('./src/api/pet.routes'));
+app.use('/api/sitter', require('./src/api/sitter.routes'));
 
 // 全局错误处理中间件
 app.use((err, req, res, next) => {

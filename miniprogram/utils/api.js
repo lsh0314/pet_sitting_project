@@ -1,5 +1,10 @@
 // 引入app实例以获取全局配置
-const app = getApp();
+let app = null;
+try {
+  app = getApp();
+} catch (e) {
+  console.error('获取app实例失败:', e);
+}
 
 /**
  * 封装微信请求
@@ -13,7 +18,18 @@ const app = getApp();
 const request = (options) => {
   return new Promise((resolve, reject) => {
     // 获取baseAPI
-    const baseAPI = app ? app.globalData.baseAPI : 'http://localhost:3000';
+    let baseAPI = 'http://localhost:3000';
+    try {
+      // 尝试获取app实例（如果之前没有获取到）
+      if (!app) {
+        app = getApp();
+      }
+      if (app && app.globalData && app.globalData.baseAPI) {
+        baseAPI = app.globalData.baseAPI;
+      }
+    } catch (e) {
+      console.error('获取baseAPI失败，使用默认值:', e);
+    }
     
     // 构建完整URL
     const url = options.url.startsWith('http') ? options.url : baseAPI + options.url;
