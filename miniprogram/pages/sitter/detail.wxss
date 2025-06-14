@@ -1,0 +1,276 @@
+/* 帮溜员详情页样式 */
+.container {
+  padding: 0;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+}
+
+/* 顶部导航栏 */
+.nav-bar {
+  position: relative;
+  height: 88rpx;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 30rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+
+.back-btn {
+  position: absolute;
+  left: 30rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: 40rpx;
+  color: #333;
+}
+
+.page-title {
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+/* 帮溜员基本信息区域 */
+.sitter-info-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.sitter-header {
+  background: linear-gradient(to right, #ffb800, #ffda44);
+  padding: 40rpx 30rpx;
+  display: flex;
+  align-items: center;
+  color: #fff;
+  position: relative;
+  border-bottom-left-radius: 30rpx;
+  border-bottom-right-radius: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(255, 184, 0, 0.2);
+}
+
+.sitter-avatar {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  border: 4rpx solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.sitter-basic {
+  margin-left: 30rpx;
+  flex: 1;
+}
+
+.sitter-name {
+  font-size: 40rpx;
+  font-weight: 600;
+  margin-bottom: 10rpx;
+}
+
+.sitter-rating {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+}
+
+.icon-star {
+  color: #ffeb3b;
+  margin-right: 8rpx;
+}
+
+.sitter-orders {
+  margin-left: 20rpx;
+  opacity: 0.9;
+}
+
+/* 内容区域 */
+.sitter-content {
+  padding: 30rpx;
+}
+
+.section {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.section-title::before {
+  content: "";
+  display: block;
+  width: 8rpx;
+  height: 32rpx;
+  background-color: #ffb800;
+  margin-right: 16rpx;
+  border-radius: 4rpx;
+}
+
+.section-content {
+  color: #666;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+.bio {
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+/* 服务列表 */
+.service-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.service-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.service-item:last-child {
+  border-bottom: none;
+}
+
+.service-name {
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.service-price {
+  color: #ff9800;
+  font-weight: 600;
+  font-size: 32rpx;
+}
+
+.no-service {
+  color: #999;
+  font-size: 28rpx;
+  padding: 20rpx 0;
+}
+
+/* 日期标签 */
+.date-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -8rpx;
+}
+
+.date-tag {
+  background-color: #fff8e1;
+  color: #ff9800;
+  padding: 8rpx 20rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  margin: 8rpx;
+  border: 1rpx solid #ffecb3;
+}
+
+/* 底部操作栏 */
+.footer-action {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  padding: 20rpx 30rpx;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: linear-gradient(to right, #ffb800, #ffda44);
+  color: #fff;
+  border: none;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  padding: 0 60rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  box-shadow: 0 6rpx 16rpx rgba(255, 184, 0, 0.3);
+}
+
+.btn-order {
+  width: 90%;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  color: #999;
+}
+
+.loading-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid #ffb800;
+  border-radius: 50%;
+  margin-bottom: 20rpx;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 错误状态 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  color: #999;
+  padding: 0 60rpx;
+  text-align: center;
+}
+
+.btn-retry {
+  margin-top: 30rpx;
+  background-color: #fff;
+  color: #ffb800;
+  border: 1rpx solid #ffb800;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  padding: 0 40rpx;
+  height: 70rpx;
+  line-height: 70rpx;
+}

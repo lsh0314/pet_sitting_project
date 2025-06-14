@@ -1,14 +1,22 @@
 <view class="container">
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="page-title">帮溜员详情</view>
+  </view>
+
   <!-- 帮溜员信息 -->
   <view class="sitter-info-container" wx:if="{{!loading && sitterInfo}}">
     <view class="sitter-header">
       <image class="sitter-avatar" src="{{sitterInfo.avatar || '/static/images/default-avatar.png'}}"></image>
       <view class="sitter-basic">
-        <view class="sitter-name">{{sitterInfo.nickname}}</view>
+        <view class="sitter-name">{{sitterInfo.nickname || '帮溜员'}}</view>
         <view class="sitter-rating">
-          <text class="iconfont icon-star"></text>
+          <text class="icon-star">★</text>
           <text>{{sitterInfo.rating || '5.0'}}</text>
-          <text class="sitter-orders">完成 {{sitterInfo.totalServices || 0}} 单</text>
+          <text class="sitter-orders">已完成 {{sitterInfo.totalServices || 0}} 单</text>
         </view>
       </view>
     </view>
@@ -35,13 +43,27 @@
         <view class="section-title">服务项目</view>
         <view class="section-content">
           <view class="service-list">
-            <view class="service-item" wx:for="{{sitterInfo.services}}" wx:key="type">
-              <view class="service-name">
-                {{item.type === 'walk' ? '遛狗' : 
-                  item.type === 'feed' ? '喂食' : '寄养'}}
+            <block wx:if="{{sitterInfo.services && sitterInfo.services.length > 0}}">
+              <view class="service-item" wx:for="{{sitterInfo.services}}" wx:key="type">
+                <view class="service-name">
+                  <text wx:if="{{item.type === 'walk'}}">🐕 遛狗</text>
+                  <text wx:elif="{{item.type === 'feed'}}">🐱 喂食</text>
+                  <text wx:else>🏠 寄养</text>
+                </view>
+                <view class="service-price">¥{{item.price}}/次</view>
               </view>
-              <view class="service-price">¥{{item.price}}/次</view>
-            </view>
+            </block>
+            <view wx:else class="no-service">暂无服务项目</view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 可预约日期 -->
+      <view class="section" wx:if="{{sitterInfo.availableDates && sitterInfo.availableDates.length > 0}}">
+        <view class="section-title">可预约日期</view>
+        <view class="section-content">
+          <view class="date-list">
+            <text class="date-tag" wx:for="{{sitterInfo.availableDates}}" wx:key="*this">{{item}}</text>
           </view>
         </view>
       </view>

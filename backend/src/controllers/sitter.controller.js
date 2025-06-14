@@ -188,10 +188,42 @@ class SitterController {
       // 获取帮溜员服务项目
       const services = await SitterService.findByUserId(sitterId);
       
+      // 构建返回数据，格式与API文档一致
+      const sitterData = {
+        id: profile.user_id,
+        nickname: profile.nickname,
+        avatar: profile.avatar_url,
+        bio: profile.bio,
+        serviceArea: profile.service_area,
+        rating: profile.rating || 5.0,
+        totalServices: profile.total_services_completed || 0,
+        services: services.map(service => ({
+          type: service.service_type,
+          price: service.price
+        })),
+        availableDates: []
+      };
+      
+      // 安全解析available_dates
+      if (profile.available_dates) {
+        try {
+          // 检查available_dates是否已经是数组
+          if (Array.isArray(profile.available_dates)) {
+            sitterData.availableDates = profile.available_dates;
+          } else {
+            // 尝试解析JSON字符串
+            sitterData.availableDates = JSON.parse(profile.available_dates);
+          }
+        } catch (e) {
+          console.error('解析available_dates失败:', e);
+          // 保持默认空数组
+        }
+      }
+      
       // 返回组合数据
       res.json({
-        profile,
-        services: services || []
+        success: true,
+        data: sitterData
       });
     } catch (error) {
       console.error('获取帮溜员详情失败:', error);

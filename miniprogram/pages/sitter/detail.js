@@ -34,8 +34,31 @@ Page({
     // 调用接口获取帮溜员详情
     api.get(`/api/sitter/${this.data.sitterId}`, {}, false)
       .then(res => {
+        // 处理返回的数据
+        let sitterInfo = null;
+        
+        if (res.success && res.data) {
+          // 新格式: { success: true, data: {...} }
+          sitterInfo = res.data;
+        } else if (res.profile) {
+          // 旧格式: { profile: {...}, services: [...] }
+          sitterInfo = {
+            id: res.profile.user_id,
+            nickname: res.profile.nickname,
+            avatar: res.profile.avatar_url,
+            bio: res.profile.bio,
+            serviceArea: res.profile.service_area,
+            rating: res.profile.rating || 5.0,
+            totalServices: res.profile.total_services_completed || 0,
+            services: (res.services || []).map(service => ({
+              type: service.service_type,
+              price: service.price
+            }))
+          };
+        }
+        
         this.setData({
-          sitterInfo: res.data,
+          sitterInfo: sitterInfo,
           loading: false
         });
       })
@@ -66,5 +89,12 @@ Page({
   // 点击重试按钮
   onTapRetry: function () {
     this.fetchSitterDetail();
+  },
+  
+  // 返回上一页
+  goBack: function() {
+    wx.navigateBack({
+      delta: 1
+    });
   }
 }) 
