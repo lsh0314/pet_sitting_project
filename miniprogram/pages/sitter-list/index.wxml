@@ -37,7 +37,7 @@
     
     <!-- 空状态 -->
     <view class="empty-container" wx:elif="{{sitters.length === 0 && !loading}}">
-      <text>暂无{{serviceTypeText}}帮溜员</text>
+      <text>暂无提供"{{serviceTypeText}}"服务的帮溜员</text>
     </view>
     
     <!-- 帮溜员列表 -->
@@ -55,6 +55,7 @@
             <text class="service-tag" wx:if="{{item.service_area}}">{{item.service_area}}</text>
             <text class="service-tag" wx:if="{{serviceType === 'walk'}}">遛狗</text>
             <text class="service-tag" wx:if="{{serviceType === 'feed'}}">喂猫</text>
+            <text class="service-tag" wx:if="{{serviceType === 'boarding'}}">寄养</text>
           </view>
         </view>
       </view>

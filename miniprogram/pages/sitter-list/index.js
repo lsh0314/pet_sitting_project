@@ -30,6 +30,8 @@ Page({
       serviceTypeText = '上门喂猫';
     } else if (serviceType === 'walk') {
       serviceTypeText = '上门遛狗';
+    } else if (serviceType === 'boarding') {
+      serviceTypeText = '宠物寄养';
     }
     
     this.setData({
@@ -88,6 +90,8 @@ Page({
         params.service_type = 'feed';
       } else if (this.data.serviceType === 'walk') {
         params.service_type = 'walk';
+      } else if (this.data.serviceType === 'boarding') {
+        params.service_type = 'boarding';
       }
     }
     

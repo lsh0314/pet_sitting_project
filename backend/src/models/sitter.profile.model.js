@@ -117,13 +117,13 @@ class SitterProfile {
       if (service_type) {
         query += `
           AND sp.user_id IN (
-            SELECT user_id FROM sitter_services
+            SELECT sitter_user_id FROM sitter_services
             WHERE service_type = ?
           )
         `;
         countQuery += `
           AND sp.user_id IN (
-            SELECT user_id FROM sitter_services
+            SELECT sitter_user_id FROM sitter_services
             WHERE service_type = ?
           )
         `;

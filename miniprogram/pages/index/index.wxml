@@ -29,6 +29,12 @@
         <view class="service-name">上门遛狗</view>
         <view class="service-btn">预订</view>
       </view>
+      
+      <view class="service-item" bindtap="navigateToService" data-type="boarding">
+        <image class="service-icon" src="/static/images/boarding.png" mode="aspectFit"></image>
+        <view class="service-name">宠物寄养</view>
+        <view class="service-btn">预订</view>
+      </view>
     </view>
   </view>
   

@@ -161,6 +161,10 @@ Page({
         wx.navigateTo({
           url: '/pages/sitter-list/index?type=walk'
         });
+      } else if (type === 'boarding') {
+        wx.navigateTo({
+          url: '/pages/sitter-list/index?type=boarding'
+        });
       }
     } else {
       // 未登录，跳转到登录页
