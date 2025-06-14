@@ -1,0 +1,301 @@
+/* pages/order/create.wxss */
+
+.container {
+  padding: 0 0 120rpx 0;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+}
+
+/* 标题样式 */
+.page-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  padding: 30rpx 0;
+  background-color: #fff;
+  border-bottom: 1rpx solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* 帮溜员卡片样式 */
+.sitter-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  margin: 30rpx;
+  padding: 30rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+
+.sitter-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+  border: 4rpx solid #ffd700; /* 金黄色边框 */
+}
+
+.sitter-info {
+  flex: 1;
+}
+
+.sitter-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.sitter-rating {
+  display: flex;
+  align-items: center;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.icon-star {
+  color: #ffd700; /* 金黄色星星 */
+  margin-right: 6rpx;
+}
+
+/* 表单部分样式 */
+.order-form {
+  padding: 0 30rpx;
+}
+
+.form-section {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  color: #333;
+  position: relative;
+  padding-left: 20rpx;
+}
+
+.section-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8rpx;
+  height: 30rpx;
+  background-color: #ffd700; /* 黄色装饰条 */
+  border-radius: 4rpx;
+}
+
+/* 宠物选择样式 */
+.pet-list {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10rpx;
+}
+
+.pet-item {
+  width: calc(33.33% - 20rpx);
+  margin: 10rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 0;
+  border-radius: 12rpx;
+  background-color: #f9f9f9;
+  position: relative;
+}
+
+.pet-item.selected {
+  background-color: #fff9e6; /* 淡黄色背景 */
+  border: 2rpx solid #ffd700; /* 金黄色边框 */
+}
+
+.pet-item.selected::after {
+  content: "✓";
+  position: absolute;
+  right: 10rpx;
+  top: 10rpx;
+  width: 36rpx;
+  height: 36rpx;
+  background-color: #ffd700;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pet-avatar {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  margin-bottom: 10rpx;
+}
+
+.pet-name {
+  font-size: 26rpx;
+  color: #333;
+}
+
+.add-pet {
+  border: 2rpx dashed #ddd;
+  background-color: #fff;
+}
+
+.add-icon {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  color: #999;
+  font-size: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10rpx;
+  margin-top: 20rpx;
+}
+
+/* 服务类型样式 */
+.service-types {
+  display: flex;
+  justify-content: space-between;
+}
+
+.service-type-item {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 0;
+  border-radius: 12rpx;
+  background-color: #f9f9f9;
+}
+
+.service-type-item.selected {
+  background-color: #fff9e6; /* 淡黄色背景 */
+  border: 2rpx solid #ffd700; /* 金黄色边框 */
+}
+
+.service-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 10rpx;
+}
+
+.service-name {
+  font-size: 26rpx;
+  color: #333;
+}
+
+/* 时间选择器样式 */
+.time-selectors {
+  background-color: #fff;
+}
+
+.picker-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #eee;
+}
+
+.picker-item:last-child {
+  border-bottom: none;
+}
+
+.picker-label {
+  color: #666;
+  font-size: 28rpx;
+}
+
+.picker-value {
+  color: #333;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+/* 地址输入框样式 */
+.address-input {
+  background-color: #f9f9f9;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 备注文本域样式 */
+.remarks-textarea {
+  background-color: #f9f9f9;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  width: 100%;
+  height: 200rpx;
+  box-sizing: border-box;
+}
+
+/* 提交按钮样式 */
+.submit-btn-container {
+  padding: 30rpx;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.btn-submit {
+  background: linear-gradient(to right, #ffd700, #ffc107); /* 黄色渐变 */
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  padding: 20rpx 0;
+  width: 100%;
+  box-shadow: 0 6rpx 16rpx rgba(255, 215, 0, 0.3);
+}
+
+.btn-submit:active {
+  transform: scale(0.98);
+}
+
+/* 加载中样式 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+}
+
+.loading-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid #ffd700; /* 黄色加载指示器 */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 30rpx;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,129 @@
+<view class="container">
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="page-title">订单详情</view>
+  </view>
+
+  <!-- 订单内容 -->
+  <view class="order-container" wx:if="{{!loading && orderInfo}}">
+    <!-- 订单状态 -->
+    <view class="order-status">
+      <view class="status-tag {{orderInfo.status}}">{{orderStatusText[orderInfo.status] || '未知状态'}}</view>
+      <view class="order-id">订单号: {{orderInfo.orderNo}}</view>
+    </view>
+    
+    <!-- 帮溜员信息 -->
+    <view class="card sitter-card">
+      <view class="card-title">帮溜员信息</view>
+      <view class="sitter-info">
+        <image class="sitter-avatar" src="{{orderInfo.sitter.avatar || '/static/images/default-avatar.png'}}"></image>
+        <view class="sitter-detail">
+          <view class="sitter-name">{{orderInfo.sitter.nickname}}</view>
+          <view class="sitter-rating">
+            <text class="icon-star">★</text>
+            <text>{{orderInfo.sitter.rating || '5.0'}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 宠物信息 -->
+    <view class="card pet-card">
+      <view class="card-title">宠物信息</view>
+      <view class="pet-info">
+        <image class="pet-avatar" src="{{orderInfo.pet.photo || '/static/images/default-pet.png'}}"></image>
+        <view class="pet-detail">
+          <view class="pet-name">{{orderInfo.pet.name}}</view>
+          <view class="pet-breed">{{orderInfo.pet.breed}}</view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 服务信息 -->
+    <view class="card service-card">
+      <view class="card-title">服务信息</view>
+      <view class="info-item">
+        <view class="info-label">服务类型</view>
+        <view class="info-value">
+          <text wx:if="{{orderInfo.serviceType === 'walk'}}">遛狗</text>
+          <text wx:elif="{{orderInfo.serviceType === 'feed'}}">喂食</text>
+          <text wx:else>寄养</text>
+        </view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">服务日期</view>
+        <view class="info-value">{{orderInfo.serviceDate}}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">服务时间</view>
+        <view class="info-value">{{orderInfo.startTime}} - {{orderInfo.endTime}}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">服务地址</view>
+        <view class="info-value">{{orderInfo.address}}</view>
+      </view>
+      <view class="info-item" wx:if="{{orderInfo.remarks}}">
+        <view class="info-label">备注</view>
+        <view class="info-value remarks">{{orderInfo.remarks}}</view>
+      </view>
+    </view>
+    
+    <!-- 订单金额 -->
+    <view class="card price-card">
+      <view class="card-title">订单金额</view>
+      <view class="price-info">
+        <view class="price-item">
+          <view class="price-label">服务费用</view>
+          <view class="price-value">¥{{orderInfo.servicePrice}}</view>
+        </view>
+        <view class="price-item total">
+          <view class="price-label">合计</view>
+          <view class="price-value">¥{{orderInfo.totalPrice}}</view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 底部操作栏 -->
+    <view class="footer-action">
+      <!-- 宠物主操作按钮 -->
+      <block wx:if="{{userRole === 'pet_owner'}}">
+        <button 
+          class="btn-primary" 
+          wx:if="{{orderInfo.status === 'accepted'}}" 
+          bindtap="onTapPay">去支付</button>
+        <button 
+          class="btn-primary" 
+          wx:if="{{orderInfo.status === 'completed'}}" 
+          bindtap="onTapConfirm">确认完成</button>
+      </block>
+      
+      <!-- 帮溜员操作按钮 -->
+      <block wx:if="{{userRole === 'sitter'}}">
+        <button 
+          class="btn-primary" 
+          wx:if="{{orderInfo.status === 'paid'}}" 
+          bindtap="onTapStart">开始服务</button>
+        <button 
+          class="btn-primary" 
+          wx:if="{{orderInfo.status === 'in_progress'}}" 
+          bindtap="onTapComplete">完成服务</button>
+      </block>
+    </view>
+  </view>
+  
+  <!-- 加载中状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-icon"></view>
+    <text>正在加载...</text>
+  </view>
+  
+  <!-- 错误状态 -->
+  <view class="error-container" wx:if="{{error}}">
+    <icon type="warn" size="64"></icon>
+    <text>加载失败，请重试</text>
+    <button class="btn-retry" bindtap="onTapRetry">重新加载</button>
+  </view>
+</view> 

@@ -6,6 +6,7 @@
     "pages/sitter/index",
     "pages/sitter/detail",
     "pages/order/create",
+    "pages/order/detail",
     "pages/auth/index",
     "pages/my/pets/index",
     "pages/my/pets/add",
