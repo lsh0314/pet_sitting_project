@@ -68,7 +68,9 @@ App({
   // 全局数据
   globalData: {
     baseAPI: 'http://localhost:3000', // 开发环境API地址
+    apiBaseUrl: 'http://localhost:3000', // 开发环境API地址
     // baseAPI: 'https://api.petsitting.com', // 生产环境API地址
+    // apiBaseUrl: 'https://api.petsitting.com', // 生产环境API地址
     isLoggedIn: false,
     userInfo: null
   }

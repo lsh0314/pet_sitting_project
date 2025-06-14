@@ -1,0 +1,51 @@
+<!-- pages/my/pets/index.wxml -->
+<view class="container">
+  <view class="header">
+    <view class="title">我的宠物</view>
+    <view class="add-btn" bindtap="goToAddPet">
+      <text class="add-icon">+</text>
+      <text>添加宠物</text>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading">
+      <image class="loading-icon" src="/static/images/loading.gif" mode="aspectFit"></image>
+      <text>加载中...</text>
+    </view>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-container" wx:elif="{{error}}">
+    <icon type="warn" size="40" color="#F56C6C"></icon>
+    <text class="error-text">{{error}}</text>
+    <button class="retry-btn" bindtap="fetchPets">重试</button>
+  </view>
+
+  <!-- 宠物列表 -->
+  <view class="pets-list" wx:elif="{{pets.length > 0}}">
+    <view class="pet-card" wx:for="{{pets}}" wx:key="id" bindtap="goToPetDetail" data-id="{{item.id}}">
+      <image class="pet-avatar" src="{{item.photo}}" mode="aspectFill"></image>
+      <view class="pet-info">
+        <view class="pet-name">{{item.name}}</view>
+        <view class="pet-details">
+          <text class="pet-breed" wx:if="{{item.breed}}">{{item.breed}}</text>
+          <text class="pet-gender" wx:if="{{item.gender}}">{{item.gender === 'male' ? '公' : '母'}}</text>
+          <text class="pet-age" wx:if="{{item.age}}">{{item.age}}</text>
+          <text class="pet-weight" wx:if="{{item.weight}}">{{item.weight}}kg</text>
+        </view>
+      </view>
+      <view class="arrow">
+        <image class="arrow-icon" src="/static/images/arrow-right.png" mode="aspectFit"></image>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-container" wx:else>
+    <image class="empty-image" src="/static/images/empty-pets.png" mode="aspectFit"></image>
+    <text class="empty-text">您还没有添加宠物</text>
+    <button class="add-pet-btn" bindtap="goToAddPet">添加宠物</button>
+  </view>
+</view> 

@@ -5,6 +5,8 @@ Page({
   data: {
     userInfo: null,
     isLoggedIn: false,
+    pets: [],
+    hasBalance: false,
     menuList: [
       {
         id: 'profile',
@@ -46,12 +48,78 @@ Page({
       isLoggedIn: app.globalData.isLoggedIn,
       userInfo: app.globalData.userInfo
     });
+    
+    // 如果已登录，获取宠物列表
+    if (this.data.isLoggedIn) {
+      this.fetchPets();
+    }
+  },
+  
+  // 获取宠物列表
+  fetchPets: function() {
+    const token = wx.getStorageSync('token');
+    if (!token) return;
+    
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/api/pet`,
+      method: 'GET',
+      header: {
+        'Authorization': `Bearer ${token}`
+      },
+      success: (res) => {
+        if (res.statusCode === 200) {
+          this.setData({
+            pets: res.data
+          });
+        }
+      },
+      fail: (err) => {
+        console.error('获取宠物列表失败:', err);
+      }
+    });
   },
 
   // 跳转到登录页
-  goToLogin: function() {
+  navigateToLogin: function() {
     wx.navigateTo({
       url: '/pages/auth/index'
+    });
+  },
+  
+  // 跳转到我的宠物页面
+  navigateToPets: function() {
+    if (!this.data.isLoggedIn) {
+      this.navigateToLogin();
+      return;
+    }
+    
+    wx.navigateTo({
+      url: '/pages/my/pets/index'
+    });
+  },
+  
+  // 跳转到添加宠物页面
+  navigateToAddPet: function() {
+    if (!this.data.isLoggedIn) {
+      this.navigateToLogin();
+      return;
+    }
+    
+    wx.navigateTo({
+      url: '/pages/my/pets/add'
+    });
+  },
+  
+  // 跳转到宠物详情页面
+  navigateToPetDetail: function(e) {
+    if (!this.data.isLoggedIn) {
+      this.navigateToLogin();
+      return;
+    }
+    
+    const petId = e.currentTarget.dataset.id;
+    wx.navigateTo({
+      url: `/pages/my/pets/detail?id=${petId}`
     });
   },
 

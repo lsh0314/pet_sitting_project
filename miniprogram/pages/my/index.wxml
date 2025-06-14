@@ -11,15 +11,21 @@
   </view>
   
   <!-- 宠物区域 -->
-  <view class="pet-container">
-    <view class="section-title">我的宠物</view>
+  <view class="pet-container" bindtap="navigateToPets">
+    <view class="section-header">
+      <view class="section-title">我的宠物</view>
+      <view class="section-more">
+        <text>查看全部</text>
+        <view class="arrow-right"></view>
+      </view>
+    </view>
     <view class="pet-list">
-      <view class="pet-item" wx:for="{{pets}}" wx:key="id" bindtap="navigateToPetDetail" data-id="{{item.id}}">
-        <image class="pet-avatar" src="{{item.avatar || '/static/images/default-pet.png'}}"></image>
+      <view class="pet-item" wx:for="{{pets}}" wx:key="id" wx:if="{{index < 3}}" catchtap="navigateToPetDetail" data-id="{{item.id}}">
+        <image class="pet-avatar" src="{{item.photo || '/static/images/default-pet.png'}}"></image>
         <view class="pet-name">{{item.name}}</view>
       </view>
       
-      <view class="pet-item add-pet" bindtap="navigateToAddPet">
+      <view class="pet-item add-pet" catchtap="navigateToAddPet">
         <view class="add-icon">+</view>
         <view class="pet-name">添加宠物</view>
       </view>

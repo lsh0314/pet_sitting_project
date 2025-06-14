@@ -6,7 +6,10 @@
     "pages/sitter/index",
     "pages/sitter/detail",
     "pages/order/create",
-    "pages/auth/index"
+    "pages/auth/index",
+    "pages/my/pets/index",
+    "pages/my/pets/add",
+    "pages/my/pets/detail"
   ],
   "window": {
     "backgroundTextStyle": "light",

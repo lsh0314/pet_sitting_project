@@ -1,0 +1,129 @@
+<!-- pages/my/pets/add.wxml -->
+<view class="container">
+  <view class="form-container">
+    <!-- 基本信息 -->
+    <view class="form-section">
+      <view class="section-title">基本信息</view>
+      
+      <!-- 宠物照片 -->
+      <view class="form-item">
+        <view class="form-label required">宠物照片</view>
+        <view class="photo-upload" bindtap="choosePhoto">
+          <image wx:if="{{tempPhotoPath}}" class="pet-photo" src="{{tempPhotoPath}}" mode="aspectFill"></image>
+          <view wx:else class="upload-placeholder">
+            <view class="upload-icon">+</view>
+            <view class="upload-text">点击上传照片</view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 宠物名称 -->
+      <view class="form-item">
+        <view class="form-label required">宠物名称</view>
+        <input class="form-input" placeholder="请输入宠物名称" value="{{petData.name}}" bindinput="onInputChange" data-field="name" />
+      </view>
+      
+      <!-- 品种 -->
+      <view class="form-item">
+        <view class="form-label">品种</view>
+        <input class="form-input" placeholder="请输入宠物品种" value="{{petData.breed}}" bindinput="onInputChange" data-field="breed" />
+      </view>
+      
+      <!-- 性别 -->
+      <view class="form-item">
+        <view class="form-label">性别</view>
+        <radio-group class="radio-group" bindchange="onGenderChange">
+          <label class="radio" wx:for="{{genderOptions}}" wx:key="value">
+            <radio value="{{item.value}}" checked="{{petData.gender === item.value}}" />{{item.name}}
+          </label>
+        </radio-group>
+      </view>
+      
+      <!-- 年龄 -->
+      <view class="form-item">
+        <view class="form-label">年龄</view>
+        <input class="form-input" placeholder="例如：2岁" value="{{petData.age}}" bindinput="onInputChange" data-field="age" />
+      </view>
+      
+      <!-- 体重 -->
+      <view class="form-item">
+        <view class="form-label">体重(kg)</view>
+        <input class="form-input" type="digit" placeholder="请输入宠物体重" value="{{petData.weight}}" bindinput="onInputChange" data-field="weight" />
+      </view>
+      
+      <!-- 绝育状态 -->
+      <view class="form-item">
+        <view class="form-label">是否绝育</view>
+        <switch checked="{{petData.isSterilized}}" bindchange="onSterilizedChange" color="#07c160" />
+      </view>
+    </view>
+    
+    <!-- 健康信息 -->
+    <view class="form-section">
+      <view class="section-title">健康信息</view>
+      
+      <!-- 健康状况 -->
+      <view class="form-item">
+        <view class="form-label">健康状况</view>
+        <textarea class="form-textarea" placeholder="请描述宠物的健康状况" value="{{petData.healthDesc}}" bindinput="onInputChange" data-field="healthDesc" />
+      </view>
+      
+      <!-- 过敏源 -->
+      <view class="form-item">
+        <view class="form-label">过敏源</view>
+        <textarea class="form-textarea" placeholder="请描述宠物的过敏源（如有）" value="{{petData.allergyInfo}}" bindinput="onInputChange" data-field="allergyInfo" />
+      </view>
+      
+      <!-- 疫苗证明 -->
+      <view class="form-item">
+        <view class="form-label">疫苗证明</view>
+        <view class="vaccine-upload">
+          <view class="vaccine-photos">
+            <view wx:for="{{tempVaccinePhotos}}" wx:key="index" class="vaccine-photo-item">
+              <image class="vaccine-photo" src="{{item}}" mode="aspectFill"></image>
+              <view class="delete-icon" catchtap="deleteVaccinePhoto" data-index="{{index}}">×</view>
+            </view>
+            <view class="vaccine-upload-btn" bindtap="chooseVaccineProof" wx:if="{{tempVaccinePhotos.length < 9}}">
+              <view class="upload-icon">+</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 性格特点 -->
+    <view class="form-section">
+      <view class="section-title">性格特点</view>
+      
+      <!-- 性格标签 -->
+      <view class="form-item">
+        <view class="form-label">性格标签</view>
+        <view class="tags-container">
+          <view 
+            wx:for="{{tagOptions}}" 
+            wx:key="*this" 
+            class="tag {{selectedTags.indexOf(item) > -1 ? 'selected' : ''}}" 
+            bindtap="onTagTap" 
+            data-tag="{{item}}"
+          >
+            {{item}}
+          </view>
+        </view>
+      </view>
+      
+      <!-- 特别注意事项 -->
+      <view class="form-item">
+        <view class="form-label">特别注意事项</view>
+        <textarea class="form-textarea" placeholder="请描述需要特别注意的事项" value="{{petData.specialNotes}}" bindinput="onInputChange" data-field="specialNotes" />
+      </view>
+    </view>
+    
+    <!-- 错误提示 -->
+    <view class="error-message" wx:if="{{error}}">{{error}}</view>
+    
+    <!-- 提交按钮 -->
+    <button class="submit-btn" bindtap="submitForm" disabled="{{isSubmitting}}">
+      {{isSubmitting ? '提交中...' : '保存'}}
+    </button>
+  </view>
+</view> 
