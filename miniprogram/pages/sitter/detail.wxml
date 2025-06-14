@@ -8,72 +8,72 @@
   </view>
 
   <!-- 帮溜员信息 -->
-  <view class="sitter-info-container" wx:if="{{!loading && sitterInfo}}">
-    <view class="sitter-header">
-      <image class="sitter-avatar" src="{{sitterInfo.avatar || '/static/images/default-avatar.png'}}"></image>
-      <view class="sitter-basic">
-        <view class="sitter-name">{{sitterInfo.nickname || '帮溜员'}}</view>
-        <view class="sitter-rating">
-          <text class="icon-star">★</text>
-          <text>{{sitterInfo.rating || '5.0'}}</text>
-          <text class="sitter-orders">已完成 {{sitterInfo.totalServices || 0}} 单</text>
-        </view>
-      </view>
-    </view>
-    
-    <view class="sitter-content">
-      <!-- 个人简介 -->
-      <view class="section">
-        <view class="section-title">个人简介</view>
-        <view class="section-content">
-          <text class="bio">{{sitterInfo.bio || '这位帮溜员很懒，还没有填写简介~'}}</text>
+  <scroll-view scroll-y class="scroll-container" wx:if="{{!loading && sitterInfo}}">
+    <view class="sitter-info-container">
+      <view class="sitter-header">
+        <image class="sitter-avatar" src="{{sitterInfo.avatar || '/static/images/default-avatar.png'}}"></image>
+        <view class="sitter-basic">
+          <view class="sitter-name">{{sitterInfo.nickname || '帮溜员'}}</view>
+          <view class="sitter-rating">
+            <text class="icon-star">★</text>
+            <text>{{sitterInfo.rating || '5.0'}}</text>
+            <text class="sitter-orders">已完成 {{sitterInfo.totalServices || 0}} 单</text>
+          </view>
         </view>
       </view>
       
-      <!-- 服务区域 -->
-      <view class="section">
-        <view class="section-title">服务区域</view>
-        <view class="section-content">
-          <text>{{sitterInfo.serviceArea || '暂无服务区域信息'}}</text>
+      <view class="sitter-content">
+        <!-- 个人简介 -->
+        <view class="section">
+          <view class="section-title">个人简介</view>
+          <view class="section-content">
+            <text class="bio">{{sitterInfo.bio || '这位帮溜员很懒，还没有填写简介~'}}</text>
+          </view>
         </view>
-      </view>
-      
-      <!-- 服务项目和价格 -->
-      <view class="section">
-        <view class="section-title">服务项目</view>
-        <view class="section-content">
-          <view class="service-list">
-            <block wx:if="{{sitterInfo.services && sitterInfo.services.length > 0}}">
-              <view class="service-item" wx:for="{{sitterInfo.services}}" wx:key="type">
-                <view class="service-name">
-                  <text wx:if="{{item.type === 'walk'}}">🐕 遛狗</text>
-                  <text wx:elif="{{item.type === 'feed'}}">🐱 喂食</text>
-                  <text wx:else>🏠 寄养</text>
+        
+        <!-- 服务区域 -->
+        <view class="section">
+          <view class="section-title">服务区域</view>
+          <view class="section-content">
+            <text>{{sitterInfo.serviceArea || '暂无服务区域信息'}}</text>
+          </view>
+        </view>
+        
+        <!-- 服务项目和价格 -->
+        <view class="section">
+          <view class="section-title">服务项目</view>
+          <view class="section-content">
+            <view class="service-list">
+              <block wx:if="{{sitterInfo.services && sitterInfo.services.length > 0}}">
+                <view class="service-item" wx:for="{{sitterInfo.services}}" wx:key="type">
+                  <view class="service-name">
+                    <text wx:if="{{item.type === 'walk'}}">🐕 遛狗</text>
+                    <text wx:elif="{{item.type === 'feed'}}">🐱 喂食</text>
+                    <text wx:else>🏠 寄养</text>
+                  </view>
+                  <view class="service-price">¥{{item.price}}/次</view>
                 </view>
-                <view class="service-price">¥{{item.price}}/次</view>
-              </view>
-            </block>
-            <view wx:else class="no-service">暂无服务项目</view>
+              </block>
+              <view wx:else class="no-service">暂无服务项目</view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 可预约日期 -->
+        <view class="section" wx:if="{{sitterInfo.availableDates && sitterInfo.availableDates.length > 0}}">
+          <view class="section-title">可预约日期</view>
+          <view class="section-content">
+            <view class="date-list">
+              <text class="date-tag" wx:for="{{sitterInfo.availableDates}}" wx:key="*this">{{item}}</text>
+            </view>
           </view>
         </view>
       </view>
       
-      <!-- 可预约日期 -->
-      <view class="section" wx:if="{{sitterInfo.availableDates && sitterInfo.availableDates.length > 0}}">
-        <view class="section-title">可预约日期</view>
-        <view class="section-content">
-          <view class="date-list">
-            <text class="date-tag" wx:for="{{sitterInfo.availableDates}}" wx:key="*this">{{item}}</text>
-          </view>
-        </view>
-      </view>
+      <!-- 底部占位，确保内容不被底部操作栏遮挡 -->
+      <view class="footer-placeholder"></view>
     </view>
-    
-    <!-- 底部操作栏 -->
-    <view class="footer-action">
-      <button class="btn-primary btn-order" bindtap="onTapOrder">向TA下单</button>
-    </view>
-  </view>
+  </scroll-view>
   
   <!-- 加载中状态 -->
   <view class="loading-container" wx:if="{{loading}}">
@@ -86,5 +86,10 @@
     <icon type="warn" size="64"></icon>
     <text>加载失败，请重试</text>
     <button class="btn-retry" bindtap="onTapRetry">重新加载</button>
+  </view>
+  
+  <!-- 底部操作栏 -->
+  <view class="footer-action" wx:if="{{!loading && sitterInfo}}">
+    <button class="btn-primary btn-order" bindtap="onTapOrder">向TA下单</button>
   </view>
 </view> 

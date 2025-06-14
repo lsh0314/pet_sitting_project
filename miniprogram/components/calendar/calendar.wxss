@@ -1,0 +1,107 @@
+.calendar {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 8rpx;
+}
+
+/* 日历头部 */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.month-switch {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #666;
+  font-size: 24rpx;
+}
+
+.current-month {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 星期几 */
+.weekdays {
+  display: flex;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.weekday {
+  flex: 1;
+  text-align: center;
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 日期网格 */
+.days {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10rpx 0;
+}
+
+.day {
+  width: 14.28%; /* 7列 */
+  height: 80rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-sizing: border-box;
+  margin: 5rpx 0;
+}
+
+.day-number {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 26rpx;
+  border-radius: 50%;
+}
+
+/* 当前月 */
+.day.current {
+  color: #333;
+}
+
+/* 上个月和下个月 */
+.day.prev,
+.day.next {
+  color: #ccc;
+  opacity: 0.5;
+}
+
+/* 今天 */
+.day.today .day-number {
+  border: 1rpx solid #4caf50;
+}
+
+/* 选中的日期 */
+.day.selected .day-number {
+  background-color: #4caf50;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* 禁用的日期 */
+.day.disabled {
+  color: #ccc;
+  pointer-events: none;
+}
+
+/* 可用日期的样式 */
+.day.current:not(.disabled) {
+  font-weight: 500;
+}

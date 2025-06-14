@@ -18,8 +18,13 @@
   <view class="order-form">
     <!-- 选择宠物 -->
     <view class="form-section">
-      <view class="section-title">选择宠物</view>
-      <view class="pet-list">
+      <view class="section-title">
+        选择宠物
+        <view class="refresh-btn" bindtap="refreshPetList">刷新</view>
+      </view>
+      
+      <!-- 有宠物时显示列表 -->
+      <view class="pet-list" wx:if="{{pets.length > 0}}">
         <view 
           class="pet-item {{selectedPetId === item.id ? 'selected' : ''}}" 
           wx:for="{{pets}}" 
@@ -30,12 +35,13 @@
           <image class="pet-avatar" src="{{item.photo || '/static/images/default-pet.png'}}"></image>
           <view class="pet-name">{{item.name}}</view>
         </view>
+        </view>
         
-        <!-- 添加宠物按钮 -->
-        <navigator url="/pages/pet/create" class="pet-item add-pet">
-          <view class="add-icon">+</view>
-          <view class="pet-name">添加宠物</view>
-        </navigator>
+      <!-- 没有宠物时显示提示 -->
+      <view class="no-pet-tip" wx:else>
+        <view class="tip-icon">🐾</view>
+        <view class="tip-text">您还没有登记宠物信息</view>
+        <navigator url="/pages/my/pets/add" class="tip-btn">去添加宠物</navigator>
       </view>
     </view>
     
@@ -74,13 +80,38 @@
     <view class="form-section">
       <view class="section-title">服务时间</view>
       <view class="time-selectors">
-        <picker mode="date" value="{{serviceDate}}" bindchange="bindDateChange">
-          <view class="picker-item">
-            <view class="picker-label">日期</view>
-            <view class="picker-value">{{serviceDate}}</view>
+        <!-- 日期选择器 -->
+        <view class="date-picker-container">
+          <view class="date-picker-header">
+            <view class="date-picker-title">选择日期</view>
+            <text class="date-picker-selected">已选：{{serviceDate}}</text>
           </view>
-        </picker>
+          
+          <!-- 日历组件 -->
+          <view class="calendar-container">
+            <calendar 
+              selected="{{serviceDate}}"
+              bindselect="bindDateChange"
+              bindmonthChange="handleMonthChange"
+              min-date="{{minDate}}"
+              max-date="{{maxDate}}"
+              days-color="{{daysColor}}"
+            />
+            <view class="calendar-legend" wx:if="{{sitterInfo.availableDates && sitterInfo.availableDates.length > 0}}">
+              <view class="legend-item">
+                <view class="legend-color available"></view>
+                <text class="legend-text">帮溜员可用日期</text>
+              </view>
+              <view class="legend-item">
+                <view class="legend-color unavailable"></view>
+                <text class="legend-text">不可选日期</text>
+              </view>
+            </view>
+          </view>
+        </view>
         
+        <!-- 时间选择器 -->
+        <view class="time-picker-row">
         <picker mode="time" value="{{startTime}}" bindchange="bindStartTimeChange">
           <view class="picker-item">
             <view class="picker-label">开始时间</view>
@@ -94,6 +125,7 @@
             <view class="picker-value">{{endTime}}</view>
           </view>
         </picker>
+        </view>
       </view>
     </view>
     

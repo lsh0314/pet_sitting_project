@@ -1,0 +1,31 @@
+<view class="calendar">
+  <!-- 日历头部 -->
+  <view class="calendar-header">
+    <view class="month-switch prev" bindtap="prevMonth">
+      <text class="iconfont">◀</text>
+    </view>
+    <view class="current-month">{{currentYear}}年{{currentMonth}}月</view>
+    <view class="month-switch next" bindtap="nextMonth">
+      <text class="iconfont">▶</text>
+    </view>
+  </view>
+  
+  <!-- 星期几 -->
+  <view class="weekdays">
+    <view class="weekday" wx:for="{{weekdays}}" wx:key="index">{{item}}</view>
+  </view>
+  
+  <!-- 日期网格 -->
+  <view class="days">
+    <view 
+      class="day {{item.month}} {{item.isSelected ? 'selected' : ''}} {{item.isToday ? 'today' : ''}} {{item.isDisabled ? 'disabled' : ''}}"
+      wx:for="{{days}}" 
+      wx:key="index"
+      bindtap="tapDay"
+      data-index="{{index}}"
+      style="{{item.month === 'current' ? 'color: ' + (item.color || 'inherit') + '; background-color: ' + (item.background || 'inherit') + ';' : ''}}"
+    >
+      <view class="day-number">{{item.day}}</view>
+    </view>
+  </view>
+</view> 

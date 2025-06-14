@@ -3,6 +3,13 @@
   padding: 0;
   background-color: #f8f8f8;
   min-height: 100vh;
+  position: relative;
+}
+
+/* 滚动区域 */
+.scroll-container {
+  height: calc(100vh - 88rpx - 128rpx); /* 减去导航栏和底部操作栏的高度 */
+  width: 100%;
 }
 
 /* 顶部导航栏 */
@@ -189,6 +196,12 @@
   font-size: 24rpx;
   margin: 8rpx;
   border: 1rpx solid #ffecb3;
+}
+
+/* 底部占位区 */
+.footer-placeholder {
+  height: 128rpx; /* 与底部操作栏高度一致 */
+  width: 100%;
 }
 
 /* 底部操作栏 */

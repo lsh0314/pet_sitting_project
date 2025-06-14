@@ -46,6 +46,9 @@
       }
     ]
   },
+  "usingComponents": {
+    "calendar": "components/calendar/calendar"
+  },
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 } 

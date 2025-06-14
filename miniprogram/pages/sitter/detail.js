@@ -1,5 +1,6 @@
 // pages/sitter/detail.js
 const api = require('../../utils/api');
+const util = require('../../utils/util');
 
 Page({
   data: {
@@ -53,8 +54,38 @@ Page({
             services: (res.services || []).map(service => ({
               type: service.service_type,
               price: service.price
-            }))
+            })),
+            availableDates: res.availableDates || []
           };
+        }
+        
+        // 处理可预约日期
+        if (sitterInfo && Array.isArray(sitterInfo.availableDates)) {
+          // 将可预约日期转换为星期几的显示
+          const weekdayMap = {
+            '0': '周日',
+            '1': '周一',
+            '2': '周二',
+            '3': '周三',
+            '4': '周四',
+            '5': '周五',
+            '6': '周六'
+          };
+          
+          // 如果availableDates是数字格式的星期几，转换为中文显示
+          if (sitterInfo.availableDates.length > 0 && !isNaN(parseInt(sitterInfo.availableDates[0]))) {
+            sitterInfo.availableDates = sitterInfo.availableDates.map(day => weekdayMap[day] || day);
+          }
+          // 如果availableDates是日期格式（如2023-07-17），转换为星期几显示
+          else if (sitterInfo.availableDates.length > 0 && sitterInfo.availableDates[0].includes('-')) {
+            const uniqueWeekdays = new Set();
+            sitterInfo.availableDates.forEach(dateStr => {
+              const date = new Date(dateStr);
+              const weekday = date.getDay(); // 0-6
+              uniqueWeekdays.add(weekdayMap[weekday]);
+            });
+            sitterInfo.availableDates = Array.from(uniqueWeekdays);
+          }
         }
         
         this.setData({
