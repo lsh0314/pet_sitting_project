@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
 // 注册API路由
 app.use('/api/auth', require('./src/api/auth.routes'));
 app.use('/api/user', require('./src/api/user.routes'));
+app.use('/api/pet', require('./src/api/pet.routes'));
 
 // 全局错误处理中间件
 app.use((err, req, res, next) => {

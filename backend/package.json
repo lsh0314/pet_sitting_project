@@ -10,6 +10,8 @@
     "test-db": "node src/scripts/test-db-connection.js",
     "import-db": "node ../database/import_petsystem.js",
     "test-login": "node src/scripts/test-wechat-login.js",
+    "migrate-pets": "node ../database/migrate.js",
+    "test-pet-api": "node src/scripts/test-pet-api.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

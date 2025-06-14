@@ -99,7 +99,5 @@ const isAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = {
-  authMiddleware,
-  isAdmin
-}; 
+// 导出中间件
+module.exports = authMiddleware;
