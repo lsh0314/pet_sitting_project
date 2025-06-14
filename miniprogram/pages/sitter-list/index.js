@@ -7,29 +7,38 @@ Page({
    * 页面的初始数据
    */
   data: {
+    serviceType: '', // 服务类型：'feed'(喂猫) 或 'walk'(遛狗)
+    serviceTypeText: '', // 服务类型文本
     sitters: [], // 帮溜员列表
     loading: false, // 加载状态
     error: false, // 错误状态
     currentPage: 1, // 当前页码
     hasMore: true, // 是否还有更多数据
+    activeFilter: 'all' // 当前筛选条件：'all', 'rating', 'orders'
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    this.fetchSitters();
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setData({
-        selected: 0 // 选中首页
-      });
+    // 获取服务类型参数
+    const serviceType = options.type || '';
+    
+    // 设置服务类型文本
+    let serviceTypeText = '推荐帮溜员';
+    if (serviceType === 'feed') {
+      serviceTypeText = '上门喂猫';
+    } else if (serviceType === 'walk') {
+      serviceTypeText = '上门遛狗';
     }
+    
+    this.setData({
+      serviceType,
+      serviceTypeText
+    });
+    
+    // 加载帮溜员列表
+    this.fetchSitters();
   },
 
   /**
@@ -67,8 +76,30 @@ Page({
     
     this.setData({ loading: true, error: false });
     
+    // 构建请求参数
+    const params = { 
+      page: this.data.currentPage,
+      size: 10
+    };
+    
+    // 添加服务类型筛选
+    if (this.data.serviceType) {
+      if (this.data.serviceType === 'feed') {
+        params.service_type = 'feed';
+      } else if (this.data.serviceType === 'walk') {
+        params.service_type = 'walk';
+      }
+    }
+    
+    // 添加排序筛选
+    if (this.data.activeFilter === 'rating') {
+      params.sort = 'rating';
+    } else if (this.data.activeFilter === 'orders') {
+      params.sort = 'orders';
+    }
+    
     // 调用接口获取帮溜员列表
-    api.get('/api/sitter', { page: this.data.currentPage, size: 10 }, false)
+    api.get('/api/sitter', params, false)
       .then(res => {
         console.log('获取帮溜员列表成功:', res);
         // 处理不同的响应格式
@@ -146,62 +177,31 @@ Page({
   },
 
   /**
-   * 导航到服务页面
+   * 设置筛选条件
    */
-  navigateToService: function (e) {
-    const type = e.currentTarget.dataset.type;
+  setFilter: function (e) {
+    const filter = e.currentTarget.dataset.filter;
     
-    if (app.globalData.isLoggedIn) {
-      // 已登录，跳转到相应服务页面
-      if (type === 'cat') {
-        wx.navigateTo({
-          url: '/pages/sitter-list/index?type=feed'
-        });
-      } else if (type === 'dog') {
-        wx.navigateTo({
-          url: '/pages/sitter-list/index?type=walk'
-        });
-      }
-    } else {
-      // 未登录，跳转到登录页
-      wx.navigateTo({
-        url: '/pages/auth/index'
+    if (filter !== this.data.activeFilter) {
+      this.setData({
+        activeFilter: filter,
+        sitters: [],
+        currentPage: 1,
+        hasMore: true,
+        loading: true,
+        error: false
       });
+      
+      this.fetchSitters();
     }
   },
 
   /**
-   * 导航到功能页面
+   * 返回上一页
    */
-  navigateToFeature: function (e) {
-    const feature = e.currentTarget.dataset.feature;
-    
-    switch (feature) {
-      case 'subscribe':
-        // 关注公众号
-        wx.showToast({
-          title: '请扫描公众号二维码',
-          icon: 'none'
-        });
-        break;
-      case 'coupon':
-        // 储值优惠
-        if (app.globalData.isLoggedIn) {
-          wx.navigateTo({
-            url: '/pages/wallet/index'
-          });
-        } else {
-          wx.navigateTo({
-            url: '/pages/auth/index'
-          });
-        }
-        break;
-      case 'adoption':
-        // 宠物领养
-        wx.navigateTo({
-          url: '/pages/adoption/index'
-        });
-        break;
-    }
+  goBack: function () {
+    wx.navigateBack({
+      delta: 1
+    });
   }
-}) 
+}); 

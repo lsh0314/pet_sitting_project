@@ -121,13 +121,35 @@ class SitterController {
    */
   static async getSitters(req, res) {
     try {
-      // 获取所有帮溜员列表
-      const sitters = await SitterProfile.findAll();
+      // 获取查询参数
+      const { service_type, page = 1, size = 10, sort } = req.query;
+      
+      // 计算分页参数
+      const offset = (page - 1) * size;
+      const limit = parseInt(size);
+      
+      // 构建查询选项
+      const options = {
+        offset,
+        limit,
+        sort
+      };
+      
+      // 如果指定了服务类型，添加到查询条件
+      if (service_type) {
+        options.service_type = service_type;
+      }
+      
+      // 获取帮溜员列表
+      const { sitters, total } = await SitterProfile.findAll(options);
       
       res.json({
         success: true,
         data: sitters,
-        total: sitters.length
+        total,
+        page: parseInt(page),
+        size: parseInt(size),
+        totalPages: Math.ceil(total / size)
       });
     } catch (error) {
       console.error('获取帮溜员列表失败:', error);

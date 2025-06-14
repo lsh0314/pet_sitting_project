@@ -1,0 +1,215 @@
+/* 页面容器 */
+.container {
+  padding: 0;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+}
+
+/* 顶部标题栏 */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 90rpx;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx;
+  z-index: 100;
+  border-bottom: 1rpx solid #eee;
+}
+
+.back-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: 40rpx;
+  color: #333;
+}
+
+.title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+  margin-right: 60rpx; /* 为了平衡左边的返回按钮 */
+}
+
+/* 筛选区域 */
+.filter-container {
+  display: flex;
+  background-color: #fff;
+  padding: 20rpx 30rpx;
+  margin-top: 90rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.filter-item {
+  padding: 10rpx 20rpx;
+  margin-right: 30rpx;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+
+.filter-item.active {
+  color: #ffd100;
+  font-weight: bold;
+}
+
+.filter-item.active:after {
+  content: "";
+  position: absolute;
+  bottom: -5rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 6rpx;
+  background-color: #ffd100;
+  border-radius: 3rpx;
+}
+
+/* 帮溜员列表 */
+.sitter-list {
+  padding: 20rpx;
+  margin-top: 20rpx;
+}
+
+/* 加载中状态 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+}
+
+.loading-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid #ffd100;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 错误状态 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+}
+
+.btn-retry {
+  margin-top: 20rpx;
+  background-color: #ffd100;
+  color: #333;
+  font-size: 28rpx;
+  padding: 10rpx 40rpx;
+  border-radius: 30rpx;
+}
+
+/* 空状态 */
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+/* 帮溜员项 */
+.sitter-item {
+  display: flex;
+  background-color: #fff;
+  padding: 30rpx;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.sitter-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  margin-right: 20rpx;
+  background-color: #f0f0f0;
+}
+
+.sitter-info {
+  flex: 1;
+}
+
+.sitter-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.sitter-rating {
+  display: flex;
+  align-items: center;
+  font-size: 24rpx;
+  color: #ff9500;
+  margin-bottom: 10rpx;
+}
+
+.sitter-orders {
+  margin-left: 20rpx;
+  color: #999;
+}
+
+.sitter-bio {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 15rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.sitter-service-tags {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.service-tag {
+  font-size: 22rpx;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  margin-right: 10rpx;
+  margin-bottom: 10rpx;
+}
+
+/* 加载更多 */
+.loading-more {
+  text-align: center;
+  padding: 20rpx 0;
+  color: #999;
+  font-size: 24rpx;
+}

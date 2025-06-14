@@ -75,12 +75,20 @@ class SitterProfile {
 
   /**
    * 获取所有帮溜员列表
-   * @returns {Promise<Array>} 帮溜员列表
+   * @param {Object} options - 查询选项
+   * @param {number} options.offset - 偏移量
+   * @param {number} options.limit - 限制数量
+   * @param {string} options.service_type - 服务类型
+   * @param {string} options.sort - 排序方式
+   * @returns {Promise<Object>} 帮溜员列表和总数
    */
-  static async findAll() {
+  static async findAll(options = {}) {
     try {
-      const [rows] = await pool.query(
-        `SELECT 
+      const { offset = 0, limit = 10, service_type, sort } = options;
+      
+      // 构建基础查询
+      let query = `
+        SELECT 
           sp.user_id, 
           sp.bio, 
           sp.service_area, 
@@ -88,13 +96,62 @@ class SitterProfile {
           sp.total_services_completed,
           u.nickname, 
           u.avatar_url
-         FROM sitter_profiles sp
-         JOIN users u ON sp.user_id = u.id
-         WHERE u.role = 'sitter' AND u.status = 'active'
-         ORDER BY sp.rating DESC, sp.total_services_completed DESC`
-      );
+        FROM sitter_profiles sp
+        JOIN users u ON sp.user_id = u.id
+        WHERE u.role = 'sitter' AND u.status = 'active'
+      `;
       
-      return rows;
+      // 构建计数查询
+      let countQuery = `
+        SELECT COUNT(*) as total
+        FROM sitter_profiles sp
+        JOIN users u ON sp.user_id = u.id
+        WHERE u.role = 'sitter' AND u.status = 'active'
+      `;
+      
+      // 参数数组
+      const queryParams = [];
+      const countParams = [];
+      
+      // 如果指定了服务类型，添加服务类型筛选
+      if (service_type) {
+        query += `
+          AND sp.user_id IN (
+            SELECT user_id FROM sitter_services
+            WHERE service_type = ?
+          )
+        `;
+        countQuery += `
+          AND sp.user_id IN (
+            SELECT user_id FROM sitter_services
+            WHERE service_type = ?
+          )
+        `;
+        queryParams.push(service_type);
+        countParams.push(service_type);
+      }
+      
+      // 添加排序
+      if (sort === 'rating') {
+        query += ` ORDER BY sp.rating DESC`;
+      } else if (sort === 'orders') {
+        query += ` ORDER BY sp.total_services_completed DESC`;
+      } else {
+        query += ` ORDER BY sp.rating DESC, sp.total_services_completed DESC`;
+      }
+      
+      // 添加分页
+      query += ` LIMIT ? OFFSET ?`;
+      queryParams.push(limit, offset);
+      
+      // 执行查询
+      const [rows] = await pool.query(query, queryParams);
+      const [countResult] = await pool.query(countQuery, countParams);
+      
+      return {
+        sitters: rows,
+        total: countResult[0].total
+      };
     } catch (error) {
       console.error('查询帮溜员列表失败:', error);
       throw error;
