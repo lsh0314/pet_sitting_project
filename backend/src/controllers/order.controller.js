@@ -99,6 +99,205 @@ class OrderController {
       });
     }
   }
+
+  /**
+   * 获取我的订单列表
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async getMyOrders(req, res) {
+    try {
+      // 从认证中间件获取当前用户ID
+      const userId = req.user.id;
+      
+      // 获取查询参数
+      const { role, status, page = 1, limit = 10 } = req.query;
+      
+      // 验证角色参数
+      if (!role || !['pet_owner', 'sitter'].includes(role)) {
+        return res.status(400).json({
+          success: false,
+          message: '无效的角色参数，必须是 pet_owner 或 sitter'
+        });
+      }
+      
+      // 查询选项
+      const options = {
+        status,
+        page: parseInt(page),
+        limit: parseInt(limit)
+      };
+      
+      // 获取订单列表
+      const result = await Order.findByUser(userId, role, options);
+      
+      // 格式化订单数据，添加状态文本和服务类型文本
+      const formattedOrders = result.orders.map(order => {
+        // 状态文本映射
+        const statusTextMap = {
+          'pending': '待接单',
+          'accepted': '待支付',
+          'paid': '待服务',
+          'ongoing': '服务中',
+          'completed': '已完成',
+          'cancelled': '已取消'
+        };
+        
+        // 服务类型文本映射
+        const serviceTypeTextMap = {
+          'walk': '遛狗',
+          'feed': '喂食',
+          'boarding': '寄养'
+        };
+        
+        // 构建时间范围
+        const timeRange = `${order.startTime} - ${order.endTime}`;
+        
+        return {
+          orderId: order.id,
+          petName: order.petName,
+          petPhoto: order.petPhoto,
+          status: order.status,
+          statusText: statusTextMap[order.status] || order.status,
+          serviceType: order.serviceType,
+          serviceTypeText: serviceTypeTextMap[order.serviceType] || order.serviceType,
+          serviceDate: order.serviceDate,
+          timeRange,
+          startTime: order.startTime,
+          endTime: order.endTime,
+          price: order.price,
+          createdAt: order.createdAt,
+          // 根据角色返回不同的对方信息
+          counterpart: role === 'pet_owner' 
+            ? { id: order.sitterUserId, nickname: order.sitterNickname, avatar: order.sitterAvatar }
+            : { id: order.ownerUserId, nickname: order.ownerNickname, avatar: order.ownerAvatar }
+        };
+      });
+      
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        data: {
+          orders: formattedOrders,
+          pagination: {
+            total: result.total,
+            page: result.page,
+            limit: result.limit,
+            totalPages: result.totalPages
+          }
+        }
+      });
+    } catch (error) {
+      console.error('获取我的订单列表失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取订单列表失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 获取订单详情
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async getOrderDetail(req, res) {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取当前用户ID
+      const userId = req.user.id;
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 验证用户是否有权限查看该订单（必须是订单的宠物主或帮溜员）
+      if (order.ownerUserId !== userId && order.sitterUserId !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: '您无权查看此订单'
+        });
+      }
+      
+      // 状态文本映射
+      const statusTextMap = {
+        'pending': '待接单',
+        'accepted': '待支付',
+        'paid': '待服务',
+        'ongoing': '服务中',
+        'completed': '已完成',
+        'cancelled': '已取消'
+      };
+      
+      // 服务类型文本映射
+      const serviceTypeTextMap = {
+        'walk': '遛狗',
+        'feed': '喂食',
+        'boarding': '寄养'
+      };
+      
+      // 构建响应数据
+      const responseData = {
+        orderId: order.id,
+        status: order.status,
+        statusText: statusTextMap[order.status] || order.status,
+        pet: {
+          id: order.petId,
+          name: order.petName,
+          photo: order.petPhoto
+        },
+        serviceType: order.serviceType,
+        serviceTypeText: serviceTypeTextMap[order.serviceType] || order.serviceType,
+        serviceDate: order.serviceDate,
+        startTime: order.startTime,
+        endTime: order.endTime,
+        timeRange: `${order.startTime} - ${order.endTime}`,
+        address: order.address,
+        remarks: order.remarks,
+        owner: {
+          id: order.ownerUserId,
+          nickname: order.ownerNickname,
+          avatar: order.ownerAvatar
+        },
+        sitter: {
+          id: order.sitterUserId,
+          nickname: order.sitterNickname,
+          avatar: order.sitterAvatar
+        },
+        payment: {
+          price: order.price,
+          isPaid: ['paid', 'ongoing', 'completed'].includes(order.status)
+        },
+        track: [], // 轨迹数据，MVP阶段为空数组
+        report: [], // 服务报告，MVP阶段为空数组
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt
+      };
+      
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        data: responseData
+      });
+    } catch (error) {
+      console.error('获取订单详情失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取订单详情失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
 }
 
 module.exports = OrderController; 

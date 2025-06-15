@@ -77,11 +77,11 @@
       <view class="price-info">
         <view class="price-item">
           <view class="price-label">服务费用</view>
-          <view class="price-value">¥{{orderInfo.servicePrice}}</view>
+          <view class="price-value">¥{{orderInfo.payment.price}}</view>
         </view>
         <view class="price-item total">
           <view class="price-label">合计</view>
-          <view class="price-value">¥{{orderInfo.totalPrice}}</view>
+          <view class="price-value">¥{{orderInfo.payment.price}}</view>
         </view>
       </view>
     </view>
