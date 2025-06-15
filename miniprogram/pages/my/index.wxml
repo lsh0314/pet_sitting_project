@@ -67,6 +67,6 @@
   <!-- 底部信息 -->
   <view class="footer-info">
     <view class="service-time">工作时间：周一至周日 8:00 - 20:00</view>
-    <view class="service-brand">——宠物派 标准化宠物服务平台——</view>
+    <view class="service-brand">——宠物帮 标准化宠物服务平台——</view>
   </view>
 </view> 
