@@ -58,7 +58,7 @@ const request = (options) => {
       header,
       success: (res) => {
         // 请求成功
-        if (res.statusCode === 200) {
+        if (res.statusCode === 200 || res.statusCode === 201) {
           // 直接返回数据，不再检查success字段
           resolve(res.data);
         } else if (res.statusCode === 401) {
