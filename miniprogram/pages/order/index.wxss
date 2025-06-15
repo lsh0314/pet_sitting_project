@@ -28,6 +28,33 @@
   transform: translateY(-50%);
 }
 
+/* 角色切换器 */
+.role-switcher {
+  display: flex;
+  background-color: #fff;
+  padding: 20rpx 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.role-item {
+  flex: 1;
+  text-align: center;
+  padding: 12rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  border-radius: 30rpx;
+  margin: 0 10rpx;
+  border: 1rpx solid #eee;
+}
+
+.role-item.active {
+  color: #333;
+  font-weight: bold;
+  background-color: #fde74c;
+  border-color: #fde74c;
+  box-shadow: 0 2rpx 6rpx rgba(253, 231, 76, 0.3);
+}
+
 /* 标签页 */
 .tab-container {
   display: flex;
@@ -71,6 +98,7 @@
   border-radius: 12rpx;
   margin-bottom: 20rpx;
   overflow: hidden;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 
 .order-header {
@@ -119,6 +147,19 @@
   font-weight: bold;
 }
 
+/* 倒计时样式 */
+.countdown {
+  margin-top: 15rpx;
+  padding-top: 15rpx;
+  border-top: 1rpx dashed #eee;
+}
+
+.countdown-text {
+  color: #ff5722 !important;
+  font-weight: bold;
+  font-size: 28rpx !important;
+}
+
 .order-footer {
   padding: 20rpx 30rpx;
   border-top: 1rpx solid #f5f5f5;
@@ -128,14 +169,18 @@
 
 .action-btns {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .action-btns button {
-  margin-left: 20rpx;
+  margin-left: 15rpx;
   font-size: 24rpx;
   padding: 10rpx 30rpx;
   line-height: 1.5;
   border-radius: 30rpx;
+  min-width: 140rpx;
+  text-align: center;
 }
 
 .btn-default {
@@ -148,6 +193,22 @@
   color: #fff;
   background-color: #ff7b7b;
   border: none;
+}
+
+/* 新增的取消订单按钮 */
+.btn-cancel {
+  color: #ff5722;
+  background-color: #fff;
+  border: 1rpx solid #ff5722;
+}
+
+/* 新增的去支付按钮 */
+.btn-pay {
+  color: #333;
+  background: linear-gradient(to right, #fde74c, #ffb700);
+  border: none;
+  font-weight: bold;
+  box-shadow: 0 4rpx 8rpx rgba(253, 231, 76, 0.3);
 }
 
 /* 空状态 */

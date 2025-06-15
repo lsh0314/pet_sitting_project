@@ -12,4 +12,7 @@ router.get('/my', authMiddleware, OrderController.getMyOrders);
 // 获取订单详情（需要认证）
 router.get('/:id', authMiddleware, OrderController.getOrderDetail);
 
+// 取消订单（需要认证）
+router.post('/:id/cancel', authMiddleware, OrderController.cancelOrder);
+
 module.exports = router; 

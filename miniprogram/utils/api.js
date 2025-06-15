@@ -58,7 +58,7 @@ const request = (options) => {
       header,
       success: (res) => {
         // 请求成功
-        if (res.statusCode === 200 || res.statusCode === 201) {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
           // 直接返回数据，不再检查success字段
           resolve(res.data);
         } else if (res.statusCode === 401) {
@@ -74,7 +74,8 @@ const request = (options) => {
       },
       fail: (err) => {
         // 网络错误等
-        showToast('网络请求失败');
+        console.error('网络请求失败:', err);
+        showToast('网络请求失败，请检查网络连接');
         reject(err);
       }
     });

@@ -298,6 +298,72 @@ class OrderController {
       });
     }
   }
+
+  /**
+   * 取消订单
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async cancelOrder(req, res) {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取当前用户ID
+      const userId = req.user.id;
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 验证用户是否有权限取消该订单（必须是订单的宠物主或帮溜员）
+      if (order.ownerUserId !== userId && order.sitterUserId !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: '您无权取消此订单'
+        });
+      }
+      
+      // 验证订单状态是否允许取消（只能取消待接单、待支付、待服务状态的订单）
+      const cancelableStatuses = ['pending', 'accepted', 'paid'];
+      if (!cancelableStatuses.includes(order.status)) {
+        return res.status(400).json({
+          success: false,
+          message: '当前订单状态不允许取消'
+        });
+      }
+      
+      // 更新订单状态为已取消
+      const success = await Order.updateStatus(orderId, 'cancelled');
+      
+      if (!success) {
+        return res.status(500).json({
+          success: false,
+          message: '取消订单失败'
+        });
+      }
+      
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        message: '订单已取消'
+      });
+    } catch (error) {
+      console.error('取消订单失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '取消订单失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
 }
 
 module.exports = OrderController; 

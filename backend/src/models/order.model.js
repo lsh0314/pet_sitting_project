@@ -85,52 +85,82 @@ class Order {
    */
   static async findByUser(userId, role, options = {}) {
     try {
-      const { status, page = 1, limit = 10 } = options;
+      // 确保userId是数字
+      userId = Number(userId);
+      
+      // 解构并处理分页参数，确保是数字类型
+      const page = Number(options.page || 1);
+      const limit = Number(options.limit || 10);
       const offset = (page - 1) * limit;
       
-      let whereClause = role === 'pet_owner' 
-        ? 'o.owner_user_id = ?' 
-        : 'o.sitter_user_id = ?';
-        
-      if (status) {
-        whereClause += ' AND o.status = ?';
+      // 处理状态参数
+      const { status } = options;
+      
+      // 构建查询SQL
+      let sql = '';
+      let countSql = '';
+      
+      // 对于待支付状态(accepted)的订单，无论角色如何，都应该查询用户作为宠物主的订单
+      // 因为支付是宠物主的责任
+      if (status === 'accepted') {
+        sql = `SELECT 
+            o.id, o.status, o.service_type as serviceType,
+            o.service_date as serviceDate, o.start_time as startTime,
+            o.end_time as endTime, o.address, o.price,
+            o.created_at as createdAt, o.updated_at as updatedAt,
+            u1.nickname as ownerNickname, u1.avatar_url as ownerAvatar,
+            u2.nickname as sitterNickname, u2.avatar_url as sitterAvatar,
+            p.name as petName, p.photo_url as petPhoto
+          FROM orders o
+          JOIN users u1 ON o.owner_user_id = u1.id
+          LEFT JOIN users u2 ON o.sitter_user_id = u2.id
+          JOIN pets p ON o.pet_id = p.id
+          WHERE o.owner_user_id = ${userId} AND o.status = '${status}'
+          ORDER BY o.created_at DESC
+          LIMIT ${limit} OFFSET ${offset}`;
+          
+        countSql = `SELECT COUNT(*) as total 
+          FROM orders o 
+          WHERE o.owner_user_id = ${userId} AND o.status = '${status}'`;
+      }
+      // 对于其他状态的订单，根据用户角色查询
+      else {
+        const whereClause = role === 'pet_owner' 
+          ? `o.owner_user_id = ${userId}` 
+          : `o.sitter_user_id = ${userId}`;
+          
+        sql = `SELECT 
+            o.id, o.status, o.service_type as serviceType,
+            o.service_date as serviceDate, o.start_time as startTime,
+            o.end_time as endTime, o.address, o.price,
+            o.created_at as createdAt, o.updated_at as updatedAt,
+            u1.nickname as ownerNickname, u1.avatar_url as ownerAvatar,
+            u2.nickname as sitterNickname, u2.avatar_url as sitterAvatar,
+            p.name as petName, p.photo_url as petPhoto
+          FROM orders o
+          JOIN users u1 ON o.owner_user_id = u1.id
+          LEFT JOIN users u2 ON o.sitter_user_id = u2.id
+          JOIN pets p ON o.pet_id = p.id
+          WHERE ${whereClause} ${status ? `AND o.status = '${status}'` : ''}
+          ORDER BY o.created_at DESC
+          LIMIT ${limit} OFFSET ${offset}`;
+          
+        countSql = `SELECT COUNT(*) as total 
+          FROM orders o 
+          WHERE ${whereClause} ${status ? `AND o.status = '${status}'` : ''}`;
       }
       
-      const queryParams = [userId];
-      if (status) queryParams.push(status);
+      console.log('SQL查询:', sql);
       
-      // 添加分页参数
-      queryParams.push(limit, offset);
-      
-      const [rows] = await db.execute(
-        `SELECT 
-          o.id, o.status, o.service_type as serviceType,
-          o.service_date as serviceDate, o.price,
-          o.created_at as createdAt, o.updated_at as updatedAt,
-          u1.nickname as ownerNickname, u1.avatar_url as ownerAvatar,
-          u2.nickname as sitterNickname, u2.avatar_url as sitterAvatar,
-          p.name as petName, p.photo_url as petPhoto
-        FROM orders o
-        JOIN users u1 ON o.owner_user_id = u1.id
-        LEFT JOIN users u2 ON o.sitter_user_id = u2.id
-        JOIN pets p ON o.pet_id = p.id
-        WHERE ${whereClause}
-        ORDER BY o.created_at DESC
-        LIMIT ? OFFSET ?`,
-        queryParams
-      );
-      
-      // 获取总数
-      const [countResult] = await db.execute(
-        `SELECT COUNT(*) as total FROM orders o WHERE ${whereClause}`,
-        status ? [userId, status] : [userId]
-      );
+      // 执行查询
+      const [rows] = await db.query(sql);
+      const [countResult] = await db.query(countSql);
       
       return {
         orders: rows,
         total: countResult[0].total,
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: page,
+        limit: limit,
         totalPages: Math.ceil(countResult[0].total / limit)
       };
     } catch (error) {

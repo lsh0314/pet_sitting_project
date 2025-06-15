@@ -12,7 +12,8 @@
     "pages/my/pets/add",
     "pages/my/pets/detail",
     "pages/my/sitter/profile",
-    "pages/sitter-list/index"
+    "pages/sitter-list/index",
+    "pages/payment/index"
   ],
   "window": {
     "backgroundTextStyle": "light",
