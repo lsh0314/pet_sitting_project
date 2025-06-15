@@ -150,8 +150,13 @@ Page({
    */
   navigateToService: function (e) {
     const type = e.currentTarget.dataset.type;
+    const app = getApp();
     
     if (app.globalData.isLoggedIn) {
+      // 保存选择的服务类型到全局变量
+      app.globalData.selectedServiceType = type === 'cat' ? 'feed' : type === 'dog' ? 'walk' : 'boarding';
+      console.log('选择服务类型:', app.globalData.selectedServiceType);
+      
       // 已登录，跳转到相应服务页面
       if (type === 'cat') {
         wx.navigateTo({

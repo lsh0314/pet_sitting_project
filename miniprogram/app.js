@@ -72,6 +72,7 @@ App({
     // baseAPI: 'https://api.petsitting.com', // 生产环境API地址
     // apiBaseUrl: 'https://api.petsitting.com', // 生产环境API地址
     isLoggedIn: false,
-    userInfo: null
+    userInfo: null,
+    selectedServiceType: null // 用户从首页选择的服务类型
   }
 }) 

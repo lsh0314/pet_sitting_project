@@ -111,9 +111,31 @@ Page({
   onTapOrder: function () {
     if (!this.data.sitterInfo) return;
     
-    // 跳转到下单页面
+    // 从全局变量获取服务类型
+    const app = getApp();
+    const selectedServiceType = app.globalData.selectedServiceType;
+    
+    console.log('下单按钮点击，全局服务类型:', selectedServiceType);
+    
+    // 检查帮溜员是否提供该服务类型
+    if (selectedServiceType && this.data.sitterInfo.services) {
+      const hasService = this.data.sitterInfo.services.some(service => {
+        const serviceType = service.type || service.service_type;
+        return serviceType === selectedServiceType;
+      });
+      
+      if (!hasService) {
+        wx.showToast({
+          title: '该帮溜员不提供此服务',
+          icon: 'none'
+        });
+        return;
+      }
+    }
+    
+    // 跳转到下单页面，传递帮溜员ID和服务类型
     wx.navigateTo({
-      url: `/pages/order/create?sitterId=${this.data.sitterId}`
+      url: `/pages/order/create?sitterId=${this.data.sitterId}${selectedServiceType ? '&serviceType=' + selectedServiceType : ''}`
     });
   },
 

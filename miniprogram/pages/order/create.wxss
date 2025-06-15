@@ -61,22 +61,23 @@
 }
 
 /* 表单部分样式 */
-.order-form {
-  padding: 0 30rpx;
-}
-
 .form-section {
   background-color: #fff;
   border-radius: 16rpx;
   padding: 30rpx;
   margin-bottom: 30rpx;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.form-section:hover {
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
 }
 
 .section-title {
   font-size: 30rpx;
   font-weight: bold;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
   color: #333;
   position: relative;
   padding-left: 20rpx;
@@ -177,36 +178,50 @@
   margin-top: 20rpx;
 }
 
-/* 服务类型样式 */
+/* 服务类型选择样式 */
 .service-types {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  margin: 0 -10rpx;
+  justify-content: flex-start;
 }
 
 .service-type-item {
-  width: 30%;
+  width: 180rpx;
+  height: 180rpx;
+  margin: 10rpx;
+  border-radius: 12rpx;
+  background-color: #f9f9f9;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20rpx 0;
-  border-radius: 12rpx;
-  background-color: #f9f9f9;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 2rpx solid #f0f0f0;
 }
 
 .service-type-item.selected {
-  background-color: #fff9e6; /* 淡黄色背景 */
-  border: 2rpx solid #ffd700; /* 金黄色边框 */
+  background-color: #fff8e1;
+  border-color: #ffd700;
+  box-shadow: 0 4rpx 12rpx rgba(255, 215, 0, 0.2);
 }
 
 .service-icon {
   width: 80rpx;
   height: 80rpx;
-  margin-bottom: 10rpx;
+  margin-bottom: 16rpx;
 }
 
 .service-name {
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #333;
+  font-weight: 500;
+}
+
+.service-type-item.selected .service-name {
+  color: #ff9800;
 }
 
 /* 时间选择器样式 */
@@ -331,6 +346,43 @@
   box-sizing: border-box;
 }
 
+/* 价格信息样式 */
+.price-section {
+  margin-bottom: 120rpx; /* 为底部按钮留出空间 */
+}
+
+.price-details {
+  background-color: #f9f9f9;
+  border-radius: 8rpx;
+  padding: 20rpx;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  border-bottom: 1rpx solid #eee;
+}
+
+.price-row:last-child {
+  border-bottom: none;
+}
+
+.total-price {
+  margin-top: 10rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx dashed #ddd;
+  font-weight: bold;
+  color: #333;
+}
+
+.total-price .price-value {
+  color: #ff6b6b;
+  font-size: 32rpx;
+}
+
 /* 提交按钮样式 */
 .submit-btn-container {
   padding: 30rpx;
@@ -340,21 +392,24 @@
   right: 0;
   background-color: #fff;
   box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
 }
 
-.btn-submit {
-  background: linear-gradient(to right, #ffd700, #ffc107); /* 黄色渐变 */
+.btn-primary {
+  background: linear-gradient(to right, #ffcc00, #ff9500);
   color: #fff;
-  border-radius: 40rpx;
+  border: none;
+  border-radius: 50rpx;
   font-size: 32rpx;
   font-weight: bold;
   padding: 20rpx 0;
-  width: 100%;
-  box-shadow: 0 6rpx 16rpx rgba(255, 215, 0, 0.3);
+  box-shadow: 0 6rpx 12rpx rgba(255, 180, 0, 0.2);
+  transition: all 0.3s ease;
 }
 
-.btn-submit:active {
-  transform: scale(0.98);
+.btn-primary:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 6rpx rgba(255, 180, 0, 0.2);
 }
 
 /* 加载中样式 */
@@ -414,4 +469,94 @@
   font-size: 26rpx;
   border-radius: 30rpx;
   font-weight: 500;
+}
+
+/* 价格提示样式 */
+.price-tip {
+  margin-top: 20rpx;
+  padding: 10rpx;
+  background-color: #fff8e1;
+  border-radius: 8rpx;
+  border-left: 4rpx solid #ffc107;
+}
+
+.tip-text {
+  font-size: 24rpx;
+  color: #ff9800;
+}
+
+/* 无服务提示样式 */
+.no-service-tip {
+  width: 100%;
+  padding: 60rpx 0;
+  text-align: center;
+  color: #999;
+  font-size: 28rpx;
+  background-color: #f9f9f9;
+  border-radius: 12rpx;
+  border: 1rpx dashed #ddd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-service-tip::before {
+  content: "🐾";
+  font-size: 60rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 加载中提示样式 */
+.loading-tip {
+  width: 100%;
+  padding: 60rpx 0;
+  text-align: center;
+  color: #666;
+  font-size: 28rpx;
+  background-color: #f9f9f9;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-tip::before {
+  content: "";
+  display: block;
+  width: 60rpx;
+  height: 60rpx;
+  margin-bottom: 20rpx;
+  border: 4rpx solid #f0f0f0;
+  border-top: 4rpx solid #4caf50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* 调试信息样式 */
+.debug-info {
+  margin-top: 20rpx;
+  padding: 20rpx;
+  background-color: #f0f8ff;
+  border: 1rpx solid #add8e6;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+}
+
+.debug-title {
+  font-weight: bold;
+  margin-bottom: 10rpx;
+  color: #0066cc;
+}
+
+.debug-item {
+  padding: 6rpx 0;
+  border-bottom: 1rpx dashed #add8e6;
+}
+
+/* 订单表单整体样式 */
+.order-form {
+  padding: 0 30rpx;
+  margin-bottom: 120rpx;
 }

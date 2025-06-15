@@ -213,11 +213,37 @@
   background-color: #fff;
   padding: 20rpx 30rpx;
   box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
-  z-index: 100;
   display: flex;
   justify-content: center;
+  z-index: 100;
 }
 
+/* 服务按钮容器 */
+.service-buttons {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+/* 服务类型按钮 */
+.btn-service {
+  flex: 1;
+  margin: 0 5px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 14px;
+  border-radius: 20px;
+  background-color: #ffcc00;
+  color: #333;
+  border: none;
+}
+
+.btn-service:active {
+  background-color: #e6b800;
+}
+
+/* 下单按钮 */
 .btn-primary {
   background: linear-gradient(to right, #ffb800, #ffda44);
   color: #fff;

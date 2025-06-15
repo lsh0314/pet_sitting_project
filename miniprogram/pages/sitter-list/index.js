@@ -163,7 +163,7 @@ Page({
   onTapSitter: function (e) {
     const sitterId = e.currentTarget.dataset.id;
     
-    // 跳转到帮溜员详情页
+    // 跳转到帮溜员详情页，保持服务类型参数
     wx.navigateTo({
       url: `/pages/sitter/detail?id=${sitterId}`
     });
