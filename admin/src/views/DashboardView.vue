@@ -1,3 +1,10 @@
+<!--
+  DashboardView.vue
+  功能：后台管理系统的数据看板页面。
+  - 展示平台核心业务数据（用户数、订单数、GMV等）
+  - 可扩展为图表、统计卡片等
+-->
+
 <template>
   <div class="dashboard-container">
     <!-- 数据卡片区 -->
@@ -386,4 +393,3 @@ onMounted(() => {
   }
 }
 </style>
-</rewritten_file>

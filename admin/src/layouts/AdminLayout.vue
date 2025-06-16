@@ -26,24 +26,34 @@
             <span>订单管理</span>
           </el-menu-item>
           
-          <el-menu-item index="/sitters">
-            <el-icon><el-icon-user /></el-icon>
-            <span>帮溜员管理</span>
-          </el-menu-item>
-          
           <el-menu-item index="/users">
             <el-icon><el-icon-user-filled /></el-icon>
             <span>用户管理</span>
           </el-menu-item>
           
-          <el-menu-item index="/pets">
-            <el-icon><el-icon-present /></el-icon>
-            <span>宠物管理</span>
+          <el-menu-item index="/verifications">
+            <el-icon><el-icon-user /></el-icon>
+            <span>认证审核</span>
           </el-menu-item>
           
-          <el-menu-item index="/settings">
+          <el-menu-item index="/withdrawals">
+            <el-icon><el-icon-money /></el-icon>
+            <span>提现审核</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/complaints">
+            <el-icon><el-icon-warning /></el-icon>
+            <span>投诉管理</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/reviews">
+            <el-icon><el-icon-star /></el-icon>
+            <span>评价管理</span>
+          </el-menu-item>
+          
+          <el-menu-item index="/config">
             <el-icon><el-icon-setting /></el-icon>
-            <span>系统设置</span>
+            <span>平台配置</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -107,7 +117,9 @@ import {
   Tickets as ElIconTickets,
   User as ElIconUser,
   UserFilled as ElIconUserFilled,
-  Present as ElIconPresent,
+  Money as ElIconMoney,
+  Warning as ElIconWarning,
+  Star as ElIconStar,
   Setting as ElIconSetting,
   Fold as ElIconFold,
   Expand as ElIconExpand,
@@ -269,4 +281,4 @@ onMounted(() => {
 .fade-leave-to {
   opacity: 0;
 }
-</style> 
+</style>

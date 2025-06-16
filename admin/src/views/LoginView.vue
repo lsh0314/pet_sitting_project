@@ -1,8 +1,15 @@
+<!--
+  LoginView.vue
+  功能：后台管理系统的登录页面。
+  - 提供管理员账号登录表单
+  - 校验用户名和密码，调用登录接口
+  - 登录成功后跳转首页
+-->
 <template>
   <div class="login-container">
     <div class="login-box">
       <div class="login-header">
-        <img src="@/assets/images/logo.png" alt="宠物派" class="logo">
+        <img src="@/assets/images/dog.jpeg" alt="宠物派" class="logo">
         <h1 class="title">宠物派管理后台</h1>
       </div>
       
@@ -140,7 +147,7 @@ const handleLogin = () => {
       }
       
       .title {
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 600;
         color: #303133;
         margin: 0;
@@ -169,4 +176,5 @@ const handleLogin = () => {
     padding: 20px;
   }
 }
-</style> 
+</style>
+

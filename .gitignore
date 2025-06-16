@@ -1,2 +1,38 @@
 # 忽略环境变量文件
 .env
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite/前端构建
+admin/dist/
+admin/.vitepress/dist/
+admin/.output/
+admin/.temp/
+
+# VSCode
+.vscode/
+
+# 小程序
+miniprogram/dist/
+miniprogram/miniprogram_npm/
+miniprogram/project.private.config.json
+
+# 数据库临时/导出
+database/*.sqlite
+database/*.db
+database/*.log
+
+# 后端日志和临时
+backend/logs/
+backend/*.log
+
+# 系统文件
+Thumbs.db
+.DS_Store
+ehthumbs.db
+desktop.ini
