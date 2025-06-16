@@ -46,6 +46,30 @@ Page({
             orderInfo.price = orderInfo.payment.price;
           }
           
+          // 确保服务类型正确映射
+          console.log("原始服务类型:", orderInfo.serviceType);
+          
+          // 处理可能的数据结构差异，确保服务类型正确
+          const serviceTypeMap = {
+            'walk': '遛狗',
+            'feed': '喂食',
+            'boarding': '寄养'
+          };
+          
+          // 从不同可能的数据结构中获取服务类型
+          let serviceType = orderInfo.serviceType;
+          if (!serviceType && orderInfo.service) {
+            serviceType = orderInfo.service.type || orderInfo.service.serviceType;
+          }
+          
+          // 确保服务类型值一致
+          if (serviceType) {
+            orderInfo.serviceType = serviceType;
+            // 添加可读的服务类型名称
+            orderInfo.serviceTypeName = serviceTypeMap[serviceType] || '其他服务';
+            console.log("处理后的服务类型:", orderInfo.serviceType, orderInfo.serviceTypeName);
+          }
+          
           // 确保我们有宠物信息
           if (!orderInfo.pet) {
             orderInfo.pet = {
