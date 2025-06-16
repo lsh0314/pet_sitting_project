@@ -4,7 +4,9 @@ Page({
   data: {
     orderId: null,
     orderInfo: null,
-    loading: true
+    loading: true,
+    error: false,
+    submitting: false
   },
 
   onLoad: function (options) {
@@ -13,11 +15,12 @@ Page({
       this.setData({
         orderId: options.id
       });
+      
       // 获取订单详情
-      this.getOrderDetail(options.id);
+      this.fetchOrderDetail();
     } else {
       wx.showToast({
-        title: '订单参数错误',
+        title: '参数错误',
         icon: 'none'
       });
       setTimeout(() => {
@@ -27,82 +30,108 @@ Page({
   },
 
   // 获取订单详情
-  getOrderDetail: function (orderId) {
-    this.setData({ loading: true });
-    api.get(`/api/order/${orderId}`)
+  fetchOrderDetail: function () {
+    this.setData({ loading: true, error: false });
+    
+    api.get(`/api/order/${this.data.orderId}`, {}, true)
       .then(res => {
+        console.log('订单详情:', res);
+        // 确保我们有正确的数据格式
+        let orderInfo = res.data || res;
+        
+        // 如果需要，处理字段名称不一致的问题
+        if (orderInfo) {
+          // 确保我们有正确的价格字段
+          if (!orderInfo.price && orderInfo.payment && orderInfo.payment.price) {
+            orderInfo.price = orderInfo.payment.price;
+          }
+          
+          // 确保我们有宠物信息
+          if (!orderInfo.pet) {
+            orderInfo.pet = {
+              name: orderInfo.petName || '未知宠物'
+            };
+          }
+          
+          // 确保我们有帮溜员信息
+          if (!orderInfo.sitter) {
+            orderInfo.sitter = {
+              nickname: orderInfo.sitterNickname || '未知帮溜员',
+              avatar: orderInfo.sitterAvatar || '/static/images/default-avatar.png',
+              rating: orderInfo.sitterRating || '5.0'
+            };
+          }
+        }
+        
         this.setData({
-          orderInfo: res,
+          orderInfo: orderInfo,
           loading: false
         });
       })
       .catch(err => {
         console.error('获取订单详情失败:', err);
+        this.setData({
+          loading: false,
+          error: true
+        });
+        
         wx.showToast({
-          title: '获取订单信息失败',
+          title: '获取订单详情失败',
           icon: 'none'
         });
-        this.setData({ loading: false });
-        setTimeout(() => {
-          wx.navigateBack();
-        }, 1500);
       });
   },
 
-  // 支付订单
-  payOrder: function () {
-    const { orderId } = this.data;
+  // 点击支付按钮
+  onTapPay: function () {
+    if (!this.data.orderInfo || this.data.submitting) return;
+    
+    this.setData({ submitting: true });
     
     wx.showLoading({
-      title: '支付处理中...',
+      title: '处理中...',
       mask: true
     });
-
+    
     // 调用支付接口
-    api.post(`/api/payment/order/${orderId}`)
+    api.post(`/api/payment/order/${this.data.orderId}`, {}, true)
       .then(res => {
         wx.hideLoading();
         
-        // MVP阶段，直接显示支付成功
         wx.showToast({
           title: '支付成功',
           icon: 'success'
         });
         
-        // 延迟返回订单列表页
+        // 跳转到订单详情页
         setTimeout(() => {
-          // 返回订单列表页并刷新
-          const pages = getCurrentPages();
-          // 如果有上一页
-          if (pages.length > 1) {
-            // 返回上一页
-            wx.navigateBack({
-              success: function() {
-                // 通知上一页刷新数据
-                const prevPage = pages[pages.length - 2];
-                prevPage.getOrderList && prevPage.getOrderList();
-              }
-            });
-          } else {
-            // 如果没有上一页，直接跳转到订单列表页
-            wx.redirectTo({
-              url: '/pages/order/index'
-            });
-          }
+          wx.redirectTo({
+            url: `/pages/order/detail?id=${this.data.orderId}`
+          });
         }, 1500);
       })
       .catch(err => {
         wx.hideLoading();
         console.error('支付失败:', err);
+        
+        this.setData({ submitting: false });
+        
         wx.showToast({
-          title: '支付失败，请重试',
+          title: err.message || '支付失败',
           icon: 'none'
         });
       });
   },
 
-  // 取消支付
-  cancelPay: function () {
+  // 点击取消按钮
+  onTapCancel: function () {
     wx.navigateBack();
+  },
+  
+  // 返回上一页
+  goBack: function() {
+    wx.navigateBack({
+      delta: 1
+    });
   }
 }) 

@@ -83,35 +83,10 @@ Page({
   onTapPay: function () {
     if (!this.data.orderInfo) return;
     
-    wx.showLoading({
-      title: '处理中...',
-      mask: true
+    // 跳转到支付页面
+    wx.navigateTo({
+      url: `/pages/payment/index?id=${this.data.orderId}`
     });
-    
-    // 调用支付接口
-    api.post(`/api/payment/order/${this.data.orderId}`, {}, true)
-      .then(res => {
-        wx.hideLoading();
-        
-        wx.showToast({
-          title: '支付成功',
-          icon: 'success'
-        });
-        
-        // 刷新订单数据
-        setTimeout(() => {
-          this.fetchOrderDetail();
-        }, 1500);
-      })
-      .catch(err => {
-        wx.hideLoading();
-        console.error('支付失败:', err);
-        
-        wx.showToast({
-          title: err.message || '支付失败',
-          icon: 'none'
-        });
-      });
   },
 
   // 帮溜员开始服务

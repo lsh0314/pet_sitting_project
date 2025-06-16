@@ -56,41 +56,16 @@ Page({
       return;
     }
     
-    // 用户角色列表
-    const roles = [];
+    // 始终显示两个角色选项，无论用户是否拥有这些角色
+    // 如果用户没有特定角色，点击对应选项时会显示空列表
     
-    // 如果用户是宠物主
-    if (userInfo.is_pet_owner || userInfo.role === 'pet_owner') {
-      roles.push({
-        id: 'pet_owner',
-        name: '宠物主'
+    // 更新当前角色（如果未设置）
+    if (!this.data.currentRole) {
+      this.setData({
+        currentRole: 'pet_owner'  // 默认显示宠物主角色
       });
     }
     
-    // 如果用户是帮溜员
-    if (userInfo.is_sitter || userInfo.role === 'sitter') {
-      roles.push({
-        id: 'sitter',
-        name: '帮溜员'
-      });
-    }
-    
-    // 如果用户没有明确角色，默认添加宠物主角色
-    if (roles.length === 0) {
-      roles.push({
-        id: 'pet_owner',
-        name: '宠物主'
-      });
-    }
-    
-    // 更新用户角色列表
-    this.setData({
-      userRoles: roles,
-      // 如果当前角色不在用户角色列表中，则设置为第一个角色
-      currentRole: roles.some(role => role.id === this.data.currentRole) ? this.data.currentRole : roles[0].id
-    });
-    
-    console.log('用户角色列表:', roles);
     console.log('当前选择的角色:', this.data.currentRole);
   },
 

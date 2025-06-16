@@ -150,8 +150,6 @@ class Order {
           WHERE ${whereClause} ${status ? `AND o.status = '${status}'` : ''}`;
       }
       
-      console.log('SQL查询:', sql);
-      
       // 执行查询
       const [rows] = await db.query(sql);
       const [countResult] = await db.query(countSql);

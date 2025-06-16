@@ -5,17 +5,21 @@
     <view class="header-more">•••</view>
   </view>
   
-  <!-- 角色切换 -->
-  <view class="role-switcher" wx:if="{{userRoles.length > 1}}">
+  <!-- 角色切换 - 改进UI使其更明显 -->
+  <view class="role-switcher">
     <view 
-      class="role-item {{currentRole === role.id ? 'active' : ''}}" 
-      wx:for="{{userRoles}}" 
-      wx:key="id" 
-      wx:for-item="role"
+      class="role-item {{currentRole === 'pet_owner' ? 'active' : ''}}" 
       bindtap="switchRole"
-      data-role="{{role.id}}"
+      data-role="pet_owner"
     >
-      {{role.name}}视角
+      我的需求
+    </view>
+    <view 
+      class="role-item {{currentRole === 'sitter' ? 'active' : ''}}" 
+      bindtap="switchRole"
+      data-role="sitter"
+    >
+      我的接单
     </view>
   </view>
   
@@ -118,7 +122,7 @@
   <!-- 空状态 -->
   <view class="empty-container" wx:if="{{!loading && orders.length === 0}}">
     <image class="empty-icon" src="/static/images/empty-cat.png"></image>
-    <view class="empty-text">喵~暂时还没有订单</view>
+    <view class="empty-text">喵~暂时还没有{{currentRole === 'pet_owner' ? '需求' : '接单'}}订单</view>
   </view>
   
   <!-- 加载状态 -->

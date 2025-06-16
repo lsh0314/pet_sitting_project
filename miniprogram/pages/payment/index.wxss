@@ -1,39 +1,223 @@
 .container {
-  padding: 0 30rpx;
-  background-color: #f8f8f8;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  background-color: #f5f5f5;
   min-height: 100vh;
-  box-sizing: border-box;
 }
 
-.header {
+/* 导航栏样式 */
+.nav-bar {
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  height: 88rpx;
-  margin-bottom: 30rpx;
+  height: 44px;
+  padding: 10px 15px;
+  margin-top: 30px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #eaeaea;
 }
 
-.header-title {
-  font-size: 34rpx;
-  font-weight: 600;
+.back-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: 20px;
   color: #333;
 }
 
+.page-title {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* 支付容器样式 */
+.payment-container {
+  padding: 15px;
+}
+
+/* 订单信息样式 */
+.order-info,
+.sitter-info,
+.payment-info {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.order-title,
+.sitter-title,
+.payment-title,
+.method-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.info-label {
+  color: #666;
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.info-value {
+  color: #333;
+  flex: 1;
+}
+
+/* 帮溜员信息样式 */
+.sitter-content {
+  display: flex;
+  align-items: center;
+}
+
+.sitter-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  margin-right: 10px;
+}
+
+.sitter-name {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.sitter-rating {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.icon-star {
+  color: #ffcc00;
+  margin-right: 4px;
+}
+
+/* 支付信息样式 */
+.payment-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.amount-label {
+  font-size: 16px;
+  color: #333;
+}
+
+.amount-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffcc00;
+}
+
+.method-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.method-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  border-radius: 4px;
+}
+
+.method-name {
+  flex: 1;
+  font-size: 16px;
+}
+
+.method-check {
+  color: #ffcc00;
+  font-weight: bold;
+}
+
+/* 底部操作栏样式 */
+.footer-action {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 15px;
+  background-color: #fff;
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+}
+
+.btn-cancel,
+.btn-pay {
+  height: 44px;
+  line-height: 44px;
+  border-radius: 22px;
+  font-size: 16px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-cancel {
+  flex: 1;
+  margin-right: 10px;
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.btn-pay {
+  flex: 2;
+  background-color: #ffcc00;
+  color: #333;
+}
+
+.btn-pay[disabled] {
+  background-color: #ffe580;
+}
+
+/* 加载中状态样式 */
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 300rpx;
+  height: 100vh;
 }
 
 .loading-icon {
-  width: 80rpx;
-  height: 80rpx;
-  border: 4rpx solid #f3f3f3;
-  border-top: 4rpx solid #3498db;
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #ffcc00;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+  margin-bottom: 10px;
 }
 
 @keyframes spin {
@@ -45,148 +229,28 @@
   }
 }
 
-.loading-text {
-  margin-top: 20rpx;
-  font-size: 28rpx;
-  color: #999;
-}
-
-.order-info {
-  margin-bottom: 120rpx;
-}
-
-.order-section {
-  background-color: #fff;
-  border-radius: 12rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-}
-
-.section-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 20rpx;
-  border-bottom: 1rpx solid #f0f0f0;
-  padding-bottom: 15rpx;
-}
-
-.info-item {
+/* 错误状态样式 */
+.error-container {
   display: flex;
-  margin-bottom: 15rpx;
-  font-size: 28rpx;
-  line-height: 1.5;
-}
-
-.label {
-  color: #666;
-  width: 180rpx;
-  flex-shrink: 0;
-}
-
-.value {
-  color: #333;
-  flex: 1;
-}
-
-.price-item {
-  display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  font-size: 28rpx;
-  margin-top: 20rpx;
-}
-
-.price {
-  font-size: 36rpx;
-  font-weight: 600;
-  color: #ff5722;
-}
-
-.payment-methods {
-  background-color: #fff;
-  border-radius: 12rpx;
-  padding: 30rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-}
-
-.payment-method {
-  display: flex;
-  align-items: center;
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
-}
-
-.method-icon {
-  width: 48rpx;
-  height: 48rpx;
-  margin-right: 20rpx;
-}
-
-.method-name {
-  flex: 1;
-  font-size: 28rpx;
-  color: #333;
-}
-
-.method-selected {
-  width: 36rpx;
-  height: 36rpx;
-  border-radius: 50%;
-  border: 1rpx solid #ddd;
-  display: flex;
   justify-content: center;
-  align-items: center;
-}
-
-.payment-method.active .method-selected {
-  border-color: #07c160;
-  background-color: #07c160;
-  position: relative;
-}
-
-.payment-method.active .method-selected:after {
-  content: "";
-  width: 20rpx;
-  height: 10rpx;
-  border-left: 3rpx solid #fff;
-  border-bottom: 3rpx solid #fff;
-  transform: rotate(-45deg);
-  position: absolute;
-  top: 10rpx;
-}
-
-.footer-btns {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  padding: 20rpx 30rpx;
-  background-color: #fff;
-  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
-}
-
-.btn-cancel {
-  flex: 1;
-  height: 80rpx;
-  line-height: 80rpx;
+  height: 100vh;
+  padding: 0 30px;
   text-align: center;
-  background-color: #f5f5f5;
+}
+
+.error-container text {
+  margin: 15px 0;
   color: #666;
-  font-size: 30rpx;
-  border-radius: 40rpx;
-  margin-right: 20rpx;
 }
 
-.btn-pay {
-  flex: 2;
-  height: 80rpx;
-  line-height: 80rpx;
-  text-align: center;
-  background-color: #07c160;
-  color: #fff;
-  font-size: 30rpx;
-  border-radius: 40rpx;
+.btn-retry {
+  width: 120px;
+  height: 40px;
+  line-height: 40px;
+  background-color: #ffcc00;
+  color: #333;
+  font-size: 14px;
+  border-radius: 20px;
 }
