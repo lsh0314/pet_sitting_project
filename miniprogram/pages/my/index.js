@@ -159,6 +159,18 @@ Page({
     });
   },
 
+  // 跳转到订单列表页面
+  navigateToOrderList: function() {
+    if (!this.data.isLoggedIn) {
+      this.navigateToLogin();
+      return;
+    }
+    
+    wx.switchTab({
+      url: '/pages/order/index'
+    });
+  },
+
   // 退出登录
   logout: function() {
     wx.showModal({

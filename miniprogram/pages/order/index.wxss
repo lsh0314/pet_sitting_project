@@ -34,17 +34,19 @@
   background-color: #fff;
   padding: 20rpx 30rpx;
   border-bottom: 1rpx solid #f0f0f0;
+  margin-bottom: 10rpx;
 }
 
 .role-item {
   flex: 1;
   text-align: center;
-  padding: 12rpx 0;
-  font-size: 28rpx;
+  padding: 16rpx 0;
+  font-size: 30rpx;
   color: #666;
   border-radius: 30rpx;
-  margin: 0 10rpx;
+  margin: 0 20rpx;
   border: 1rpx solid #eee;
+  position: relative;
 }
 
 .role-item.active {
@@ -53,6 +55,18 @@
   background-color: #fde74c;
   border-color: #fde74c;
   box-shadow: 0 2rpx 6rpx rgba(253, 231, 76, 0.3);
+}
+
+.role-item.active::after {
+  content: "";
+  position: absolute;
+  bottom: -10rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 6rpx;
+  background-color: #fde74c;
+  border-radius: 3rpx;
 }
 
 /* 标签页 */
