@@ -841,12 +841,16 @@ Page({
           icon: 'success'
         });
         
-        // 跳转到订单详情页
+        // 获取订单ID
+        const orderId = res.orderId || res.data?.id || '';
+        
+        // 创建订单成功后，跳转到支付页面
         setTimeout(() => {
           wx.redirectTo({
-            url: `/pages/order/detail?id=${res.orderId || res.data?.id || ''}`
+            url: `/pages/payment/index?id=${orderId}`
           });
         }, 1500);
+        
       })
       .catch(err => {
         console.error('创建订单失败:', err);

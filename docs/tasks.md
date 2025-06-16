@@ -80,11 +80,18 @@ MVP 将**不包含**以下功能（可后续迭代）：
 - **任务 3.12: [Backend] (API)** 实现`GET /api/order/my`接口。根据传入的`role`（`pet_owner`或`sitter`）返回相应的订单列表。
 - **任务 3.13: [Miniprogram] (UI/Logic)** 创建“我的订单”页面，并根据用户角色调用`GET /api/order/my`接口展示订单列表。
 
+- **任务 3.14**: [Backend] (API) - 实现后端接口 实现`GET /api/order/my`接口，根据 role 参数返回“我作为宠物主”或“我作为帮溜员”的订单列表。
+
+- **任务 3.15: [Miniprogram] (UI)** - 创建订单列表页面
+
+- **任务 3.16: [Miniprogram] (Logic)** - 实现 Tab 切换和数据加载
+  这个任务是给刚刚创建的 UI 页面注入灵魂（数据和交互）。
+
 #### **阶段 4：支付与订单完成 (Payment & Completion)**
 
 - **任务 4.1: [DB]** 编写并执行`payments`表的 SQL 迁移脚本。
 - **任务 4.2: [Backend] (API)** 实现`POST /api/payment/order/:id`接口。**MVP 逻辑**: 不必接入真实微信支付。该接口只需在`payments`表中创建一条记录，然后将对应`orders`表的状态更新为`paid`即可。
-- **任务 4.3: [Miniprogram] (UI)** 在宠物主的订单详情页，当订单状态为`accepted`时，显示一个“去支付”按钮。
+- **任务 4.3: [Miniprogram] (UI)** 在 pages/order/create 页面调用 POST /api/order 成功后，不跳转，而是立即使用返回的 orderId，继续调用 POST /api/payment/order/:id 接口。
 - **任务 4.4: [Miniprogram] (Logic)** 为“去支付”按钮绑定事件，调用`POST /api/payment/order/:id`接口，成功后提示“支付成功”，并刷新订单状态。
 - **任务 4.5: [Backend] (API)** 实现`POST /api/order/:id/start`和`POST /api/order/:id/complete`接口，用于帮溜员更新订单状态。
 - **任务 4.6: [Backend] (API)** 实现`POST /api/order/:id/confirm`接口，用于宠物主确认收货，将订单状态变为最终的`completed`或`confirmed`。
