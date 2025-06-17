@@ -21,6 +21,7 @@ admin/.temp/
 miniprogram/dist/
 miniprogram/miniprogram_npm/
 miniprogram/project.private.config.json
+miniprogram/utils/config.js
 
 # 数据库临时/导出
 database/*.sqlite

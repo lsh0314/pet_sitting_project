@@ -13,7 +13,8 @@
     "pages/my/pets/detail",
     "pages/my/sitter/profile",
     "pages/sitter-list/index",
-    "pages/payment/index"
+    "pages/payment/index",
+    "pages/order/service/start"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -50,6 +51,15 @@
   "usingComponents": {
     "calendar": "components/calendar/calendar"
   },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于验证服务地点"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseLocation"
+  ],
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 } 

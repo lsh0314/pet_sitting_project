@@ -152,12 +152,37 @@
     <!-- 服务地址 -->
     <view class="form-section">
       <view class="section-title">服务地址</view>
-      <input 
-        class="address-input" 
-        placeholder="请输入详细地址" 
-        value="{{address}}" 
-        bindinput="inputAddress"
-      />
+      
+      <!-- 地址选择器 -->
+      <view class="address-selector">
+        <!-- 城市和地区选择 -->
+        <view class="region-picker">
+          <picker mode="region" bindchange="bindRegionChange" value="{{region}}">
+            <view class="region-picker-content">
+              <text class="region-text">{{region[0]}} {{region[1]}} {{region[2]}}</text>
+              <text class="region-arrow">▼</text>
+            </view>
+          </picker>
+        </view>
+        
+        <!-- 详细地址输入 -->
+        <view class="detail-address-container">
+          <input 
+            class="address-input" 
+            placeholder="请输入详细地址（如小区名、门牌号）" 
+            value="{{addressDetail}}" 
+            bindinput="inputAddressDetail"
+          />
+        </view>
+        
+        <!-- 获取当前位置按钮 -->
+        <view class="location-btn-container">
+          <button class="location-btn" bindtap="getCurrentLocation">
+            <image class="location-icon" src="/static/images/location.svg"></image>
+            <text>获取当前位置</text>
+          </button>
+        </view>
+      </view>
     </view>
     
     <!-- 备注 -->
@@ -204,5 +229,32 @@
       loading="{{submitting}}" 
       disabled="{{submitting}}"
     >提交订单</button>
+  </view>
+  
+  <!-- 位置确认模态框 -->
+  <view class="location-confirm-modal" wx:if="{{showLocationConfirmModal}}">
+    <view class="modal-mask"></view>
+    <view class="modal-content">
+      <view class="modal-title">确认位置信息</view>
+      
+      <view class="modal-body">
+        <view class="selected-location-info">
+          <view class="location-name" wx:if="{{selectedLocation.name}}">
+            <text class="info-label">位置名称：</text>
+            <text class="info-value">{{selectedLocation.name}}</text>
+          </view>
+          <view class="location-address">
+            <text class="info-label">位置地址：</text>
+            <text class="info-value">{{selectedLocation.address}}</text>
+          </view>
+        </view>
+        
+      </view>
+      
+      <view class="modal-footer">
+        <button class="modal-btn cancel-btn" bindtap="cancelLocationConfirm">取消</button>
+        <button class="modal-btn confirm-btn" bindtap="confirmSelectedLocation">确认</button>
+      </view>
+    </view>
   </view>
 </view> 

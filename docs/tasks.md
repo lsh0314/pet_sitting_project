@@ -10,7 +10,7 @@
 - 帮溜员创建和编辑自己的基础资料（简介、服务和价格）。
 - 宠物主创建和编辑宠物档案。
 - 宠物主能查看帮溜员列表并进入其主页。
-- 宠物主能对特定帮溜员发起“直接邀约”订单。
+- 宠物主能对特定帮溜员发起"直接邀约"订单。
 - 帮溜员能接受或拒绝邀约。
 - 宠物主能完成（模拟）支付。
 - 双方能更新订单状态（开始服务、完成服务、确认收货）。
@@ -45,7 +45,7 @@ MVP 将**不包含**以下功能（可后续迭代）：
 - **任务 1.1: [DB]** 编写并执行`users`表的 SQL 迁移脚本。
 - **任务 1.2: [Backend] (API)** 实现`POST /api/auth/wechat-login`接口。 **逻辑**: 接收`code`，（MVP 阶段可返回模拟的`openid`），在`users`表中查找或创建用户，生成 JWT 并返回。
 - **任务 1.3: [Backend] (Middleware)** 编写 JWT 认证中间件`auth.middleware.js`。该中间件用于解析请求头中的 token，验证其有效性，并将用户信息附加到`req`对象上，供后续受保护的接口使用。
-- **任务 1.4: [Miniprogram] (UI)** 在`pages/auth/`下，创建登录页面的 UI，包含一个“微信授权登录”按钮。
+- **任务 1.4: [Miniprogram] (UI)** 在`pages/auth/`下，创建登录页面的 UI，包含一个"微信授权登录"按钮。
 - **任务 1.5: [Miniprogram] (Logic)** 为登录按钮绑定事件：调用`wx.login()`获取`code`，然后调用封装好的 API 请求函数，将`code`发送到后端的`POST /api/auth/wechat-login`接口。
 - **任务 1.6: [Miniprogram] (State)** 登录成功后，将后端返回的 JWT `token`和用户信息，通过`wx.setStorageSync`保存到本地缓存。同时设置一个全局状态（`app.globalData`）来标记用户已登录。
 - **任务 1.7: [Backend] (API)** 实现`GET /api/user/profile`接口，使用`auth.middleware.js`保护。它应返回当前登录用户的基本信息。
@@ -55,13 +55,13 @@ MVP 将**不包含**以下功能（可后续迭代）：
 
 - **任务 2.1: [DB]** 编写并执行`pets`表的 SQL 迁移脚本。
 - **任务 2.2: [Backend] (API)** 实现`POST /api/pet`和`GET /api/pet`（列表）接口，均使用 JWT 中间件保护。
-- **任务 2.3: [Miniprogram] (UI)** 在`pages/my/`下创建“我的宠物”页面，包含一个宠物列表和一个“添加新宠物”的按钮。
-- **任务 2.4: [Miniprogram] (UI)** 创建“添加/编辑宠物”的表单页面。
-- **任务 2.5: [Miniprogram] (Logic)** 将“添加/编辑宠物”表单与`POST /api/pet`（或`PUT /api/pet/:id`）接口连接。
-- **任务 2.6: [Miniprogram] (Logic)** 在“我的宠物”页面加载时，调用`GET /api/pet`接口，获取并展示宠物列表。
+- **任务 2.3: [Miniprogram] (UI)** 在`pages/my/`下创建"我的宠物"页面，包含一个宠物列表和一个"添加新宠物"的按钮。
+- **任务 2.4: [Miniprogram] (UI)** 创建"添加/编辑宠物"的表单页面。
+- **任务 2.5: [Miniprogram] (Logic)** 将"添加/编辑宠物"表单与`POST /api/pet`（或`PUT /api/pet/:id`）接口连接。
+- **任务 2.6: [Miniprogram] (Logic)** 在"我的宠物"页面加载时，调用`GET /api/pet`接口，获取并展示宠物列表。
 - **任务 2.7: [DB]** 编写并执行`sitter_profiles`和`sitter_services`表的 SQL 迁移脚本。
 - **任务 2.8: [Backend] (API)** 实现`PUT /api/sitter/profile`和`GET /api/sitter/profile`接口，均使用 JWT 中间件保护。`PUT`接口需要同时处理`sitter_profiles`和`sitter_services`两张表的数据。
-- **任务 2.9: [Miniprogram] (UI)** 在`pages/my/`下创建“我的帮溜主页”页面，包含一个表单用于编辑个人简介、服务区域、服务类型和价格。
+- **任务 2.9: [Miniprogram] (UI)** 在`pages/my/`下创建"我的帮溜主页"页面，包含一个表单用于编辑个人简介、服务区域、服务类型和价格。
 - **任务 2.10: [Miniprogram] (Logic)** 将该表单与`PUT /api/sitter/profile`接口连接，并能在页面加载时通过`GET /api/sitter/profile`回填已有数据。
 
 #### **阶段 3：核心交易流程 (Discovery & Ordering)**
@@ -74,13 +74,13 @@ MVP 将**不包含**以下功能（可后续迭代）：
 - **任务 3.6: [Miniprogram] (Logic)** 在`pages/sitter/detail`页面加载时，根据传入的`id`调用`GET /api/sitter/:id`接口，展示帮溜员的详细资料。
 - **任务 3.7: [DB]** 编写并执行`orders`表的 SQL 迁移脚本。
 - **任务 3.8: [Backend] (API)** 实现`POST /api/order`接口。**MVP 逻辑**: 这是一个直接邀约接口，`targetSitter`字段为必填。创建订单时，状态设为`pending`或`accepted`（此处定义`accepted`更简单，代表等待支付）。
-- **任务 3.9: [Miniprogram] (UI)** 在帮溜员主页上，添加一个“向 TA 下单”按钮，点击后跳转到订单创建页。
+- **任务 3.9: [Miniprogram] (UI)** 在帮溜员主页上，添加一个"向 TA 下单"按钮，点击后跳转到订单创建页。
 - **任务 3.10: [Miniprogram] (UI)** 创建`pages/order/create`页面，包含一个表单让宠物主选择自己的宠物、服务时间、填写备注等。
 - **任务 3.11: [Miniprogram] (Logic)** 连接订单创建表单与`POST /api/order`接口。
 - **任务 3.12: [Backend] (API)** 实现`GET /api/order/my`接口。根据传入的`role`（`pet_owner`或`sitter`）返回相应的订单列表。
-- **任务 3.13: [Miniprogram] (UI/Logic)** 创建“我的订单”页面，并根据用户角色调用`GET /api/order/my`接口展示订单列表。
+- **任务 3.13: [Miniprogram] (UI/Logic)** 创建"我的订单"页面，并根据用户角色调用`GET /api/order/my`接口展示订单列表。
 
-- **任务 3.14**: [Backend] (API) - 实现后端接口 实现`GET /api/order/my`接口，根据 role 参数返回“我作为宠物主”或“我作为帮溜员”的订单列表。
+- **任务 3.14**: [Backend] (API) - 实现后端接口 实现`GET /api/order/my`接口，根据 role 参数返回"我作为宠物主"或"我作为帮溜员"的订单列表。
 
 - **任务 3.15: [Miniprogram] (UI)** - 创建订单列表页面
 
@@ -92,10 +92,33 @@ MVP 将**不包含**以下功能（可后续迭代）：
 - **任务 4.1: [DB]** 编写并执行`payments`表的 SQL 迁移脚本。
 - **任务 4.2: [Backend] (API)** 实现`POST /api/payment/order/:id`接口。**MVP 逻辑**: 不必接入真实微信支付。该接口只需在`payments`表中创建一条记录，然后将对应`orders`表的状态更新为`paid`即可。
 - **任务 4.3: [Miniprogram] (UI)** 在 pages/order/create 页面调用 POST /api/order 成功后，不跳转，而是立即使用返回的 orderId，继续调用 POST /api/payment/order/:id 接口。
-- **任务 4.4: [Miniprogram] (Logic)** 为“去支付”按钮绑定事件，调用`POST /api/payment/order/:id`接口，成功后提示“支付成功”，并刷新订单状态。
-- **任务 4.5: [Backend] (API)** 实现`POST /api/order/:id/start`和`POST /api/order/:id/complete`接口，用于帮溜员更新订单状态。
-- **任务 4.6: [Backend] (API)** 实现`POST /api/order/:id/confirm`接口，用于宠物主确认收货，将订单状态变为最终的`completed`或`confirmed`。
-- **任务 4.7: [Miniprogram] (UI/Logic)** 在订单详情页，根据当前用户角色和订单状态，动态显示“开始服务”、“完成服务”、“确认收货”等操作按钮，并绑定到对应的 API 接口。
+- **任务 4.4: [Miniprogram] (Logic)** 为"去支付"按钮绑定事件，调用`POST /api/payment/order/:id`接口，成功后提示"支付成功"，并刷新订单状态。
+
+- **任务 4.5: [DB]** 编写并执行`order_reports`表的 SQL 迁移脚本，用于存储服务过程中的照片和视频记录。
+- **任务 4.6: [DB]** 编写并执行`order_tracks`表的 SQL 迁移脚本，用于存储遛狗服务的 GPS 轨迹点。
+- **任务 4.7: [Backend] (API)** 实现`POST /api/order/:id/start`接口，用于帮溜员开始服务。**逻辑**：将订单状态从`paid`更新为`ongoing`，并要求上传一张开始服务的照片作为打卡凭证。
+- **任务 4.8: [Backend] (API)** 实现`POST /api/order/:id/report`接口，用于帮溜员上传服务过程中的照片和视频记录。**逻辑**：将上传的媒体内容存储到`order_reports`表中。
+- **任务 4.9: [Backend] (API)** 实现`POST /api/order/:id/track`接口，用于帮溜员在遛狗服务中上传 GPS 位置点。**逻辑**：将位置点（经纬度）存储到`order_tracks`表中。
+- **任务 4.10: [Backend] (API)** 实现`POST /api/order/:id/complete`接口，用于帮溜员完成服务。**逻辑**：将订单状态从`ongoing`更新为`completed`，并要求上传一张完成服务的照片作为结束凭证。
+- **任务 4.11: [Backend] (API)** 实现`GET /api/order/:id/tracks`接口，用于获取遛狗服务的 GPS 轨迹点列表，以便在地图上显示遛狗路线。
+- **任务 4.12: [Backend] (API)** 实现`GET /api/order/:id/reports`接口，用于获取服务过程中的所有照片和视频记录。
+- **任务 4.13: [Backend] (API)** 实现`POST /api/order/:id/confirm`接口，用于宠物主确认服务完成。**逻辑**：将订单状态从`completed`更新为`confirmed`。
+- **任务 4.14: [Backend] (API)** 实现`POST /api/order/:id/review`接口，用于宠物主对帮溜员进行评价。**逻辑**：在`reviews`表中创建一条评价记录，包括星级评分和文字评价。
+- **任务 4.15: [Miniprogram] (UI)** 在订单详情页面，根据当前用户角色和订单状态，动态显示不同的操作按钮：
+  - 对于帮溜员，paid 状态显示"开始服务"按钮
+  - 对于帮溜员，ongoing 状态显示"上传照片/视频"和"完成服务"按钮
+  - 对于帮溜员，遛狗服务时显示"开始记录轨迹"按钮
+  - 对于宠物主，completed 状态显示"确认完成"和"评价"按钮
+- **任务 4.16: [Miniprogram] (UI)** 创建服务开始打卡页面，包含拍照上传功能，调用`POST /api/order/:id/start`接口。
+- **任务 4.17: [Miniprogram] (UI)** 创建服务过程记录页面，包含拍照/录像上传功能，调用`POST /api/order/:id/report`接口。
+- **任务 4.18: [Miniprogram] (UI)** 创建服务完成打卡页面，包含拍照上传功能，调用`POST /api/order/:id/complete`接口。
+- **任务 4.19: [Miniprogram] (Logic)** 为遛狗服务实现实时 GPS 轨迹记录功能：
+  - 调用微信小程序的`wx.startLocationUpdate`和`wx.onLocationChange`API 监听位置变化
+  - 定时（如每 30 秒）将位置点通过`POST /api/order/:id/track`接口上传到服务器
+  - 服务结束时停止位置监听
+- **任务 4.20: [Miniprogram] (UI)** 在订单详情页面，对于遛狗服务，添加一个地图组件，通过调用`GET /api/order/:id/tracks`接口获取轨迹点，并在地图上绘制遛狗路线。
+- **任务 4.21: [Miniprogram] (UI)** 创建服务评价页面，包含星级评分和文字评价输入框，调用`POST /api/order/:id/review`接口。
+- **任务 4.22: [Miniprogram] (Logic)** 在订单详情页面，通过调用`GET /api/order/:id/reports`接口获取并展示服务过程中的照片和视频记录。
 
 #### **阶段 5：基础后台管理 (Basic Admin)**
 

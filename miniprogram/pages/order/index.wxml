@@ -111,10 +111,29 @@
             </view>
           </block>
           
+          <!-- 帮溜员"待服务"状态下的按钮组 -->
+          <block wx:if="{{currentRole === 'sitter' && item.status === 'paid'}}">
+            <view class="button-row">
+              <!-- 查看详情按钮 -->
+              <button 
+                class="btn-row-item btn-default" 
+                data-id="{{item.orderId}}"
+                bindtap="viewOrderDetail"
+              >查看详情</button>
+              
+              <!-- 开始服务按钮 -->
+              <button 
+                class="btn-row-item btn-primary" 
+                data-id="{{item.orderId}}"
+                bindtap="startService"
+              >开始服务</button>
+            </view>
+          </block>
+          
           <!-- 其他状态只显示查看详情按钮 -->
           <button 
             class="btn-default" 
-            wx:if="{{item.status !== 'accepted'}}"
+            wx:if="{{item.status !== 'accepted' && !(currentRole === 'sitter' && item.status === 'paid')}}"
             data-id="{{item.orderId}}"
             bindtap="viewOrderDetail"
           >查看详情</button>

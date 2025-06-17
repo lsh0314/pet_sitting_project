@@ -27,7 +27,8 @@ class OrderController {
         address,
         remarks,
         price,
-        targetSitter
+        targetSitter,
+        locationCoords
       } = req.body;
       
       // 验证必填字段
@@ -79,7 +80,8 @@ class OrderController {
         address,
         remarks,
         price,
-        commissionRate: 0.1 // 默认佣金比例10%
+        commissionRate: 0.1, // 默认佣金比例10%
+        locationCoords: locationCoords ? JSON.stringify(locationCoords) : null // 保存位置坐标
       };
       
       // 创建订单
@@ -246,6 +248,16 @@ class OrderController {
         'boarding': '寄养'
       };
       
+      // 解析位置坐标
+      let locationCoords = null;
+      if (order.locationCoords) {
+        try {
+          locationCoords = JSON.parse(order.locationCoords);
+        } catch (e) {
+          console.error('解析位置坐标失败:', e);
+        }
+      }
+      
       // 构建响应数据
       const responseData = {
         orderId: order.id,
@@ -263,6 +275,7 @@ class OrderController {
         endTime: order.endTime,
         timeRange: `${order.startTime} - ${order.endTime}`,
         address: order.address,
+        locationCoords: locationCoords,
         remarks: order.remarks,
         owner: {
           id: order.ownerUserId,
@@ -360,6 +373,377 @@ class OrderController {
       res.status(500).json({
         success: false,
         message: '取消订单失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 开始服务
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async startService(req, res) {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取当前用户ID（帮溜员）
+      const sitterId = req.user.id;
+      
+      // 获取请求体中的数据
+      const { photoUrl, location } = req.body;
+      
+      // 验证必填字段
+      if (!photoUrl) {
+        return res.status(400).json({
+          success: false,
+          message: '缺少必填字段：photoUrl'
+        });
+      }
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 验证用户是否是该订单的帮溜员
+      if (order.sitterUserId !== sitterId) {
+        return res.status(403).json({
+          success: false,
+          message: '您不是该订单的帮溜员'
+        });
+      }
+      
+      // 验证订单状态是否为待服务
+      if (order.status !== 'paid') {
+        return res.status(400).json({
+          success: false,
+          message: '只能开始待服务状态的订单'
+        });
+      }
+      
+      // 创建服务报告（开始服务打卡）
+      const reportData = {
+        orderId,
+        text: '服务开始打卡',
+        imageUrls: JSON.stringify([photoUrl]),
+        videoUrl: null
+      };
+      
+      // 保存位置信息（如果有）
+      let locationData = null;
+      if (location) {
+        locationData = {
+          orderId,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          address: location.address || null,
+          distance: location.distance || null,
+          type: 'start' // 标记为开始服务的位置
+        };
+      }
+      
+      // 更新订单状态为服务中
+      const success = await Order.startService(orderId, reportData, locationData);
+      
+      if (!success) {
+        return res.status(500).json({
+          success: false,
+          message: '开始服务失败'
+        });
+      }
+      
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        message: '服务已开始'
+      });
+    } catch (error) {
+      console.error('开始服务失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '开始服务失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 完成服务
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async completeService(req, res) {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取当前用户ID（帮溜员）
+      const sitterId = req.user.id;
+      
+      // 获取请求体中的数据
+      const { photoUrl, location } = req.body;
+      
+      // 验证必填字段
+      if (!photoUrl) {
+        return res.status(400).json({
+          success: false,
+          message: '缺少必填字段：photoUrl'
+        });
+      }
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 验证用户是否是该订单的帮溜员
+      if (order.sitterUserId !== sitterId) {
+        return res.status(403).json({
+          success: false,
+          message: '您不是该订单的帮溜员'
+        });
+      }
+      
+      // 验证订单状态是否为服务中
+      if (order.status !== 'ongoing') {
+        return res.status(400).json({
+          success: false,
+          message: '只能完成服务中状态的订单'
+        });
+      }
+      
+      // 创建服务报告（完成服务打卡）
+      const reportData = {
+        orderId,
+        text: '服务完成打卡',
+        imageUrls: JSON.stringify([photoUrl]),
+        videoUrl: null
+      };
+      
+      // 保存位置信息（如果有）
+      let locationData = null;
+      if (location) {
+        locationData = {
+          orderId,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          address: location.address || null,
+          distance: location.distance || null,
+          type: 'end' // 标记为结束服务的位置
+        };
+      }
+      
+      // 更新订单状态为已完成
+      const success = await Order.completeService(orderId, reportData, locationData);
+      
+      if (!success) {
+        return res.status(500).json({
+          success: false,
+          message: '完成服务失败'
+        });
+      }
+      
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        message: '服务已完成'
+      });
+    } catch (error) {
+      console.error('完成服务失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '完成服务失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 添加服务报告
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async addServiceReport(req, res) {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取当前用户ID（帮溜员）
+      const sitterId = req.user.id;
+      
+      // 获取请求体中的数据
+      const { text, imageUrls, videoUrl } = req.body;
+      
+      // 验证至少有一种媒体内容
+      if (!imageUrls && !videoUrl) {
+        return res.status(400).json({
+          success: false,
+          message: '服务报告必须包含图片或视频'
+        });
+      }
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 验证用户是否是该订单的帮溜员
+      if (order.sitterUserId !== sitterId) {
+        return res.status(403).json({
+          success: false,
+          message: '您不是该订单的帮溜员'
+        });
+      }
+      
+      // 验证订单状态是否为服务中
+      if (order.status !== 'ongoing') {
+        return res.status(400).json({
+          success: false,
+          message: '只能为服务中状态的订单添加报告'
+        });
+      }
+      
+      // 创建服务报告
+      const reportData = {
+        orderId,
+        text: text || '',
+        imageUrls: imageUrls ? JSON.stringify(imageUrls) : null,
+        videoUrl: videoUrl || null
+      };
+      
+      // 保存服务报告
+      const reportId = await Order.addReport(reportData);
+      
+      if (!reportId) {
+        return res.status(500).json({
+          success: false,
+          message: '添加服务报告失败'
+        });
+      }
+      
+      // 返回成功响应
+      res.status(201).json({
+        success: true,
+        message: '服务报告已添加',
+        reportId
+      });
+    } catch (error) {
+      console.error('添加服务报告失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '添加服务报告失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 添加轨迹点
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async addTrackPoint(req, res) {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取当前用户ID（帮溜员）
+      const sitterId = req.user.id;
+      
+      // 获取请求体中的数据
+      const { latitude, longitude } = req.body;
+      
+      // 验证必填字段
+      if (latitude === undefined || longitude === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: '缺少必填字段：latitude, longitude'
+        });
+      }
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 验证用户是否是该订单的帮溜员
+      if (order.sitterUserId !== sitterId) {
+        return res.status(403).json({
+          success: false,
+          message: '您不是该订单的帮溜员'
+        });
+      }
+      
+      // 验证订单状态是否为服务中
+      if (order.status !== 'ongoing') {
+        return res.status(400).json({
+          success: false,
+          message: '只能为服务中状态的订单添加轨迹点'
+        });
+      }
+      
+      // 验证是否为遛狗服务
+      if (order.serviceType !== 'walk') {
+        return res.status(400).json({
+          success: false,
+          message: '只有遛狗服务才能添加轨迹点'
+        });
+      }
+      
+      // 创建轨迹点数据
+      const trackData = {
+        orderId,
+        latitude,
+        longitude
+      };
+      
+      // 保存轨迹点
+      const trackId = await Order.addTrackPoint(trackData);
+      
+      if (!trackId) {
+        return res.status(500).json({
+          success: false,
+          message: '添加轨迹点失败'
+        });
+      }
+      
+      // 返回成功响应
+      res.status(201).json({
+        success: true,
+        message: '轨迹点已添加',
+        trackId
+      });
+    } catch (error) {
+      console.error('添加轨迹点失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '添加轨迹点失败',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }

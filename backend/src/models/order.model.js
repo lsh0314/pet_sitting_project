@@ -14,8 +14,8 @@ class Order {
       const [result] = await db.execute(
         `INSERT INTO orders (
           owner_user_id, sitter_user_id, pet_id, status, service_type,
-          service_date, start_time, end_time, address, remarks, price, commission_rate
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          service_date, start_time, end_time, address, remarks, price, commission_rate, location_coords
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           orderData.ownerUserId,
           orderData.sitterUserId,
@@ -28,7 +28,8 @@ class Order {
           orderData.address,
           orderData.remarks || null,
           orderData.price,
-          orderData.commissionRate || 0.1
+          orderData.commissionRate || 0.1,
+          orderData.locationCoords || null
         ]
       );
       
@@ -53,7 +54,7 @@ class Order {
           o.service_date as serviceDate, o.start_time as startTime, 
           o.end_time as endTime, o.address, o.remarks, o.price,
           o.commission_rate as commissionRate, o.created_at as createdAt,
-          o.updated_at as updatedAt,
+          o.updated_at as updatedAt, o.location_coords as locationCoords,
           u1.nickname as ownerNickname, u1.avatar_url as ownerAvatar,
           u2.nickname as sitterNickname, u2.avatar_url as sitterAvatar,
           p.name as petName, p.photo_url as petPhoto
@@ -259,12 +260,276 @@ class Order {
       return {
         orders: rows,
         total: countResult[0].total,
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page,
+        limit,
         totalPages: Math.ceil(countResult[0].total / limit)
       };
     } catch (error) {
       console.error('获取所有订单失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 开始服务
+   * @param {number} orderId - 订单ID
+   * @param {Object} reportData - 服务报告数据
+   * @param {Object} locationData - 位置数据（可选）
+   * @returns {Promise<boolean>} - 是否成功
+   */
+  static async startService(orderId, reportData, locationData = null) {
+    const connection = await db.getConnection();
+    
+    try {
+      // 开始事务
+      await connection.beginTransaction();
+      
+      // 更新订单状态为服务中
+      const [updateResult] = await connection.execute(
+        'UPDATE orders SET status = ? WHERE id = ? AND status = ?',
+        ['ongoing', orderId, 'paid']
+      );
+      
+      if (updateResult.affectedRows === 0) {
+        await connection.rollback();
+        return false;
+      }
+      
+      // 创建服务开始报告
+      const [reportResult] = await connection.execute(
+        `INSERT INTO order_reports (
+          order_id, text, image_urls, video_url
+        ) VALUES (?, ?, ?, ?)`,
+        [
+          orderId,
+          reportData.text,
+          reportData.imageUrls,
+          reportData.videoUrl
+        ]
+      );
+      
+      // 如果有位置数据，保存位置信息
+      if (locationData) {
+        await connection.execute(
+          `INSERT INTO order_tracks (
+            order_id, latitude, longitude, address, distance, type
+          ) VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            orderId,
+            locationData.latitude,
+            locationData.longitude,
+            locationData.address || null,
+            locationData.distance || null,
+            locationData.type || 'start'
+          ]
+        );
+      }
+      
+      // 提交事务
+      await connection.commit();
+      
+      return true;
+    } catch (error) {
+      // 回滚事务
+      await connection.rollback();
+      console.error('开始服务失败:', error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * 完成服务
+   * @param {number} orderId - 订单ID
+   * @param {Object} reportData - 服务报告数据
+   * @param {Object} locationData - 位置数据（可选）
+   * @returns {Promise<boolean>} - 是否成功
+   */
+  static async completeService(orderId, reportData, locationData = null) {
+    const connection = await db.getConnection();
+    
+    try {
+      // 开始事务
+      await connection.beginTransaction();
+      
+      // 更新订单状态为已完成
+      const [updateResult] = await connection.execute(
+        'UPDATE orders SET status = ? WHERE id = ? AND status = ?',
+        ['completed', orderId, 'ongoing']
+      );
+      
+      if (updateResult.affectedRows === 0) {
+        await connection.rollback();
+        return false;
+      }
+      
+      // 创建服务完成报告
+      const [reportResult] = await connection.execute(
+        `INSERT INTO order_reports (
+          order_id, text, image_urls, video_url
+        ) VALUES (?, ?, ?, ?)`,
+        [
+          orderId,
+          reportData.text,
+          reportData.imageUrls,
+          reportData.videoUrl
+        ]
+      );
+      
+      // 如果有位置数据，保存位置信息
+      if (locationData) {
+        await connection.execute(
+          `INSERT INTO order_tracks (
+            order_id, latitude, longitude, address, distance, type
+          ) VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            orderId,
+            locationData.latitude,
+            locationData.longitude,
+            locationData.address || null,
+            locationData.distance || null,
+            locationData.type || 'end'
+          ]
+        );
+      }
+      
+      // 更新帮溜员完成服务次数
+      const [orderInfo] = await connection.execute(
+        'SELECT sitter_user_id FROM orders WHERE id = ?',
+        [orderId]
+      );
+      
+      if (orderInfo.length > 0) {
+        const sitterId = orderInfo[0].sitter_user_id;
+        await connection.execute(
+          `UPDATE sitter_profiles 
+           SET total_services_completed = total_services_completed + 1 
+           WHERE user_id = ?`,
+          [sitterId]
+        );
+      }
+      
+      // 提交事务
+      await connection.commit();
+      
+      return true;
+    } catch (error) {
+      // 回滚事务
+      await connection.rollback();
+      console.error('完成服务失败:', error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * 添加服务报告
+   * @param {Object} reportData - 服务报告数据
+   * @returns {Promise<number|boolean>} - 返回报告ID或false
+   */
+  static async addReport(reportData) {
+    try {
+      const [result] = await db.execute(
+        `INSERT INTO order_reports (
+          order_id, text, image_urls, video_url
+        ) VALUES (?, ?, ?, ?)`,
+        [
+          reportData.orderId,
+          reportData.text || '',
+          reportData.imageUrls,
+          reportData.videoUrl
+        ]
+      );
+      
+      return result.insertId;
+    } catch (error) {
+      console.error('添加服务报告失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 添加轨迹点
+   * @param {Object} trackData - 轨迹点数据
+   * @returns {Promise<number|boolean>} - 返回轨迹点ID或false
+   */
+  static async addTrackPoint(trackData) {
+    try {
+      const [result] = await db.execute(
+        `INSERT INTO order_tracks (
+          order_id, latitude, longitude
+        ) VALUES (?, ?, ?)`,
+        [
+          trackData.orderId,
+          trackData.latitude,
+          trackData.longitude
+        ]
+      );
+      
+      return result.insertId;
+    } catch (error) {
+      console.error('添加轨迹点失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取订单轨迹点列表
+   * @param {number} orderId - 订单ID
+   * @returns {Promise<Array>} - 返回轨迹点列表
+   */
+  static async getTrackPoints(orderId) {
+    try {
+      const [rows] = await db.execute(
+        `SELECT 
+          id, latitude, longitude, created_at as timestamp
+        FROM order_tracks
+        WHERE order_id = ?
+        ORDER BY created_at ASC`,
+        [orderId]
+      );
+      
+      return rows;
+    } catch (error) {
+      console.error('获取轨迹点列表失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取订单服务报告列表
+   * @param {number} orderId - 订单ID
+   * @returns {Promise<Array>} - 返回服务报告列表
+   */
+  static async getReports(orderId) {
+    try {
+      const [rows] = await db.execute(
+        `SELECT 
+          id, text, image_urls as imageUrls, video_url as videoUrl,
+          created_at as timestamp
+        FROM order_reports
+        WHERE order_id = ?
+        ORDER BY created_at ASC`,
+        [orderId]
+      );
+      
+      // 解析图片URL数组
+      return rows.map(report => {
+        if (report.imageUrls) {
+          try {
+            report.imageUrls = JSON.parse(report.imageUrls);
+          } catch (e) {
+            report.imageUrls = [];
+          }
+        } else {
+          report.imageUrls = [];
+        }
+        return report;
+      });
+    } catch (error) {
+      console.error('获取服务报告列表失败:', error);
       throw error;
     }
   }

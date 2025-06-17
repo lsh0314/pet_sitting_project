@@ -100,12 +100,8 @@
           bindtap="onTapConfirm">确认完成</button>
       </block>
       
-      <!-- 帮溜员操作按钮 -->
+      <!-- 帮溜员操作按钮 - 移除开始服务按钮 -->
       <block wx:if="{{userRole === 'sitter'}}">
-        <button 
-          class="btn-primary" 
-          wx:if="{{orderInfo.status === 'paid'}}" 
-          bindtap="onTapStart">开始服务</button>
         <button 
           class="btn-primary" 
           wx:if="{{orderInfo.status === 'in_progress'}}" 

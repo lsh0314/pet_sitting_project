@@ -454,5 +454,26 @@ Page({
     wx.navigateTo({
       url: `/pages/payment/index?id=${orderId}`
     });
+  },
+  
+  // 开始服务
+  startService: function(e) {
+    const orderId = e.currentTarget.dataset.id;
+    
+    // 显示确认对话框
+    wx.showModal({
+      title: '开始服务',
+      content: '确定要开始服务吗？开始后需要拍照打卡确认您已到达服务地点',
+      confirmText: '确定',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          // 跳转到服务开始打卡页面
+          wx.navigateTo({
+            url: `/pages/order/service/start?id=${orderId}`
+          });
+        }
+      }
+    });
   }
 }) 
