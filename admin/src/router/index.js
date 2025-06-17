@@ -7,11 +7,16 @@ import AdminLayout from '../layouts/AdminLayout.vue'
 // 路由懒加载
 const LoginView = () => import('../views/LoginView.vue')
 const DashboardView = () => import('../views/DashboardView.vue')
+
 const OrdersView = () => import('../views/OrdersView.vue')
-const SittersView = () => import('../views/SittersView.vue')
+const OrderDetailView = () => import('../views/OrderDetailView.vue')
 const UsersView = () => import('../views/UsersView.vue')
-const PetsView = () => import('../views/PetsView.vue')
-const SettingsView = () => import('../views/SettingsView.vue')
+const VerificationsView = () => import('../views/VerificationsView.vue')
+const WithdrawalsView = () => import('../views/WithdrawalsView.vue')
+const ComplaintsView = () => import('../views/ComplaintsView.vue')
+const ComplaintDetailView = () => import('../views/ComplaintDetailView.vue')
+const ReviewsView = () => import('../views/ReviewsView.vue')
+const ConfigView = () => import('../views/ConfigView.vue')
 const NotFoundView = () => import('../views/NotFoundView.vue')
 
 const router = createRouter({
@@ -35,16 +40,22 @@ const router = createRouter({
           meta: { title: '仪表盘' }
         },
         {
+          path: '',
+          name: 'dashboard',
+          component: DashboardView,
+          meta: { title: '仪表盘' }
+        },
+        {
           path: 'orders',
           name: 'orders',
           component: OrdersView,
           meta: { title: '订单管理' }
         },
         {
-          path: 'sitters',
-          name: 'sitters',
-          component: SittersView,
-          meta: { title: '帮溜员管理' }
+          path: 'orders/:id',
+          name: 'order-detail',
+          component: OrderDetailView,
+          meta: { title: '订单详情' }
         },
         {
           path: 'users',
@@ -53,16 +64,40 @@ const router = createRouter({
           meta: { title: '用户管理' }
         },
         {
-          path: 'pets',
-          name: 'pets',
-          component: PetsView,
-          meta: { title: '宠物管理' }
+          path: 'verifications',
+          name: 'verifications',
+          component: VerificationsView,
+          meta: { title: '认证审核' }
         },
         {
-          path: 'settings',
-          name: 'settings',
-          component: SettingsView,
-          meta: { title: '系统设置' }
+          path: 'withdrawals',
+          name: 'withdrawals',
+          component: WithdrawalsView,
+          meta: { title: '提现审核' }
+        },
+        {
+          path: 'complaints',
+          name: 'complaints',
+          component: ComplaintsView,
+          meta: { title: '投诉管理' }
+        },
+        {
+          path: 'complaints/:id',
+          name: 'complaint-detail',
+          component: ComplaintDetailView,
+          meta: { title: '投诉详情' }
+        },
+        {
+          path: 'reviews',
+          name: 'reviews',
+          component: ReviewsView,
+          meta: { title: '评价管理' }
+        },
+        {
+          path: 'config',
+          name: 'config',
+          component: ConfigView,
+          meta: { title: '平台配置' }
         }
       ]
     },

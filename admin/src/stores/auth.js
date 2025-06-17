@@ -11,26 +11,22 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 计算属性
   const isAuthenticated = computed(() => !!token.value)
-  const isAdmin = computed(() => user.value?.role === 'admin')
+  const isAdmin = computed(() => user.value?.role === 'admin' || user.value?.role === 'super_admin')
 
   // 操作
   async function login(credentials) {
     try {
       loading.value = true
       error.value = null
-      
-      const response = await axios.post('/api/admin/auth/login', credentials)
-      
+      // 管理员登录接口为 /api/auth/admin-login
+      const response = await axios.post('/api/auth/admin-login', credentials)
       token.value = response.data.token
       user.value = response.data.user
-      
       // 保存到本地存储
       localStorage.setItem('token', token.value)
       localStorage.setItem('user', JSON.stringify(user.value))
-      
       // 设置请求头的授权信息
       axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
-      
       return response.data
     } catch (err) {
       error.value = err.response?.data?.message || '登录失败，请检查您的凭据'

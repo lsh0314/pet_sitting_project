@@ -1,3 +1,10 @@
+<!--
+  OrdersView.vue
+  功能：后台管理系统的订单管理页面。
+  - 展示所有订单列表
+  - 支持订单筛选、查看详情、操作等（后续可扩展）
+  - 通过表格组件展示订单核心信息
+-->
 <template>
   <div class="orders-container">
     <div class="page-header">
@@ -459,4 +466,4 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
 }
-</style> 
+</style>
