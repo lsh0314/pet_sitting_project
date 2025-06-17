@@ -167,6 +167,7 @@ class OrderController {
           timeRange,
           startTime: order.startTime,
           endTime: order.endTime,
+          address: order.address, // 添加地址字段
           price: order.price,
           createdAt: order.createdAt,
           // 根据角色返回不同的对方信息

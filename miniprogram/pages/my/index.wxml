@@ -4,7 +4,7 @@
     <view class="storage-tag" wx:if="{{hasBalance}}">储值最高赠¥500</view>
     <view class="edit-profile-btn" wx:if="{{isLoggedIn}}" bindtap="navigateToEditProfile">编辑资料</view>
     
-    <image class="avatar" src="{{userInfo.avatarUrl || '/static/images/default-avatar.png'}}"></image>
+    <image class="avatar" src="{{userInfo.avatar_url || '/static/images/default-avatar.png'}}"></image>
     
     <view class="nickname" wx:if="{{isLoggedIn}}">{{userInfo.nickname || '未设置用户名'}}</view>
     <button class="login-btn" wx:else bindtap="navigateToLogin">登录/注册</button>

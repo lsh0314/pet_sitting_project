@@ -12,6 +12,7 @@
     "pages/my/pets/add",
     "pages/my/pets/detail",
     "pages/my/sitter/profile",
+    "pages/my/edit-profile",
     "pages/sitter-list/index",
     "pages/payment/index",
     "pages/order/service/start"

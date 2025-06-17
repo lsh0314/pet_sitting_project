@@ -1,0 +1,51 @@
+<view class="container">
+  <view class="header">
+    <view class="title">编辑资料</view>
+  </view>
+
+  <view class="form-container">
+    <!-- 头像 -->
+    <view class="form-item avatar-item">
+      <view class="form-label">头像</view>
+      <view class="avatar-container" bindtap="chooseAvatar">
+        <image class="avatar" src="{{userInfo.avatar_url || '/static/images/default-avatar.png'}}"></image>
+        <view class="avatar-edit-icon">
+          <view class="edit-icon">✎</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 昵称 -->
+    <view class="form-item">
+      <view class="form-label">昵称</view>
+      <input 
+        class="form-input" 
+        value="{{nickname}}" 
+        placeholder="请输入昵称" 
+        maxlength="20"
+        data-field="nickname"
+        bindinput="onInputChange"
+      />
+    </view>
+
+    <!-- 性别 -->
+    <view class="form-item">
+      <view class="form-label">性别</view>
+      <radio-group class="radio-group" bindchange="onGenderChange">
+        <label class="radio-label" wx:for="{{genderOptions}}" wx:key="value">
+          <radio value="{{item.value}}" checked="{{gender === item.value}}" color="#fde74c" />
+          <text>{{item.name}}</text>
+        </label>
+      </radio-group>
+    </view>
+
+    <!-- 其他资料项可以根据需要添加 -->
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="button-container">
+    <button class="submit-button" bindtap="submitForm" disabled="{{isSubmitting}}">
+      {{isSubmitting ? '保存中...' : '保存'}}
+    </button>
+  </view>
+</view> 
