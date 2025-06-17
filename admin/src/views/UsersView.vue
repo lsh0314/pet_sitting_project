@@ -195,14 +195,15 @@
           <el-form-item>
             <el-button type="primary" @click="handleSaveUserInfo">保存</el-button>
           </el-form-item>
-        </el-form>
-
-        <el-descriptions :column="1" border>
+        </el-form>        <el-descriptions :column="1" border>
           <el-descriptions-item label="用户角色">{{ roleMap[currentUser.role] }}</el-descriptions-item>
           <el-descriptions-item label="账号状态">
             <el-tag :type="currentUser.status === 'active' ? 'success' : 'danger'">
               {{ statusMap[currentUser.status] }}
             </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="性别">
+            {{ genderMap[currentUser.gender || 'unknown'] }}
           </el-descriptions-item>
           <el-descriptions-item label="注册时间">{{ formatDate(currentUser.created_at) }}</el-descriptions-item>
           <el-descriptions-item label="最后更新">{{ formatDate(currentUser.updated_at) }}</el-descriptions-item>
@@ -272,10 +273,16 @@ const statusMap = {
   banned: '已封禁'
 }
 
+const genderMap = {
+  male: '男',
+  female: '女',
+  unknown: '未知'
+}
+
 const identityStatusMap = {
-  unverified: '未认证',
+  unsubmitted: '未申请',
   pending: '审核中',
-  verified: '已认证',
+  approved: '已认证',
   rejected: '未通过'
 }
 
@@ -451,6 +458,37 @@ const handleSaveUserInfo = async () => {
   } catch (err) {
     console.error('保存失败:', err)
     ElMessage.error('保存失败')
+  }
+}
+
+// 选中用户列表
+const selectedUsers = ref([])
+
+// 表格多选
+const handleSelectionChange = (val) => {
+  selectedUsers.value = val
+}
+
+// 查看用户详情
+const viewUserDetail = async (user) => {
+  try {
+    // 先获取完整的用户信息
+    const response = await axios.get(`/api/user/admin/${user.id}/detail`)
+    if (response.data.success) {
+      currentUser.value = response.data.data
+      userDetailVisible.value = true
+      editForm.value = {
+        nickname: response.data.data.nickname,
+        avatar_url: response.data.data.avatar_url,
+        gender: response.data.data.gender || 'unknown'
+      }
+      console.log('用户详情:', currentUser.value) // 调试日志
+    } else {
+      throw new Error(response.data.message)
+    }
+  } catch (err) {
+    console.error('查看用户详情失败:', err)
+    ElMessage.error('查看用户详情失败')
   }
 }
 
