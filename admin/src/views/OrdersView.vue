@@ -163,14 +163,14 @@
                 {{ formatOrderStatus(orderDetail.status) }}
               </el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="用户名">{{ orderDetail.user?.username }}</el-descriptions-item>
-            <el-descriptions-item label="联系电话">{{ orderDetail.user?.phone }}</el-descriptions-item>
+            <el-descriptions-item label="用户名">{{ orderDetail.user ? orderDetail.user.username : '' }}</el-descriptions-item>
+            <el-descriptions-item label="联系电话">{{ orderDetail.user ? orderDetail.user.phone : '' }}</el-descriptions-item>
             <el-descriptions-item label="服务类型">{{ formatServiceType(orderDetail.service_type) }}</el-descriptions-item>
             <el-descriptions-item label="服务时间">{{ orderDetail.service_date }} {{ orderDetail.start_time }}-{{ orderDetail.end_time }}</el-descriptions-item>
             <el-descriptions-item label="服务地址" :span="2">{{ orderDetail.address }}</el-descriptions-item>
-            <el-descriptions-item label="宠物信息">{{ orderDetail.pet?.name }} ({{ orderDetail.pet?.breed }})</el-descriptions-item>
-            <el-descriptions-item label="帮溜员">{{ orderDetail.sitter?.username || '未分配' }}</el-descriptions-item>
-            <el-descriptions-item label="订单金额">¥{{ orderDetail.amount?.toFixed(2) }}</el-descriptions-item>
+            <el-descriptions-item label="宠物信息">{{ orderDetail.pet ? orderDetail.pet.name : '' }} ({{ orderDetail.pet ? orderDetail.pet.breed : '' }})</el-descriptions-item>
+            <el-descriptions-item label="帮溜员">{{ orderDetail.sitter ? orderDetail.sitter.username : '未分配' }}</el-descriptions-item>
+            <el-descriptions-item label="订单金额">¥{{ orderDetail.amount ? orderDetail.amount.toFixed(2) : '' }}</el-descriptions-item>
             <el-descriptions-item label="支付方式">{{ formatPaymentMethod(orderDetail.payment_method) }}</el-descriptions-item>
             <el-descriptions-item label="创建时间">{{ formatDate(orderDetail.created_at) }}</el-descriptions-item>
             <el-descriptions-item label="更新时间">{{ formatDate(orderDetail.updated_at) }}</el-descriptions-item>

@@ -32,14 +32,7 @@ const router = createRouter({
       path: '/',
       component: AdminLayout,
       meta: { requiresAuth: true },
-      children: [
-        {
-          path: '',
-          name: 'dashboard',
-          component: DashboardView,
-          meta: { title: '仪表盘' }
-        },
-        {
+      children: [        {
           path: '',
           name: 'dashboard',
           component: DashboardView,
