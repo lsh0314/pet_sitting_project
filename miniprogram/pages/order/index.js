@@ -17,21 +17,30 @@ Page({
     },
     countdownTimers: {}, // 存储订单倒计时定时器
     currentRole: 'pet_owner', // 默认角色为宠物主
-    userRoles: [] // 用户拥有的角色列表
+    userRoles: [], // 用户拥有的角色列表
+    isSitter: false, // 是否是伴宠专员
+    checkingSitterStatus: false // 是否正在检查伴宠专员状态
   },
 
   onLoad: function (options) {
+    console.log('页面加载 onLoad');
     // 页面加载时执行
     this.checkUserRoles();
+    // 检查用户是否是伴宠专员
+    this.checkSitterStatus();
   },
 
   onShow: function () {
+    console.log('页面显示 onShow');
     // 设置底部tabbar选中状态
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({
         selected: 1 // 选中订单页
       });
     }
+    
+    // 检查用户是否是伴宠专员（每次页面显示时都检查）
+    this.checkSitterStatus();
     
     // 获取订单列表
     this.getOrderList();
@@ -45,6 +54,39 @@ Page({
   onUnload: function() {
     // 页面卸载时清除所有倒计时
     this.clearAllCountdowns();
+  },
+
+  // 检查用户是否是伴宠专员
+  checkSitterStatus: function() {
+    console.log('开始检查用户是否是伴宠专员...');
+    this.setData({ checkingSitterStatus: true });
+    
+    // 调用API检查用户是否是伴宠专员
+    api.get('/api/sitter/profile')
+      .then(res => {
+        console.log('获取伴宠专员资料结果:', res);
+        // 如果返回的profile不为null，说明用户是伴宠专员
+        const isSitter = res && res.profile !== null;
+        console.log('是否是伴宠专员:', isSitter);
+        this.setData({ 
+          isSitter: isSitter,
+          checkingSitterStatus: false
+        });
+        
+        // 如果当前选择的是伴宠专员角色，但用户不是伴宠专员，自动切换到宠物主角色
+        if (this.data.currentRole === 'sitter' && !isSitter) {
+          console.log('用户不是伴宠专员，自动切换到宠物主角色');
+          this.setData({ currentRole: 'pet_owner' });
+          this.getOrderList();
+        }
+      })
+      .catch(err => {
+        console.error('检查伴宠专员状态失败:', err);
+        this.setData({ 
+          isSitter: false,
+          checkingSitterStatus: false
+        });
+      });
   },
 
   // 检查用户拥有的角色
@@ -72,14 +114,65 @@ Page({
   // 切换角色
   switchRole: function(e) {
     const role = e.currentTarget.dataset.role;
+    console.log('尝试切换角色:', role);
     
-    if (role !== this.data.currentRole) {
-      this.setData({
-        currentRole: role
-      });
-      
-      // 重新获取订单列表
-      this.getOrderList();
+    // 如果要切换到伴宠专员角色
+    if (role === 'sitter') {
+      // 检查用户是否是伴宠专员
+      api.get('/api/sitter/profile')
+        .then(res => {
+          console.log('获取伴宠专员资料结果:', res);
+          // 如果返回的profile为null，说明用户不是伴宠专员
+          const isSitter = res && res.profile !== null;
+          
+          if (!isSitter) {
+            console.log('用户不是伴宠专员，显示提示信息');
+            // 显示提示信息
+            wx.showModal({
+              title: '提示',
+              content: '还未成为伴宠专员不能接单，请至我的页面申请',
+              confirmText: '去申请',
+              cancelText: '取消',
+              success: (res) => {
+                if (res.confirm) {
+                  console.log('用户点击去申请，跳转到我的页面');
+                  // 跳转到"我的"页面
+                  wx.switchTab({
+                    url: '/pages/my/index'
+                  });
+                }
+              }
+            });
+          } else {
+            // 用户是伴宠专员，允许切换角色
+            console.log('用户是伴宠专员，允许切换角色');
+            if (role !== this.data.currentRole) {
+              this.setData({
+                currentRole: role
+              });
+              
+              // 重新获取订单列表
+              this.getOrderList();
+            }
+          }
+        })
+        .catch(err => {
+          console.error('检查伴宠专员状态失败:', err);
+          wx.showToast({
+            title: '网络错误，请重试',
+            icon: 'none'
+          });
+        });
+    } else {
+      // 切换到宠物主角色，直接允许
+      if (role !== this.data.currentRole) {
+        this.setData({
+          currentRole: role
+        });
+        
+        // 重新获取订单列表
+        this.getOrderList();
+      }
     }
   },
 

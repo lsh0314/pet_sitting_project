@@ -49,6 +49,38 @@
   position: relative;
 }
 
+/* 伴宠专员警告图标 */
+.sitter-warning {
+  display: inline-block;
+  width: 32rpx;
+  height: 32rpx;
+  line-height: 32rpx;
+  text-align: center;
+  background-color: #ff5722;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 24rpx;
+  font-weight: bold;
+  margin-left: 8rpx;
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  box-shadow: 0 2rpx 6rpx rgba(255, 87, 34, 0.5);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .role-item.active {
   color: #333;
   font-weight: bold;

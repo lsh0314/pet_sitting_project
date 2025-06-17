@@ -20,6 +20,8 @@
       data-role="sitter"
     >
       我的接单
+      <!-- 如果用户不是伴宠专员，显示一个小图标 -->
+      <text wx:if="{{!isSitter}}" class="sitter-warning">!</text>
     </view>
   </view>
   
