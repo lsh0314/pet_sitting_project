@@ -4,15 +4,11 @@ const SitterProfile = require('../models/sitter.profile.model');
 const SitterService = require('../models/sitter.service.model');
 
 /**
- * 订单控制器 - 处理与订单相关的请求
+ * 创建新订单
+ * @param {Object} req - Express请求对象
+ * @param {Object} res - Express响应对象
  */
-class OrderController {
-  /**
-   * 创建新订单
-   * @param {Object} req - Express请求对象
-   * @param {Object} res - Express响应对象
-   */
-  static async createOrder(req, res) {
+const createOrder = async (req, res) => {
     try {
       // 从认证中间件获取当前用户ID（宠物主）
       const ownerUserId = req.user.id;
@@ -105,7 +101,7 @@ class OrderController {
    * @param {Object} req - Express请求对象
    * @param {Object} res - Express响应对象
    */
-  static async getMyOrders(req, res) {
+  const getMyOrders = async (req, res) => {
     try {
       // 从认证中间件获取当前用户ID
       const userId = req.user.id;
@@ -198,11 +194,11 @@ class OrderController {
   }
 
   /**
-   * 获取订单详情
+   * 获取订单详情（普通用户）
    * @param {Object} req - Express请求对象
    * @param {Object} res - Express响应对象
    */
-  static async getOrderDetail(req, res) {
+  const getOrderDetail = async (req, res) => {
     try {
       // 获取订单ID
       const orderId = req.params.id;
@@ -304,7 +300,7 @@ class OrderController {
    * @param {Object} req - Express请求对象
    * @param {Object} res - Express响应对象
    */
-  static async cancelOrder(req, res) {
+  const cancelOrder = async (req, res) => {
     try {
       // 获取订单ID
       const orderId = req.params.id;
@@ -364,6 +360,312 @@ class OrderController {
       });
     }
   }
+
+  /**
+   * 获取订单详情（管理员）
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  const getAdminOrderDetail = async (req, res) => {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 状态文本映射
+      const statusTextMap = {
+        'pending': '待接单',
+        'accepted': '待支付',
+        'paid': '待服务',
+        'ongoing': '服务中',
+        'completed': '已完成',
+        'cancelled': '已取消'
+      };
+      
+      // 服务类型文本映射
+      const serviceTypeTextMap = {
+        'walk': '遛狗',
+        'feed': '喂食',
+        'boarding': '寄养'
+      };
+      
+      // 构建响应数据
+      const responseData = {
+        orderId: order.id,
+        status: order.status,
+        statusText: statusTextMap[order.status] || order.status,
+        pet: {
+          id: order.petId,
+          name: order.petName,
+          photo: order.petPhoto
+        },
+        serviceType: order.serviceType,
+        serviceTypeText: serviceTypeTextMap[order.serviceType] || order.serviceType,
+        serviceDate: order.serviceDate,
+        startTime: order.startTime,
+        endTime: order.endTime,
+        timeRange: `${order.startTime} - ${order.endTime}`,
+        address: order.address,
+        remarks: order.remarks,
+        owner: {
+          id: order.ownerUserId,
+          nickname: order.ownerNickname,
+          avatar: order.ownerAvatar
+        },
+        sitter: {
+          id: order.sitterUserId,
+          nickname: order.sitterNickname,
+          avatar: order.sitterAvatar
+        },
+        payment: {
+          price: order.price,
+          isPaid: ['paid', 'ongoing', 'completed'].includes(order.status)
+        },
+        track: [], // 轨迹数据，MVP阶段为空数组
+        report: [], // 服务报告，MVP阶段为空数组
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt
+      };
+      
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        data: responseData
+      });
+    } catch (error) {
+      console.error('获取订单详情失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取订单详情失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 获取所有订单列表（管理员）
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  /**
+ * 获取所有订单列表（管理员）
+ */
+const getAllOrders = async (req, res) => {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        orderId,
+        username,
+        serviceType,
+        status,
+        startDate,
+        endDate
+      } = req.query;
+  
+      // 确保分页参数是数字类型
+      const pageNum = parseInt(page) || 1;
+      const limitNum = parseInt(limit) || 10;
+      
+      // 查询选项
+      const options = {
+        page: Math.max(1, pageNum),  // 确保页码至少为1
+        limit: Math.max(1, Math.min(100, limitNum)),  // 限制每页条数在1-100之间
+        orderId,
+        username,
+        serviceType,
+        status,
+        startDate,
+        endDate
+      };
+      
+      // 获取订单列表
+      const result = await Order.findAll(options);
+      
+      // 检查是否有数据
+      if (!result.rows || result.rows.length === 0) {
+        return res.status(200).json({
+          success: true,
+          data: {
+            items: [],
+            total: 0,
+            page: pageNum,
+            limit: limitNum
+          }
+        });
+      }
+      
+      // 简化返回数据，只包含前端列表需要的关键信息
+      const simplifiedOrders = result.rows.map(order => ({
+        id: order.id,
+        status: order.status,
+        serviceType: order.service_type,
+        serviceDate: order.service_date,
+        price: order.price,
+        petName: order.pet_name,
+        ownerName: order.owner_nickname,
+        sitterName: order.sitter_nickname,
+        createdAt: order.created_at
+      }));
+
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        data: {
+          items: simplifiedOrders,
+          total: result.total,
+          page: pageNum,
+          limit: limitNum
+        }
+      });
+    } catch (error) {
+      console.error('获取订单列表失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取订单列表失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 更新订单状态（管理员）
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  const updateOrderStatus = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+  
+      // 验证状态值
+      const validStatuses = ['pending', 'accepted', 'paid', 'in_progress', 'completed', 'cancelled', 'refunded'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: '无效的订单状态'
+        });
+      }
+  
+      // 更新订单状态
+      const result = await Order.updateStatus(id, status, req.user.id);
+  
+      if (!result) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+  
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        message: '订单状态更新成功'
+      });
+    } catch (error) {
+      console.error('更新订单状态失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '更新订单状态失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 导出订单数据（管理员）
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+const exportOrders = async (req, res) => {
+  try {
+    const {
+      orderId,
+      username,
+      serviceType,
+      status,
+      startDate,
+      endDate
+    } = req.query;
+
+    // 查询选项
+    const options = {
+      orderId,
+      username,
+      serviceType,
+      status,
+      startDate,
+      endDate
+    };
+
+    // 获取所有符合条件的订单
+    const orders = await Order.exportData(options);
+
+    // 创建CSV数据
+    const fields = [
+      '订单ID',
+      '用户名',
+      '宠物名',
+      '服务类型',
+      '服务日期',
+      '服务时间',
+      '服务地址',
+      '订单金额',
+      '订单状态',
+      '创建时间'
+    ];
+
+    const csv = [
+      fields.join(','), // 表头
+      ...orders.map(order => {
+        return [
+          order.id,
+          order.username,
+          order.petName,
+          order.serviceType,
+          order.serviceDate,
+          `${order.startTime}-${order.endTime}`,
+          `"${order.address.replace(/"/g, '""')}"`, // 处理地址中可能存在的逗号
+          order.price,
+          order.status,
+          order.createdAt
+        ].join(',');
+      })
+    ].join('\n');
+
+    // 设置响应头
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename=orders-${new Date().toISOString()}.csv`);
+
+    // 发送CSV数据
+    res.send('\ufeff' + csv); // 添加BOM标记以支持中文
+  } catch (error) {
+    console.error('导出订单数据失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '导出订单数据失败',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
 }
 
-module.exports = OrderController; 
+module.exports = {
+  createOrder,
+  getMyOrders,
+  getOrderDetail,
+  cancelOrder,
+  getAllOrders,
+  updateOrderStatus,
+  exportOrders,
+  getAdminOrderDetail
+};

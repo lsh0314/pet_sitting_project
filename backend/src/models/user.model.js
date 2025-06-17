@@ -140,10 +140,13 @@ class UserModel {
         return null;
       }
 
+      // 确保管理员角色不为空
+      const adminRole = admin.role || 'admin';
+      
       return {
         id: admin.id,
         username: admin.username,
-        role: admin.role || 'admin'
+        role: adminRole
       };
     } catch (error) {
       console.error('验证管理员登录失败:', error);
