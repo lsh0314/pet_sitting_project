@@ -269,12 +269,13 @@
   justify-content: space-between;
   margin-top: 10rpx;
   height: 70rpx;
+  gap: 10rpx; /* 添加间距 */
 }
 
 /* 横向排列的按钮样式 */
 .btn-row-item {
   flex: 1;
-  margin: 0 4rpx !important;
+  margin: 0 !important;
   font-size: 24rpx !important;
   padding: 0 !important;
   min-width: 0 !important;
@@ -304,8 +305,9 @@
   border: 1rpx solid #ff5722 !important;
 }
 
-/* 去支付按钮 */
-.btn-row-item.btn-pay {
+/* 去支付按钮和开始服务按钮 */
+.btn-row-item.btn-pay,
+.btn-row-item.btn-primary {
   background: linear-gradient(to right, #fde74c, #ffb700) !important;
   color: #333 !important;
   border: none !important;

@@ -5,8 +5,23 @@ Page({
   data: {
     orders: [],
     loading: false,
-    currentTab: 0, // 0: 全部, 1: 待支付, 2: 待服务, 3: 服务中, 4: 已完成
-    tabs: ['全部', '待支付', '待服务', '服务中', '已完成'],
+    currentTab: 0, // 0: 全部, 1: 待支付(宠物主)/待服务(帮溜员), 2: 待服务/服务中, 3: 服务中/已完成, 4: 已完成
+    petOwnerTabs: ['全部', '待支付', '待服务', '服务中', '已完成'],
+    sitterTabs: ['全部', '待服务', '服务中', '已完成'],
+    tabs: ['全部', '待支付', '待服务', '服务中', '已完成'], // 默认使用宠物主标签
+    petOwnerStatusMap: {
+      0: '', // 全部
+      1: 'accepted', // 待支付
+      2: 'paid', // 待服务
+      3: 'in_progress', // 服务中
+      4: 'completed,confirmed' // 已完成
+    },
+    sitterStatusMap: {
+      0: '', // 全部
+      1: 'paid', // 待服务
+      2: 'in_progress', // 服务中
+      3: 'completed,confirmed' // 已完成
+    },
     statusMap: {
       0: '', // 全部
       1: 'accepted', // 待支付
@@ -27,6 +42,16 @@ Page({
     this.checkUserRoles();
     // 检查用户是否是伴宠专员
     this.checkSitterStatus();
+    
+    // 设置初始标签页和状态映射
+    const role = this.data.currentRole;
+    const tabs = role === 'sitter' ? this.data.sitterTabs : this.data.petOwnerTabs;
+    const statusMap = role === 'sitter' ? this.data.sitterStatusMap : this.data.petOwnerStatusMap;
+    
+    this.setData({
+      tabs: tabs,
+      statusMap: statusMap
+    });
   },
 
   onShow: function () {
@@ -75,7 +100,15 @@ Page({
         // 如果当前选择的是伴宠专员角色，但用户不是伴宠专员，自动切换到宠物主角色
         if (this.data.currentRole === 'sitter' && !isSitter) {
           console.log('用户不是伴宠专员，自动切换到宠物主角色');
-          this.setData({ currentRole: 'pet_owner' });
+          
+          // 切换到宠物主角色时，更新标签页和状态映射
+          this.setData({ 
+            currentRole: 'pet_owner',
+            tabs: this.data.petOwnerTabs,
+            statusMap: this.data.petOwnerStatusMap,
+            currentTab: 0 // 切换角色时重置为"全部"标签
+          });
+          
           this.getOrderList();
         }
       })
@@ -117,6 +150,18 @@ Page({
     
     // 如果要切换到伴宠专员角色
     if (role === 'sitter') {
+      // 检查是否已被封禁（取消订单达到3次）
+      const cancelCount = wx.getStorageSync('sitter_cancel_count') || 0;
+      if (cancelCount >= 3) {
+        wx.showModal({
+          title: '账号已封禁',
+          content: '您的伴宠专员账号已被封禁，无法接单。请联系客服申诉。',
+          showCancel: false,
+          confirmText: '我知道了'
+        });
+        return;
+      }
+      
       // 检查用户是否是伴宠专员
       api.get('/api/sitter/profile')
         .then(res => {
@@ -146,8 +191,15 @@ Page({
             // 用户是伴宠专员，允许切换角色
             console.log('用户是伴宠专员，允许切换角色');
             if (role !== this.data.currentRole) {
+              // 切换到帮溜员角色时，更新标签页和状态映射
+              const tabs = role === 'sitter' ? this.data.sitterTabs : this.data.petOwnerTabs;
+              const statusMap = role === 'sitter' ? this.data.sitterStatusMap : this.data.petOwnerStatusMap;
+              
               this.setData({
-                currentRole: role
+                currentRole: role,
+                tabs: tabs,
+                statusMap: statusMap,
+                currentTab: 0 // 切换角色时重置为"全部"标签
               });
               
               // 重新获取订单列表
@@ -165,8 +217,15 @@ Page({
     } else {
       // 切换到宠物主角色，直接允许
       if (role !== this.data.currentRole) {
+        // 切换到宠物主角色时，更新标签页和状态映射
+        const tabs = role === 'sitter' ? this.data.sitterTabs : this.data.petOwnerTabs;
+        const statusMap = role === 'sitter' ? this.data.sitterStatusMap : this.data.petOwnerStatusMap;
+        
         this.setData({
-          currentRole: role
+          currentRole: role,
+          tabs: tabs,
+          statusMap: statusMap,
+          currentTab: 0 // 切换角色时重置为"全部"标签
         });
         
         // 重新获取订单列表
@@ -421,18 +480,60 @@ Page({
   // 取消订单
   cancelOrder: function(e) {
     const orderId = e.currentTarget.dataset.id;
+    
+    // 根据当前角色显示不同的取消确认内容
+    let title = '确认取消';
+    let content = '确定要取消这个订单吗？';
+    
+    // 如果是帮溜员角色，添加警告信息
+    if (this.data.currentRole === 'sitter') {
+      title = '⚠️ 警告：取消订单';
+      content = '作为伴宠专员取消订单到达三次将永久封禁接单功能。\n\n确定要取消这个订单吗？';
+      
+      // 获取已取消订单次数（这里模拟，实际应该从服务器获取）
+      // 在实际项目中，应该从用户资料或后端API获取取消次数
+      const cancelCount = wx.getStorageSync('sitter_cancel_count') || 0;
+      
+      // 添加已取消次数到提示内容
+      content = `您已取消${cancelCount}次订单，作为伴宠专员取消订单到达三次将永久封禁接单功能。\n\n确定要取消这个订单吗？`;
+    }
+    
     wx.showModal({
-      title: '确认取消',
-      content: '确定要取消这个订单吗？',
+      title: title,
+      content: content,
+      confirmColor: this.data.currentRole === 'sitter' ? '#ff5722' : '#07c160', // 帮溜员取消按钮显示为红色
       success: (res) => {
         if (res.confirm) {
           // 调用取消订单API
           api.post(`/api/order/${orderId}/cancel`, { reason: '用户主动取消' })
             .then(() => {
-              wx.showToast({
-                title: '订单已取消',
-                icon: 'success'
-              });
+              // 如果是帮溜员角色，更新取消次数
+              if (this.data.currentRole === 'sitter') {
+                const cancelCount = wx.getStorageSync('sitter_cancel_count') || 0;
+                const newCancelCount = cancelCount + 1;
+                wx.setStorageSync('sitter_cancel_count', newCancelCount);
+                
+                // 如果达到3次，显示封禁警告
+                if (newCancelCount >= 3) {
+                  wx.showModal({
+                    title: '账号警告',
+                    content: '您已取消3次订单，接单功能已被封禁。请联系客服申诉。',
+                    showCancel: false,
+                    confirmText: '我知道了'
+                  });
+                } else {
+                  wx.showToast({
+                    title: '订单已取消',
+                    icon: 'success'
+                  });
+                }
+              } else {
+                wx.showToast({
+                  title: '订单已取消',
+                  icon: 'success'
+                });
+              }
+              
               // 刷新订单列表
               this.getOrderList();
             })
@@ -472,6 +573,50 @@ Page({
           wx.navigateTo({
             url: `/pages/order/service/start?id=${orderId}`
           });
+        }
+      }
+    });
+  },
+  
+  // 完成服务
+  completeService: function(e) {
+    const orderId = e.currentTarget.dataset.id;
+    
+    // 显示确认对话框
+    wx.showModal({
+      title: '完成服务',
+      content: '确定已完成服务吗？完成后需要拍照打卡确认服务结束',
+      confirmText: '确定',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          // 跳转到服务完成打卡页面
+          // 实际项目中应该有一个服务完成打卡页面
+          // 这里暂时直接调用API
+          wx.showLoading({
+            title: '处理中...',
+            mask: true
+          });
+          
+          // 调用完成服务API
+          api.post(`/api/order/${orderId}/complete`)
+            .then(() => {
+              wx.hideLoading();
+              wx.showToast({
+                title: '服务已完成',
+                icon: 'success'
+              });
+              // 刷新订单列表
+              this.getOrderList();
+            })
+            .catch(err => {
+              wx.hideLoading();
+              console.error('完成服务失败:', err);
+              wx.showToast({
+                title: '操作失败，请重试',
+                icon: 'none'
+              });
+            });
         }
       }
     });
