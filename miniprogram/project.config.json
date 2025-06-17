@@ -49,8 +49,8 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "2.16.0",
-  "appid": "wxe076220e8e193cc0",
+  "libVersion": "3.8.8",
+  "appid": "wx41d597c55d7ed5ba",
   "projectname": "宠物帮溜",
   "isGameTourist": false,
   "condition": {

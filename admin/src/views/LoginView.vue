@@ -98,22 +98,24 @@ const loading = computed(() => authStore.loading)
 const currentYear = computed(() => new Date().getFullYear())
 
 // 方法
-const handleLogin = () => {
-  loginFormRef.value.validate(async (valid) => {
+const handleLogin = async () => {
+  try {
+    const valid = await loginFormRef.value.validate()
     if (!valid) return
+
+    await authStore.login(loginForm)
+    ElMessage.success('登录成功')
     
-    try {
-      await authStore.login(loginForm)
-      
-      ElMessage.success('登录成功')
-      
-      // 如果有重定向，跳转到重定向页面，否则跳转到首页
-      const redirectPath = route.query.redirect || '/'
-      router.replace(redirectPath)
-    } catch (error) {
-      ElMessage.error(error)
-    }
-  })
+    // 获取重定向路径，默认为首页
+    const redirectPath = route.query.redirect || '/'
+    
+    // 使用 window.location.href 进行硬跳转
+    // 这样可以确保页面完全重新加载，状态得到刷新
+    window.location.href = redirectPath
+  } catch (error) {
+    console.error('登录失败:', error)
+    ElMessage.error(typeof error === 'string' ? error : '登录失败，请稍后重试')
+  }
 }
 </script>
 
@@ -125,7 +127,7 @@ const handleLogin = () => {
   justify-content: center;
   align-items: center;
   background-color: #f0f2f5;
-  background-image: url('@/assets/images/login-bg.jpg');
+  background-image: url('@/assets/images/login_/bg.png');
   background-size: cover;
   background-position: center;
   

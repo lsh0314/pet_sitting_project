@@ -10,6 +10,15 @@ import './assets/styles/main.scss'
 
 const app = createApp(App)
 
+import axios from 'axios'
+axios.interceptors.request.use(config => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`
+  }
+  return config
+})
+
 app.use(createPinia())
 app.use(router)
 app.use(ElementPlus, {
