@@ -217,6 +217,11 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
+  width: 100%;
+}
+
+.action-btns .button-row {
+  width: 100%;
 }
 
 .action-btns button {
@@ -255,6 +260,61 @@
   border: none;
   font-weight: bold;
   box-shadow: 0 4rpx 8rpx rgba(253, 231, 76, 0.3);
+}
+
+/* 横向按钮排列容器 */
+.button-row {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-top: 10rpx;
+  height: 70rpx;
+}
+
+/* 横向排列的按钮样式 */
+.btn-row-item {
+  flex: 1;
+  margin: 0 4rpx !important;
+  font-size: 24rpx !important;
+  padding: 0 !important;
+  min-width: 0 !important;
+  border-radius: 30rpx !important;
+  line-height: 70rpx !important;
+  height: 70rpx !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+/* 查看详情按钮 */
+.btn-row-item.btn-default {
+  background-color: #f2f2f2 !important;
+  color: #666 !important;
+  border: 1rpx solid #e0e0e0 !important;
+}
+
+/* 取消订单按钮 */
+.btn-row-item.btn-cancel {
+  background-color: #ffffff !important;
+  color: #ff5722 !important;
+  border: 1rpx solid #ff5722 !important;
+}
+
+/* 去支付按钮 */
+.btn-row-item.btn-pay {
+  background: linear-gradient(to right, #fde74c, #ffb700) !important;
+  color: #333 !important;
+  border: none !important;
+  font-weight: bold !important;
+}
+
+/* 覆盖原有按钮样式中的margin-left */
+.action-btns .btn-row-item {
+  margin-left: 2rpx !important;
 }
 
 /* 空状态 */

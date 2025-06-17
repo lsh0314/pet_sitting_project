@@ -87,26 +87,28 @@
           
           <!-- 待支付状态下的按钮组 -->
           <block wx:if="{{item.status === 'accepted'}}">
-            <!-- 查看详情按钮 -->
-            <button 
-              class="btn-default" 
-              data-id="{{item.orderId}}"
-              bindtap="viewOrderDetail"
-            >查看详情</button>
-            
-            <!-- 取消订单按钮 -->
-            <button 
-              class="btn-cancel" 
-              data-id="{{item.orderId}}"
-              bindtap="cancelOrder"
-            >取消订单</button>
-            
-            <!-- 去支付按钮 -->
-            <button 
-              class="btn-pay" 
-              data-id="{{item.orderId}}"
-              bindtap="payOrder"
-            >去支付</button>
+            <view class="button-row">
+              <!-- 查看详情按钮 -->
+              <button 
+                class="btn-row-item btn-default" 
+                data-id="{{item.orderId}}"
+                bindtap="viewOrderDetail"
+              >查看详情</button>
+              
+              <!-- 取消订单按钮 -->
+              <button 
+                class="btn-row-item btn-cancel" 
+                data-id="{{item.orderId}}"
+                bindtap="cancelOrder"
+              >取消订单</button>
+              
+              <!-- 去支付按钮 -->
+              <button 
+                class="btn-row-item btn-pay" 
+                data-id="{{item.orderId}}"
+                bindtap="payOrder"
+              >去支付</button>
+            </view>
           </block>
           
           <!-- 其他状态只显示查看详情按钮 -->
