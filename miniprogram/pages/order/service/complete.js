@@ -45,14 +45,14 @@ Page({
       .then(res => {
         console.log('获取订单详情成功:', res);
         this.setData({
-          orderInfo: res,
+          orderInfo: res.data,
           loading: false
         });
         
         // 如果订单有坐标信息，保存下来
-        if (res.locationCoords) {
+        if (res.data.locationCoords) {
           this.setData({
-            orderCoords: res.locationCoords
+            orderCoords: res.data.locationCoords
           });
         } else {
           // 如果订单没有坐标信息，暂时无法解析坐标
@@ -251,8 +251,8 @@ Page({
     });
   },
 
-  // 开始服务
-  startService: function () {
+  // 完成服务
+  completeService: function () {
     if (!this.data.photoTaken) {
       wx.showToast({
         title: '请先拍照打卡',
@@ -292,13 +292,13 @@ Page({
           }
         }
         
-        // 调用开始服务API
-        return api.post(`/api/order/${this.data.orderId}/start`, requestData);
+        // 调用完成服务API
+        return api.post(`/api/order/${this.data.orderId}/complete`, requestData);
       })
       .then(() => {
         this.setData({ uploading: false });
         wx.showToast({
-          title: '服务已开始',
+          title: '服务已完成',
           icon: 'success'
         });
         
@@ -307,17 +307,17 @@ Page({
           // 返回上一页并刷新
           const pages = getCurrentPages();
           const prevPage = pages[pages.length - 2];
-          if (prevPage && prevPage.getOrderList) {
-            prevPage.getOrderList();
+          if (prevPage && prevPage.fetchOrderDetail) {
+            prevPage.fetchOrderDetail();
           }
           wx.navigateBack();
         }, 1500);
       })
       .catch(err => {
-        console.error('开始服务失败:', err);
+        console.error('完成服务失败:', err);
         this.setData({ uploading: false });
         wx.showToast({
-          title: '开始服务失败，请重试',
+          title: '完成服务失败，请重试',
           icon: 'none'
         });
       });

@@ -134,16 +134,21 @@ CREATE TABLE `order_reports` (
 -- 7. GPS轨迹表 (order_tracks)
 -- 记录遛狗服务的GPS轨迹点
 -- ----------------------------
-CREATE TABLE `order_tracks` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `order_id` BIGINT UNSIGNED NOT NULL COMMENT '关联的订单ID',
-  `latitude` DECIMAL(10, 8) NOT NULL COMMENT '纬度',
-  `longitude` DECIMAL(11, 8) NOT NULL COMMENT '经度',
-  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_order_id` (`order_id`),
-  FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='GPS轨迹点表';
+DROP TABLE IF EXISTS `order_tracks`;
+CREATE TABLE `order_tracks`  (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `order_id` bigint UNSIGNED NOT NULL COMMENT '关联的订单ID',
+  `latitude` decimal(10, 8) NOT NULL COMMENT '纬度',
+  `longitude` decimal(11, 8) NOT NULL COMMENT '经度',
+  `address` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '地址文本',
+  `distance` int NULL DEFAULT NULL COMMENT '与服务地址的距离(米)',
+  `type` enum('start','track','end') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'track' COMMENT '轨迹点类型',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_order_id`(`order_id` ASC) USING BTREE,
+  INDEX `idx_tracks_type`(`type` ASC) USING BTREE,
+  CONSTRAINT `order_tracks_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'GPS轨迹点表' ROW_FORMAT = Dynamic;
 
 
 -- ----------------------------

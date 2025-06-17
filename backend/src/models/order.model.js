@@ -95,7 +95,10 @@ class Order {
       const offset = (page - 1) * limit;
       
       // 处理状态参数
-      const { status } = options;
+      let { status } = options;
+      
+      // 如果状态参数是'ongoing'，则在SQL查询中使用'ongoing'
+      // 注意：这里确保前端和后端使用相同的状态名称
       
       // 构建查询SQL
       let sql = '';
@@ -459,12 +462,15 @@ class Order {
     try {
       const [result] = await db.execute(
         `INSERT INTO order_tracks (
-          order_id, latitude, longitude
-        ) VALUES (?, ?, ?)`,
+          order_id, latitude, longitude, address, distance, type
+        ) VALUES (?, ?, ?, ?, ?, ?)`,
         [
           trackData.orderId,
           trackData.latitude,
-          trackData.longitude
+          trackData.longitude,
+          trackData.address || null,
+          trackData.distance || null,
+          trackData.type || 'track'
         ]
       );
       
@@ -484,7 +490,8 @@ class Order {
     try {
       const [rows] = await db.execute(
         `SELECT 
-          id, latitude, longitude, created_at as timestamp
+          id, latitude, longitude, address, distance, type,
+          created_at as timestamp
         FROM order_tracks
         WHERE order_id = ?
         ORDER BY created_at ASC`,
@@ -505,6 +512,8 @@ class Order {
    */
   static async getReports(orderId) {
     try {
+      console.log(`获取订单 ${orderId} 的服务报告`);
+      
       const [rows] = await db.execute(
         `SELECT 
           id, text, image_urls as imageUrls, video_url as videoUrl,
@@ -515,21 +524,136 @@ class Order {
         [orderId]
       );
       
+      console.log('数据库查询结果:', JSON.stringify(rows));
+      
       // 解析图片URL数组
-      return rows.map(report => {
+      const reports = rows.map(report => {
+        console.log(`处理报告 ID ${report.id}, imageUrls 原始值:`, report.imageUrls);
+        
         if (report.imageUrls) {
           try {
-            report.imageUrls = JSON.parse(report.imageUrls);
+            // 检查是否已经是数组
+            if (Array.isArray(report.imageUrls)) {
+              console.log('imageUrls 已经是数组:', report.imageUrls);
+            } else {
+              // 尝试解析 JSON 字符串
+              report.imageUrls = JSON.parse(report.imageUrls);
+              console.log('解析后的 imageUrls:', report.imageUrls);
+            }
           } catch (e) {
+            console.error('解析 imageUrls 失败:', e);
             report.imageUrls = [];
           }
         } else {
+          console.log('imageUrls 为空，设置为空数组');
           report.imageUrls = [];
         }
+        
         return report;
       });
+      
+      console.log('处理后的服务报告:', JSON.stringify(reports));
+      return reports;
     } catch (error) {
       console.error('获取服务报告列表失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 确认服务完成
+   * @param {number} orderId - 订单ID
+   * @returns {Promise<boolean>} - 是否成功
+   */
+  static async confirmService(orderId) {
+    const connection = await db.getConnection();
+    
+    try {
+      // 开始事务
+      await connection.beginTransaction();
+      
+      // 更新订单状态为已确认
+      const [updateResult] = await connection.execute(
+        'UPDATE orders SET status = ? WHERE id = ? AND status = ?',
+        ['confirmed', orderId, 'completed']
+      );
+      
+      if (updateResult.affectedRows === 0) {
+        await connection.rollback();
+        return false;
+      }
+      
+      // 获取订单信息
+      const [orderInfo] = await connection.execute(
+        'SELECT price, commission_rate, sitter_user_id FROM orders WHERE id = ?',
+        [orderId]
+      );
+      
+      if (orderInfo.length === 0) {
+        await connection.rollback();
+        return false;
+      }
+      
+      const order = orderInfo[0];
+      
+      // 计算帮溜员实际收入（订单金额 - 平台佣金）
+      const commissionAmount = order.price * order.commission_rate;
+      const sitterIncome = order.price - commissionAmount;
+      
+      // TODO: 在未来的迭代中，这里可以添加将钱转入帮溜员钱包的逻辑
+      
+      // 提交事务
+      await connection.commit();
+      return true;
+    } catch (error) {
+      // 回滚事务
+      await connection.rollback();
+      console.error('确认服务完成失败:', error);
+      throw error;
+    } finally {
+      // 释放连接
+      connection.release();
+    }
+  }
+
+  /**
+   * 添加订单评价
+   * @param {Object} reviewData - 评价数据
+   * @returns {Promise<number|boolean>} - 返回评价ID或false
+   */
+  static async addReview(reviewData) {
+    try {
+      // 检查是否已经评价过
+      const [existingReview] = await db.execute(
+        `SELECT id FROM reviews 
+         WHERE order_id = ? AND reviewer_user_id = ?`,
+        [reviewData.orderId, reviewData.reviewerUserId]
+      );
+      
+      if (existingReview.length > 0) {
+        return false; // 已经评价过
+      }
+      
+      // 插入评价
+      const [result] = await db.execute(
+        `INSERT INTO reviews (
+          order_id, reviewer_user_id, reviewee_user_id, 
+          rating, comment, tags, is_anonymous
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          reviewData.orderId,
+          reviewData.reviewerUserId,
+          reviewData.revieweeUserId,
+          reviewData.rating,
+          reviewData.comment || null,
+          reviewData.tags ? JSON.stringify(reviewData.tags) : null,
+          reviewData.isAnonymous || false
+        ]
+      );
+      
+      return result.insertId;
+    } catch (error) {
+      console.error('添加评价失败:', error);
       throw error;
     }
   }

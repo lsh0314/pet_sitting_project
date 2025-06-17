@@ -259,6 +259,28 @@ class OrderController {
         }
       }
       
+      // 获取服务报告（包括打卡照片）
+      let reports = [];
+      try {
+        console.log(`获取订单 ${orderId} 的服务报告`);
+        reports = await Order.getReports(orderId);
+        console.log('从Order.getReports获取的报告:', JSON.stringify(reports));
+        
+        // 报告中的imageUrls已经在getReports方法中解析过，不需要再次解析
+      } catch (e) {
+        console.error('获取服务报告失败:', e);
+      }
+      
+      // 获取GPS轨迹点（如果是遛狗服务）
+      let tracks = [];
+      if (order.serviceType === 'walk') {
+        try {
+          tracks = await Order.getTrackPoints(orderId);
+        } catch (e) {
+          console.error('获取GPS轨迹点失败:', e);
+        }
+      }
+      
       // 构建响应数据
       const responseData = {
         orderId: order.id,
@@ -292,8 +314,8 @@ class OrderController {
           price: order.price,
           isPaid: ['paid', 'ongoing', 'completed'].includes(order.status)
         },
-        track: [], // 轨迹数据，MVP阶段为空数组
-        report: [], // 服务报告，MVP阶段为空数组
+        reports: reports, // 添加服务报告
+        tracks: tracks,   // 添加GPS轨迹点
         createdAt: order.createdAt,
         updatedAt: order.updatedAt
       };
@@ -395,6 +417,8 @@ class OrderController {
       // 获取请求体中的数据
       const { photoUrl, location } = req.body;
       
+      console.log('开始服务请求数据:', req.body);
+      
       // 验证必填字段
       if (!photoUrl) {
         return res.status(400).json({
@@ -434,9 +458,11 @@ class OrderController {
       const reportData = {
         orderId,
         text: '服务开始打卡',
-        imageUrls: JSON.stringify([photoUrl]),
+        imageUrls: JSON.stringify([photoUrl]), // 确保是JSON字符串
         videoUrl: null
       };
+      
+      console.log('服务报告数据:', reportData);
       
       // 保存位置信息（如果有）
       let locationData = null;
@@ -492,6 +518,8 @@ class OrderController {
       // 获取请求体中的数据
       const { photoUrl, location } = req.body;
       
+      console.log('完成服务请求数据:', req.body);
+      
       // 验证必填字段
       if (!photoUrl) {
         return res.status(400).json({
@@ -531,9 +559,11 @@ class OrderController {
       const reportData = {
         orderId,
         text: '服务完成打卡',
-        imageUrls: JSON.stringify([photoUrl]),
+        imageUrls: JSON.stringify([photoUrl]), // 确保是JSON字符串
         videoUrl: null
       };
+      
+      console.log('服务报告数据:', reportData);
       
       // 保存位置信息（如果有）
       let locationData = null;
@@ -672,7 +702,7 @@ class OrderController {
       const sitterId = req.user.id;
       
       // 获取请求体中的数据
-      const { latitude, longitude } = req.body;
+      const { latitude, longitude, address, distance, type } = req.body;
       
       // 验证必填字段
       if (latitude === undefined || longitude === undefined) {
@@ -721,7 +751,10 @@ class OrderController {
       const trackData = {
         orderId,
         latitude,
-        longitude
+        longitude,
+        address,
+        distance,
+        type
       };
       
       // 保存轨迹点
@@ -745,6 +778,291 @@ class OrderController {
       res.status(500).json({
         success: false,
         message: '添加轨迹点失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 获取订单轨迹点列表
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async getOrderTracks(req, res) {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取当前用户ID
+      const userId = req.user.id;
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 验证用户是否有权限查看该订单（必须是订单的宠物主或帮溜员）
+      if (order.ownerUserId !== userId && order.sitterUserId !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: '您无权查看此订单'
+        });
+      }
+      
+      // 验证是否为遛狗服务
+      if (order.serviceType !== 'walk') {
+        return res.status(400).json({
+          success: false,
+          message: '只有遛狗服务才有轨迹点'
+        });
+      }
+      
+      // 获取轨迹点列表
+      const tracks = await Order.getTrackPoints(orderId);
+      
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        data: tracks
+      });
+    } catch (error) {
+      console.error('获取轨迹点列表失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取轨迹点列表失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 获取订单服务报告列表
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async getOrderReports(req, res) {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取当前用户ID
+      const userId = req.user.id;
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 验证用户是否有权限查看该订单（必须是订单的宠物主或帮溜员）
+      if (order.ownerUserId !== userId && order.sitterUserId !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: '您无权查看此订单'
+        });
+      }
+      
+      // 获取服务报告列表
+      const reports = await Order.getReports(orderId);
+      
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        data: reports
+      });
+    } catch (error) {
+      console.error('获取服务报告列表失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取服务报告列表失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 确认服务完成
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async confirmService(req, res) {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取当前用户ID（宠物主）
+      const ownerId = req.user.id;
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 验证用户是否是该订单的宠物主
+      if (order.ownerUserId !== ownerId) {
+        return res.status(403).json({
+          success: false,
+          message: '您不是该订单的宠物主'
+        });
+      }
+      
+      // 验证订单状态是否为已完成
+      if (order.status !== 'completed') {
+        return res.status(400).json({
+          success: false,
+          message: '只能确认已完成状态的订单'
+        });
+      }
+      
+      // 确认服务完成
+      const success = await Order.confirmService(orderId);
+      
+      if (!success) {
+        return res.status(500).json({
+          success: false,
+          message: '确认服务完成失败'
+        });
+      }
+      
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        message: '服务已确认完成'
+      });
+    } catch (error) {
+      console.error('确认服务完成失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '确认服务完成失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 添加订单评价
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async addReview(req, res) {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取当前用户ID
+      const userId = req.user.id;
+      
+      // 获取请求体中的数据
+      const { rating, comment, tags, isAnonymous } = req.body;
+      
+      // 验证必填字段
+      if (rating === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: '缺少必填字段：rating'
+        });
+      }
+      
+      // 验证评分范围
+      if (rating < 1 || rating > 5) {
+        return res.status(400).json({
+          success: false,
+          message: '评分必须在1-5之间'
+        });
+      }
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 验证用户是否是该订单的宠物主或帮溜员
+      if (order.ownerUserId !== userId && order.sitterUserId !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: '您无权评价此订单'
+        });
+      }
+      
+      // 验证订单状态是否为已确认或已完成
+      const validStatuses = ['completed', 'confirmed'];
+      if (!validStatuses.includes(order.status)) {
+        return res.status(400).json({
+          success: false,
+          message: '只能评价已完成或已确认的订单'
+        });
+      }
+      
+      // 确定评价者和被评价者
+      let revieweeUserId;
+      if (userId === order.ownerUserId) {
+        // 宠物主评价帮溜员
+        revieweeUserId = order.sitterUserId;
+      } else {
+        // 帮溜员评价宠物主
+        revieweeUserId = order.ownerUserId;
+      }
+      
+      // 创建评价数据
+      const reviewData = {
+        orderId,
+        reviewerUserId: userId,
+        revieweeUserId,
+        rating,
+        comment,
+        tags,
+        isAnonymous
+      };
+      
+      // 保存评价
+      const reviewId = await Order.addReview(reviewData);
+      
+      if (!reviewId) {
+        return res.status(400).json({
+          success: false,
+          message: '您已经评价过此订单'
+        });
+      }
+      
+      // 如果是宠物主评价帮溜员，更新帮溜员的评分
+      if (userId === order.ownerUserId) {
+        // TODO: 更新帮溜员的平均评分（未来迭代）
+      }
+      
+      // 返回成功响应
+      res.status(201).json({
+        success: true,
+        message: '评价已提交',
+        reviewId
+      });
+    } catch (error) {
+      console.error('添加评价失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '添加评价失败',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }

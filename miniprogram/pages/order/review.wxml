@@ -1,0 +1,85 @@
+<view class="container">
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar">
+    <view class="back-btn" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    <view class="page-title">评价服务</view>
+  </view>
+
+  <!-- 评价表单 -->
+  <view class="review-form" wx:if="{{!loading && orderInfo}}">
+    <!-- 帮溜员信息 -->
+    <view class="sitter-info">
+      <image class="sitter-avatar" src="{{orderInfo.sitter.avatar || '/static/images/default-avatar.png'}}"></image>
+      <view class="sitter-name">{{orderInfo.sitter.nickname}}</view>
+    </view>
+    
+    <!-- 星级评分 -->
+    <view class="rating-section">
+      <view class="section-title">服务评分</view>
+      <view class="rating-stars">
+        <view 
+          class="star {{rating >= 1 ? 'active' : ''}}" 
+          data-rating="1" 
+          bindtap="onRatingChange">★</view>
+        <view 
+          class="star {{rating >= 2 ? 'active' : ''}}" 
+          data-rating="2" 
+          bindtap="onRatingChange">★</view>
+        <view 
+          class="star {{rating >= 3 ? 'active' : ''}}" 
+          data-rating="3" 
+          bindtap="onRatingChange">★</view>
+        <view 
+          class="star {{rating >= 4 ? 'active' : ''}}" 
+          data-rating="4" 
+          bindtap="onRatingChange">★</view>
+        <view 
+          class="star {{rating >= 5 ? 'active' : ''}}" 
+          data-rating="5" 
+          bindtap="onRatingChange">★</view>
+      </view>
+    </view>
+    
+    <!-- 评价标签 -->
+    <view class="tags-section">
+      <view class="section-title">评价标签</view>
+      <view class="tags-container">
+        <view 
+          wx:for="{{availableTags}}" 
+          wx:key="*this"
+          class="tag {{tags.includes(item) ? 'active' : ''}}"
+          data-tag="{{item}}"
+          bindtap="onTagTap">{{item}}</view>
+      </view>
+    </view>
+    
+    <!-- 评价内容 -->
+    <view class="comment-section">
+      <view class="section-title">评价内容</view>
+      <textarea 
+        class="comment-input" 
+        placeholder="请输入您的评价内容（选填）" 
+        value="{{comment}}"
+        bindinput="onCommentInput"></textarea>
+    </view>
+    
+    <!-- 匿名评价 -->
+    <view class="anonymous-section">
+      <view class="anonymous-label">匿名评价</view>
+      <switch checked="{{isAnonymous}}" bindchange="onAnonymousChange" color="#4CAF50" />
+    </view>
+    
+    <!-- 提交按钮 -->
+    <button class="submit-btn" bindtap="onSubmit" disabled="{{loading}}">
+      {{loading ? '提交中...' : '提交评价'}}
+    </button>
+  </view>
+  
+  <!-- 加载中状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-icon"></view>
+    <text>正在加载...</text>
+  </view>
+</view> 

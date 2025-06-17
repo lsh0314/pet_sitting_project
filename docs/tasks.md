@@ -96,7 +96,7 @@ MVP 将**不包含**以下功能（可后续迭代）：
 
 - **任务 4.5: [DB]** 编写并执行`order_reports`表的 SQL 迁移脚本，用于存储服务过程中的照片和视频记录。
 - **任务 4.6: [DB]** 编写并执行`order_tracks`表的 SQL 迁移脚本，用于存储遛狗服务的 GPS 轨迹点。
-- **任务 4.7: [Backend] (API)** 实现`POST /api/order/:id/start`接口，用于帮溜员开始服务。**逻辑**：将订单状态从`paid`更新为`ongoing`，并要求上传一张开始服务的照片作为打卡凭证。
+- **任务 4.7: [Backend] (API)** 实现`POST /api/order/:id/start`接口，用于帮溜员开始服务。**逻辑**：将订单状态从`paid`更新为`ongoing`，并要求上传一张开始服务的照片以及位置签到作为打卡凭证。
 - **任务 4.8: [Backend] (API)** 实现`POST /api/order/:id/report`接口，用于帮溜员上传服务过程中的照片和视频记录。**逻辑**：将上传的媒体内容存储到`order_reports`表中。
 - **任务 4.9: [Backend] (API)** 实现`POST /api/order/:id/track`接口，用于帮溜员在遛狗服务中上传 GPS 位置点。**逻辑**：将位置点（经纬度）存储到`order_tracks`表中。
 - **任务 4.10: [Backend] (API)** 实现`POST /api/order/:id/complete`接口，用于帮溜员完成服务。**逻辑**：将订单状态从`ongoing`更新为`completed`，并要求上传一张完成服务的照片作为结束凭证。

@@ -13,20 +13,20 @@ Page({
       0: '', // 全部
       1: 'accepted', // 待支付
       2: 'paid', // 待服务
-      3: 'in_progress', // 服务中
+      3: 'ongoing', // 服务中
       4: 'completed,confirmed' // 已完成
     },
     sitterStatusMap: {
       0: '', // 全部
       1: 'paid', // 待服务
-      2: 'in_progress', // 服务中
+      2: 'ongoing', // 服务中
       3: 'completed,confirmed' // 已完成
     },
     statusMap: {
       0: '', // 全部
       1: 'accepted', // 待支付
       2: 'paid', // 待服务
-      3: 'in_progress', // 服务中
+      3: 'ongoing', // 服务中
       4: 'completed,confirmed' // 已完成
     },
     countdownTimers: {}, // 存储订单倒计时定时器
@@ -305,7 +305,7 @@ Page({
             switch(order.status) {
               case 'accepted': statusText = '待支付'; break;
               case 'paid': statusText = '待服务'; break;
-              case 'in_progress': statusText = '服务中'; break;
+              case 'ongoing': statusText = '服务中'; break;
               case 'completed': statusText = '待确认'; break;
               case 'confirmed': statusText = '已完成'; break;
               default: statusText = '未知状态';

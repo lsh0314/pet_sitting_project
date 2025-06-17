@@ -15,7 +15,10 @@
     "pages/my/edit-profile",
     "pages/sitter-list/index",
     "pages/payment/index",
-    "pages/order/service/start"
+    "pages/order/service/start",
+    "pages/order/service/complete",
+    "pages/order/review",
+    "pages/order/report"
   ],
   "window": {
     "backgroundTextStyle": "light",

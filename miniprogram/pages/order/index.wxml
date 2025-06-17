@@ -138,7 +138,7 @@
           </block>
           
           <!-- 帮溜员"服务中"状态下的按钮组 -->
-          <block wx:if="{{currentRole === 'sitter' && item.status === 'in_progress'}}">
+          <block wx:if="{{currentRole === 'sitter' && item.status === 'ongoing'}}">
             <view class="button-row">
               <!-- 查看详情按钮 -->
               <button 
@@ -159,7 +159,7 @@
           <!-- 其他状态只显示查看详情按钮 -->
           <button 
             class="btn-default" 
-            wx:if="{{item.status !== 'accepted' && !(currentRole === 'sitter' && (item.status === 'paid' || item.status === 'in_progress'))}}"
+            wx:if="{{item.status !== 'accepted' && !(currentRole === 'sitter' && (item.status === 'paid' || item.status === 'ongoing'))}}"
             data-id="{{item.orderId}}"
             bindtap="viewOrderDetail"
           >查看详情</button>
