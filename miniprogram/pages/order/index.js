@@ -5,15 +5,14 @@ Page({
   data: {
     orders: [],
     loading: false,
-    currentTab: 0, // 0: 全部, 1: 待接单, 2: 待支付, 3: 待服务, 4: 服务中, 5: 已完成
-    tabs: ['全部', '待接单', '待支付', '待服务', '服务中', '已完成'],
+    currentTab: 0, // 0: 全部, 1: 待支付, 2: 待服务, 3: 服务中, 4: 已完成
+    tabs: ['全部', '待支付', '待服务', '服务中', '已完成'],
     statusMap: {
       0: '', // 全部
-      1: 'pending', // 待接单
-      2: 'accepted', // 待支付
-      3: 'paid', // 待服务
-      4: 'in_progress', // 服务中
-      5: 'completed,confirmed' // 已完成
+      1: 'accepted', // 待支付
+      2: 'paid', // 待服务
+      3: 'in_progress', // 服务中
+      4: 'completed,confirmed' // 已完成
     },
     countdownTimers: {}, // 存储订单倒计时定时器
     currentRole: 'pet_owner', // 默认角色为宠物主
@@ -245,7 +244,6 @@ Page({
           if (!order.statusText) {
             let statusText = '';
             switch(order.status) {
-              case 'pending': statusText = '待接单'; break;
               case 'accepted': statusText = '待支付'; break;
               case 'paid': statusText = '待服务'; break;
               case 'in_progress': statusText = '服务中'; break;

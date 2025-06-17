@@ -118,7 +118,6 @@ const getServiceTypeText = (type) => {
  */
 const getOrderStatusText = (status) => {
   const statusMap = {
-    'pending': '等待接单',
     'accepted': '等待支付',
     'paid': '待开始',
     'ongoing': '服务中',

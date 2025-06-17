@@ -114,7 +114,7 @@
           <!-- 其他状态只显示查看详情按钮 -->
           <button 
             class="btn-default" 
-            wx:if="{{item.status !== 'pending' && item.status !== 'accepted'}}"
+            wx:if="{{item.status !== 'accepted'}}"
             data-id="{{item.orderId}}"
             bindtap="viewOrderDetail"
           >查看详情</button>

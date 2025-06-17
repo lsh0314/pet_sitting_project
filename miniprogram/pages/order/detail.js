@@ -10,7 +10,6 @@ Page({
     error: false,
     userRole: '',
     orderStatusText: {
-      'pending': '待接单',
       'accepted': '待支付',
       'paid': '待服务',
       'in_progress': '服务中',
