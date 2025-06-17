@@ -100,7 +100,6 @@ class UserController {
       return error(res, '获取用户列表失败', 500);
     }
   }
-
   /**
    * 更新用户状态(管理员)
    * @param {Object} req - 请求对象
@@ -115,9 +114,9 @@ class UserController {
         return error(res, '无效的状态值', 400);
       }
       
-      const success = await userModel.updateStatus(userId, status);
+      const result = await userModel.updateStatus(userId, status);
       
-      if (success) {
+      if (result) {
         return success(res, null, '更新用户状态成功');
       } else {
         return error(res, '用户不存在', 404);
@@ -163,33 +162,47 @@ class UserController {
       return error(res, '搜索用户失败', 500);
     }
   }
-
   /**
    * 获取用户详情
    */
   async getUserDetail(req, res) {
     try {
-      const userId = req.params.id;
-      const [rows] = await pool.execute(
-        `SELECT u.*, 
-         sp.status as identity_status,
-         sp.id_card_verified,
-         sp.service_areas,
-         sp.introduction,
-         sp.service_count
-         FROM users u 
-         LEFT JOIN sitter_profiles sp ON u.id = sp.user_id 
-         WHERE u.id = ?`,
-        [userId]
-      );
+      const userId = req.params.id;      const [rows] = await pool.execute(`
+        SELECT 
+          u.*,
+          sp.bio,
+          sp.service_area,
+          sp.available_dates,
+          IFNULL(
+            (SELECT COUNT(*) FROM orders WHERE sitter_user_id = u.id AND status = 'confirmed'),
+            0
+          ) as service_count,
+          sp.total_services_completed,
+          sp.rating,
+          sp.updated_at as profile_updated_at
+        FROM users u 
+        LEFT JOIN sitter_profiles sp ON u.id = sp.user_id 
+        WHERE u.id = ?
+      `, [userId]);
 
       if (rows.length === 0) {
         return error(res, '用户不存在', 404);
       }
 
       const user = rows[0];
+      
+      // 移除敏感信息
       delete user.password;
       delete user.openid;
+      
+      // 确保性别信息正确
+      user.gender = user.gender || 'unknown';
+        // 确保用户状态正确
+      user.identity_status = user.identity_status || 'unsubmitted';
+      user.total_services_completed = user.total_services_completed || 0;
+      user.rating = user.rating || 5.00;
+
+      console.log('用户详情:', user); // 调试日志
 
       return success(res, user);
     } catch (err) {
