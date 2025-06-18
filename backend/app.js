@@ -30,6 +30,7 @@ app.use('/api/sitter', require('./src/api/sitter.routes'));
 app.use('/api/order', require('./src/api/order.routes'));
 app.use('/api/payment', require('./src/api/payment.routes'));
 app.use('/api/upload', require('./src/api/upload.routes'));
+app.use('/api/verifications', require('./src/api/verification.routes'));
 
 // 全局错误处理中间件
 app.use((err, req, res, next) => {
