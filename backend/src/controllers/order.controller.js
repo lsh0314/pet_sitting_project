@@ -141,7 +141,10 @@ class OrderController {
           'accepted': '待支付',
           'paid': '待服务',
           'ongoing': '服务中',
+          'pending_confirm': '待确认',
+          'pending_review': '待评价',
           'completed': '已完成',
+          'confirmed': '已完成',
           'cancelled': '已取消'
         };
         
@@ -238,7 +241,10 @@ class OrderController {
         'accepted': '待支付',
         'paid': '待服务',
         'ongoing': '服务中',
+        'pending_confirm': '待确认',
+        'pending_review': '待评价',
         'completed': '已完成',
+        'confirmed': '已完成',
         'cancelled': '已取消'
       };
       
@@ -923,11 +929,11 @@ class OrderController {
         });
       }
       
-      // 验证订单状态是否为已完成
-      if (order.status !== 'completed') {
+      // 验证订单状态是否为待确认
+      if (order.status !== 'pending_confirm') {
         return res.status(400).json({
           success: false,
-          message: '只能确认已完成状态的订单'
+          message: '只能确认待确认状态的订单'
         });
       }
       
@@ -1096,7 +1102,10 @@ class OrderController {
         'accepted': '待支付',
         'paid': '待服务',
         'ongoing': '服务中',
+        'pending_confirm': '待确认',
+        'pending_review': '待评价',
         'completed': '已完成',
+        'confirmed': '已完成',
         'cancelled': '已取消'
       };
       

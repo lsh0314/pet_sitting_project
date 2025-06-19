@@ -5,29 +5,29 @@ Page({
   data: {
     orders: [],
     loading: false,
-    currentTab: 0, // 0: 全部, 1: 待支付(宠物主)/待服务(帮溜员), 2: 待服务/服务中, 3: 服务中/已完成, 4: 已完成
-    petOwnerTabs: ['全部', '待支付', '待服务', '服务中', '已完成'],
+    currentTab: 0, // 0: 全部, 1: 待支付(宠物主)/待服务(帮溜员), 2: 待服务/服务中, 3: 待确认/待评价, 4: 已完成
+    petOwnerTabs: ['全部', '待支付', '待服务', '待确认', '已完成'],
     sitterTabs: ['全部', '待服务', '服务中', '已完成'],
-    tabs: ['全部', '待支付', '待服务', '服务中', '已完成'], // 默认使用宠物主标签
+    tabs: ['全部', '待支付', '待服务', '待确认', '已完成'], // 默认使用宠物主标签
     petOwnerStatusMap: {
       0: '', // 全部
       1: 'accepted', // 待支付
       2: 'paid', // 待服务
-      3: 'ongoing', // 服务中
-      4: 'completed,confirmed' // 已完成
+      3: 'pending_confirm', // 待确认
+      4: 'pending_review,confirmed' // 待评价和已完成
     },
     sitterStatusMap: {
       0: '', // 全部
       1: 'paid', // 待服务
       2: 'ongoing', // 服务中
-      3: 'completed,confirmed' // 已完成
+      3: 'pending_confirm,pending_review,confirmed' // 待确认、待评价和已完成
     },
     statusMap: {
       0: '', // 全部
       1: 'accepted', // 待支付
       2: 'paid', // 待服务
-      3: 'ongoing', // 服务中
-      4: 'completed,confirmed' // 已完成
+      3: 'pending_confirm', // 待确认
+      4: 'pending_review,confirmed' // 待评价和已完成
     },
     countdownTimers: {}, // 存储订单倒计时定时器
     currentRole: 'pet_owner', // 默认角色为宠物主
@@ -306,7 +306,8 @@ Page({
               case 'accepted': statusText = '待支付'; break;
               case 'paid': statusText = '待服务'; break;
               case 'ongoing': statusText = '服务中'; break;
-              case 'completed': statusText = '待确认'; break;
+              case 'pending_confirm': statusText = '待确认'; break;
+              case 'pending_review': statusText = '待评价'; break;
               case 'confirmed': statusText = '已完成'; break;
               default: statusText = '未知状态';
             }
@@ -619,6 +620,62 @@ Page({
             });
         }
       }
+    });
+  },
+  
+  // 确认服务完成
+  confirmService: function(e) {
+    const orderId = e.currentTarget.dataset.id;
+    
+    // 显示确认对话框
+    wx.showModal({
+      title: '确认服务',
+      content: '确认服务已完成吗？确认后将无法撤销',
+      confirmText: '确认',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          wx.showLoading({
+            title: '处理中...',
+            mask: true
+          });
+          
+          // 调用确认服务完成API
+          api.post(`/api/order/${orderId}/confirm`, {}, true)
+            .then(res => {
+              wx.hideLoading();
+              
+              wx.showToast({
+                title: '已确认完成',
+                icon: 'success'
+              });
+              
+              // 刷新订单列表
+              setTimeout(() => {
+                this.getOrderList();
+              }, 1500);
+            })
+            .catch(err => {
+              wx.hideLoading();
+              console.error('确认服务失败:', err);
+              
+              wx.showToast({
+                title: err.message || '操作失败',
+                icon: 'none'
+              });
+            });
+        }
+      }
+    });
+  },
+
+  // 评价服务
+  reviewService: function(e) {
+    const orderId = e.currentTarget.dataset.id;
+    
+    // 跳转到评价页面
+    wx.navigateTo({
+      url: `/pages/order/review?id=${orderId}`
     });
   }
 }) 

@@ -111,6 +111,25 @@
             </view>
           </block>
           
+          <!-- 宠物主"待确认"状态下的按钮组 -->
+          <block wx:if="{{currentRole === 'pet_owner' && item.status === 'pending_confirm'}}">
+            <view class="button-row">
+              <!-- 查看详情按钮 -->
+              <button 
+                class="btn-row-item btn-default" 
+                data-id="{{item.orderId}}"
+                bindtap="viewOrderDetail"
+              >查看详情</button>
+              
+              <!-- 确认完成按钮 -->
+              <button 
+                class="btn-row-item btn-primary" 
+                data-id="{{item.orderId}}"
+                bindtap="confirmService"
+              >确认完成</button>
+            </view>
+          </block>
+          
           <!-- 帮溜员"待服务"状态下的按钮组 -->
           <block wx:if="{{currentRole === 'sitter' && item.status === 'paid'}}">
             <view class="button-row">
@@ -156,10 +175,29 @@
             </view>
           </block>
           
+          <!-- 宠物主"待评价"状态下的按钮组 -->
+          <block wx:if="{{currentRole === 'pet_owner' && item.status === 'pending_review'}}">
+            <view class="button-row">
+              <!-- 查看详情按钮 -->
+              <button 
+                class="btn-row-item btn-default" 
+                data-id="{{item.orderId}}"
+                bindtap="viewOrderDetail"
+              >查看详情</button>
+              
+              <!-- 评价服务按钮 -->
+              <button 
+                class="btn-row-item btn-primary" 
+                data-id="{{item.orderId}}"
+                bindtap="reviewService"
+              >评价服务</button>
+            </view>
+          </block>
+          
           <!-- 其他状态只显示查看详情按钮 -->
           <button 
             class="btn-default" 
-            wx:if="{{item.status !== 'accepted' && !(currentRole === 'sitter' && (item.status === 'paid' || item.status === 'ongoing'))}}"
+            wx:if="{{item.status !== 'accepted' && !(currentRole === 'sitter' && (item.status === 'paid' || item.status === 'ongoing')) && !(currentRole === 'pet_owner' && (item.status === 'pending_confirm' || item.status === 'pending_review'))}}"
             data-id="{{item.orderId}}"
             bindtap="viewOrderDetail"
           >查看详情</button>

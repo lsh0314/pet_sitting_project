@@ -298,10 +298,10 @@ class Order {
       // 开始事务
       await connection.beginTransaction();
       
-      // 更新订单状态为已完成
+      // 更新订单状态为待确认(pending_confirm)
       const [updateResult] = await connection.execute(
         'UPDATE orders SET status = ? WHERE id = ? AND status = ?',
-        ['completed', orderId, 'ongoing']
+        ['pending_confirm', orderId, 'ongoing']
       );
       
       if (updateResult.affectedRows === 0) {
@@ -514,10 +514,10 @@ class Order {
       // 开始事务
       await connection.beginTransaction();
       
-      // 更新订单状态为已确认
+      // 更新订单状态为待评价
       const [updateResult] = await connection.execute(
         'UPDATE orders SET status = ? WHERE id = ? AND status = ?',
-        ['confirmed', orderId, 'completed']
+        ['pending_review', orderId, 'pending_confirm']
       );
       
       if (updateResult.affectedRows === 0) {

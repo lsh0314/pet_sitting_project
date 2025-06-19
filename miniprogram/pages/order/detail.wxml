@@ -134,13 +134,17 @@
           wx:if="{{orderInfo.status === 'accepted'}}" 
           bindtap="onTapPay">去支付</button>
         
-        <!-- 已完成状态，显示确认完成和评价按钮 -->
-        <block wx:if="{{orderInfo.status === 'completed'}}">
+        <!-- 待确认状态，显示确认完成按钮 -->
+        <block wx:if="{{orderInfo.status === 'pending_confirm'}}">
           <button 
             class="btn-primary" 
             bindtap="onTapConfirm">确认完成</button>
+        </block>
+        
+        <!-- 待评价状态，显示评价服务按钮 -->
+        <block wx:if="{{orderInfo.status === 'pending_review'}}">
           <button 
-            class="btn-secondary" 
+            class="btn-primary" 
             bindtap="onTapReview">评价服务</button>
         </block>
       </block>
@@ -155,14 +159,9 @@
         
         <!-- 服务中状态 -->
         <block wx:if="{{orderInfo.status === 'ongoing'}}">
-          <!-- 上传照片/视频按钮 -->
-          <button 
-            class="btn-secondary" 
-            bindtap="onTapAddReport">上传照片/视频</button>
-          
           <!-- 完成服务按钮 -->
           <button 
-            class="btn-primary" 
+            class="btn-primary center-btn" 
             bindtap="onTapComplete">完成服务</button>
           
           <!-- 遛狗服务显示记录轨迹按钮 -->

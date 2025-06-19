@@ -121,7 +121,8 @@ const getOrderStatusText = (status) => {
     'accepted': '等待支付',
     'paid': '待开始',
     'ongoing': '服务中',
-    'completed': '待确认',
+    'pending_confirm': '待确认',
+    'pending_review': '待评价',
     'confirmed': '已完成',
     'cancelled': '已取消'
   }
