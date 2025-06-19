@@ -26,7 +26,13 @@
         </el-form-item>
         
         <el-form-item label="服务类型">
-          <el-select v-model="searchForm.serviceType" placeholder="所有类型" clearable>
+          <el-select 
+            v-model="searchForm.serviceType" 
+            placeholder="所有类型" 
+            clearable
+            @change="handleSearch"
+            style="width: 160px"
+          >
             <el-option label="遛狗" value="walk" />
             <el-option label="喂食" value="feed" />
             <el-option label="寄养" value="care" />
@@ -34,7 +40,13 @@
         </el-form-item>
         
         <el-form-item label="订单状态">
-          <el-select v-model="searchForm.status" placeholder="所有状态" clearable>
+          <el-select 
+            v-model="searchForm.status" 
+            placeholder="所有状态" 
+            clearable
+            @change="handleSearch"
+            style="width: 160px"
+          >
             <el-option label="待支付" value="pending" />
             <el-option label="已支付" value="paid" />
             <el-option label="服务中" value="in_progress" />
@@ -43,16 +55,28 @@
             <el-option label="已退款" value="refunded" />
           </el-select>
         </el-form-item>
-        
-        <el-form-item label="下单时间">
-          <el-date-picker
-            v-model="searchForm.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            value-format="YYYY-MM-DD"
-          />
+          <el-form-item label="下单时间">
+          <div class="date-picker-group">
+            <el-date-picker
+              v-model="searchForm.startDate"
+              type="date"
+              placeholder="开始日期"
+              value-format="YYYY-MM-DD"
+              :disabledDate="disabledStartDate"
+              @change="handleDateChange"
+              style="width: 160px"
+            />
+            <span class="date-separator">至</span>
+            <el-date-picker
+              v-model="searchForm.endDate"
+              type="date"
+              placeholder="结束日期"
+              value-format="YYYY-MM-DD"
+              :disabledDate="disabledEndDate"
+              @change="handleDateChange"
+              style="width: 160px"
+            />
+          </div>
         </el-form-item>
         
         <el-form-item>
@@ -177,15 +201,35 @@ const searchForm = reactive({
   username: '',
   serviceType: '',
   status: '',
-  dateRange: null
+  startDate: '',
+  endDate: ''
 })
 
-// 方法
+// 日期禁用方法
+const disabledStartDate = (time) => {
+  if (!searchForm.endDate) {
+    return time.getTime() > Date.now()
+  }
+  return time.getTime() > new Date(searchForm.endDate).getTime() || time.getTime() > Date.now()
+}
+
+const disabledEndDate = (time) => {
+  if (!searchForm.startDate) {
+    return time.getTime() > Date.now()
+  }
+  return time.getTime() < new Date(searchForm.startDate).getTime() || time.getTime() > Date.now()
+}
+
+// 日期变化处理
+const handleDateChange = () => {
+  handleSearch()
+}
+
 const formatServiceType = (type) => {
   const typeMap = {
     'walk': '遛狗',
     'feed': '喂食',
-    'care': '寄养'
+    'boarding': '寄养'
   }
   return typeMap[type] || type
 }
@@ -241,8 +285,11 @@ const resetSearch = () => {
   searchForm.username = ''
   searchForm.serviceType = ''
   searchForm.status = ''
-  searchForm.dateRange = null
-  handleSearch()
+  searchForm.startDate = ''
+  searchForm.endDate = ''
+  nextTick(() => {
+    handleSearch()
+  })
 }
 
 const exportOrders = async () => {
@@ -288,13 +335,9 @@ const fetchOrders = async () => {
       orderId: searchForm.orderId,
       username: searchForm.username,
       serviceType: searchForm.serviceType,
-      status: searchForm.status
-    }
-    
-    // 添加日期范围条件
-    if (searchForm.dateRange && searchForm.dateRange.length === 2) {
-      params.startDate = searchForm.dateRange[0]
-      params.endDate = searchForm.dateRange[1]
+      status: searchForm.status,
+      startDate: searchForm.startDate,
+      endDate: searchForm.endDate
     }
     
     console.log('请求参数:', params)
@@ -437,5 +480,20 @@ const viewOrderDetail = (orderId) => {
   padding: 15px;
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.date-picker-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-separator {
+  color: #606266;
+}
+
+.el-form-item {
+  margin-bottom: 18px;
+  margin-right: 18px;
 }
 </style>
