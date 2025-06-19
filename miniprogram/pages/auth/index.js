@@ -17,7 +17,12 @@ Page({
       { id: 2, name: '小红', openid: 'openid_2', role: 'sitter' },
       { id: 3, name: '旺财', openid: 'openid_3', role: 'sitter' },
       { id: 4, name: '小花', openid: 'openid_4', role: 'sitter' },
-      { id: 5, name: '大壮', openid: 'openid_5', role: 'sitter' }
+      { id: 5, name: '大壮', openid: 'openid_5', role: 'sitter' },
+      { id: 6, name: '张三', openid: 'openid_6', role: 'pet_owner' },
+      { id: 7, name: '李四', openid: 'openid_7', role: 'pet_owner' },
+      { id: 8, name: '王五', openid: 'openid_8', role: 'pet_owner' },
+      { id: 9, name: '赵六', openid: 'openid_9', role: 'pet_owner' },
+      { id: 10, name: '钱七', openid: 'openid_10', role: 'pet_owner' }
     ]
   },
 

@@ -14,8 +14,8 @@ class Order {
       const [result] = await db.execute(
         `INSERT INTO orders (
           owner_user_id, sitter_user_id, pet_id, status, service_type,
-          service_date, start_time, end_time, address, remarks, price, commission_rate
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          service_date, start_time, end_time, address, remarks, price, commission_rate, location_coords
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           orderData.ownerUserId,
           orderData.sitterUserId,
@@ -28,7 +28,8 @@ class Order {
           orderData.address,
           orderData.remarks || null,
           orderData.price,
-          orderData.commissionRate || 0.1
+          orderData.commissionRate || 0.1,
+          orderData.locationCoords || null
         ]
       );
       
@@ -53,7 +54,7 @@ class Order {
           o.service_date as serviceDate, o.start_time as startTime, 
           o.end_time as endTime, o.address, o.remarks, o.price,
           o.commission_rate as commissionRate, o.created_at as createdAt,
-          o.updated_at as updatedAt,
+          o.updated_at as updatedAt, o.location_coords as locationCoords,
           u1.nickname as ownerNickname, u1.avatar_url as ownerAvatar,
           u2.nickname as sitterNickname, u2.avatar_url as sitterAvatar,
           p.name as petName, p.photo_url as petPhoto
@@ -94,7 +95,10 @@ class Order {
       const offset = (page - 1) * limit;
       
       // 处理状态参数
-      const { status } = options;
+      let { status } = options;
+      
+      // 如果状态参数是'ongoing'，则在SQL查询中使用'ongoing'
+      // 注意：这里确保前端和后端使用相同的状态名称
       
       // 构建查询SQL
       let sql = '';
@@ -216,7 +220,38 @@ class Order {
    * @returns {Promise<Object>} - 返回订单列表和分页信息
    */
   static async findAll(options) {
+  static async findAll(options) {
     try {
+      const {
+        page = 1,
+        limit = 10,
+        orderId,
+        username,
+        serviceType,
+        status,
+        startDate,
+        endDate
+      } = options;
+
+      let whereClause = 'WHERE 1=1';
+      const params = [];
+
+      // 构建WHERE子句
+      if (orderId) {
+        whereClause += ' AND o.id = ?';
+        params.push(orderId);
+      }
+      
+      if (username) {
+        whereClause += ' AND (owner.nickname LIKE ? OR sitter.nickname LIKE ?)';
+
+        params.push(`%${username}%`, `%${username}%`);
+      }
+      
+      if (serviceType) {
+        whereClause += ' AND o.service_type = ?';
+        params.push(serviceType);
+      }
       const {
         page = 1,
         limit = 10,

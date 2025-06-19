@@ -207,6 +207,7 @@ Page({
     switch(id) {
       case 'profile':
         // 跳转到个人资料页
+        this.navigateToEditProfile();
         break;
       case 'pets':
         this.navigateToPets();
@@ -218,5 +219,17 @@ Page({
         // 跳转到我的钱包页
         break;
     }
+  },
+  
+  // 跳转到编辑资料页面
+  navigateToEditProfile: function() {
+    if (!this.data.isLoggedIn) {
+      this.navigateToLogin();
+      return;
+    }
+    
+    wx.navigateTo({
+      url: '/pages/my/edit-profile'
+    });
   }
 }) 

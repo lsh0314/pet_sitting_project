@@ -6,6 +6,23 @@ try {
   console.error('获取app实例失败:', e);
 }
 
+// 获取基础API地址
+const getBaseUrl = () => {
+  let baseAPI = 'http://127.0.0.1:3000';
+  try {
+    // 尝试获取app实例（如果之前没有获取到）
+    if (!app) {
+      app = getApp();
+    }
+    if (app && app.globalData && app.globalData.baseAPI) {
+      baseAPI = app.globalData.baseAPI;
+    }
+  } catch (e) {
+    console.error('获取baseAPI失败，使用默认值:', e);
+  }
+  return baseAPI;
+};
+
 /**
  * 封装微信请求
  * @param {Object} options - 请求选项
@@ -18,18 +35,7 @@ try {
 const request = (options) => {
   return new Promise((resolve, reject) => {
     // 获取baseAPI
-    let baseAPI = 'http://127.0.0.1:3000';
-    try {
-      // 尝试获取app实例（如果之前没有获取到）
-      if (!app) {
-        app = getApp();
-      }
-      if (app && app.globalData && app.globalData.baseAPI) {
-        baseAPI = app.globalData.baseAPI;
-      }
-    } catch (e) {
-      console.error('获取baseAPI失败，使用默认值:', e);
-    }
+    const baseAPI = getBaseUrl();
     
     // 构建完整URL
     const url = options.url.startsWith('http') ? options.url : baseAPI + options.url;
@@ -163,5 +169,11 @@ module.exports = {
       data,
       auth
     });
-  }
+  },
+  
+  /**
+   * 获取API基础URL
+   * @returns {string} API基础URL
+   */
+  getBaseUrl: getBaseUrl
 }; 

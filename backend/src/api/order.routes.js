@@ -10,6 +10,31 @@ router.get('/my', authMiddleware, OrderController.getMyOrders);
 router.get('/:id', authMiddleware, OrderController.getOrderDetail);
 router.post('/:id/cancel', authMiddleware, OrderController.cancelOrder);
 
+// 开始服务（需要认证）
+router.post('/:id/start', authMiddleware, OrderController.startService);
+
+// 完成服务（需要认证）
+router.post('/:id/complete', authMiddleware, OrderController.completeService);
+
+// 上传服务报告（需要认证）
+router.post('/:id/report', authMiddleware, OrderController.addServiceReport);
+
+// 上传GPS轨迹点（需要认证）
+router.post('/:id/track', authMiddleware, OrderController.addTrackPoint);
+
+// 获取GPS轨迹点列表（需要认证）
+router.get('/:id/tracks', authMiddleware, OrderController.getOrderTracks);
+
+// 获取服务报告列表（需要认证）
+router.get('/:id/reports', authMiddleware, OrderController.getOrderReports);
+
+// 确认服务完成（需要认证）
+router.post('/:id/confirm', authMiddleware, OrderController.confirmService);
+
+// 评价订单（需要认证）
+router.post('/:id/review', authMiddleware, OrderController.addReview);
+
+module.exports = router; 
 // 管理员订单管理接口
 router.get('/admin/list', authMiddleware, adminMiddleware, OrderController.getAllOrders);
 router.get('/admin/:id', authMiddleware, adminMiddleware, OrderController.getAdminOrderDetail);

@@ -13,7 +13,12 @@ Page({
     serviceDate: util.getCurrentDate(),
     startTime: '08:00',
     endTime: '09:00',
-    address: '',
+    // 地址相关字段
+    region: ['北京市', '北京市', '海淀区'], // 默认地区
+    addressDetail: '', // 详细地址
+    address: '', // 完整地址（region + addressDetail）
+    locationCoords: null, // 位置坐标 {latitude, longitude}
+    
     remarks: '',
     loading: false,
     submitting: false,
@@ -585,10 +590,289 @@ Page({
     this.calculatePrice();
   },
 
-  // 输入地址
-  inputAddress: function (e) {
+  // 地区选择器变化处理
+  bindRegionChange: function(e) {
+    console.log('地区选择变化:', e.detail.value);
     this.setData({
-      address: e.detail.value
+      region: e.detail.value
+    });
+    // 更新完整地址
+    this.updateFullAddress();
+  },
+
+  // 详细地址输入处理
+  inputAddressDetail: function(e) {
+    this.setData({
+      addressDetail: e.detail.value
+    });
+    // 更新完整地址
+    this.updateFullAddress();
+  },
+
+  // 更新完整地址
+  updateFullAddress: function() {
+    const { region, addressDetail } = this.data;
+    const fullAddress = region.join('') + addressDetail;
+    this.setData({
+      address: fullAddress
+    });
+    console.log('更新完整地址:', fullAddress);
+  },
+
+  // 获取当前位置
+  getCurrentLocation: function() {
+    wx.showLoading({
+      title: '获取位置中...',
+    });
+
+    wx.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        console.log('获取位置成功:', res);
+        const { latitude, longitude } = res;
+        
+        // 保存坐标信息
+        this.setData({
+          locationCoords: { latitude, longitude }
+        });
+        
+        // 显示加载中
+        wx.showLoading({
+          title: '打开位置选择...',
+        });
+        
+        // 使用微信官方的地址选择器
+        wx.chooseLocation({
+          latitude: latitude,
+          longitude: longitude,
+          success: (result) => {
+            console.log('选择位置成功:', result);
+            
+            // 保存选择的位置信息
+            const selectedLocation = {
+              latitude: result.latitude,
+              longitude: result.longitude,
+              name: result.name || '',
+              address: result.address || ''
+            };
+            
+            // 不再自动调用逆地址解析，而是先显示基本信息
+            this.setData({
+              selectedLocation: selectedLocation,
+              showLocationConfirmModal: true, // 显示确认模态框
+              // 设置一些基本信息
+              addressDetail: selectedLocation.name || selectedLocation.address || '请输入详细地址',
+              locationCoords: {
+                latitude: selectedLocation.latitude,
+                longitude: selectedLocation.longitude
+              }
+            });
+            
+            wx.hideLoading();
+          },
+          fail: (err) => {
+            console.error('选择位置失败:', err);
+            
+            // 如果用户取消选择，使用默认值
+            this.setData({
+              region: ['北京市', '北京市', '海淀区'],
+              addressDetail: '请输入详细地址'
+            });
+            
+            // 更新完整地址
+            this.updateFullAddress();
+            
+            wx.showToast({
+              title: '请手动输入地址',
+              icon: 'none'
+            });
+            
+            wx.hideLoading();
+          }
+        });
+      },
+      fail: (err) => {
+        console.error('获取位置失败:', err);
+        wx.hideLoading();
+        
+        // 判断错误类型
+        if (err.errMsg.includes('auth deny')) {
+          // 用户拒绝授权
+          wx.showModal({
+            title: '位置权限未开启',
+            content: '需要获取您的地理位置才能使用此功能，请在设置中开启位置权限',
+            confirmText: '去设置',
+            success: (res) => {
+              if (res.confirm) {
+                wx.openSetting();
+              }
+            }
+          });
+        } else {
+          // 其他错误
+          wx.showToast({
+            title: '获取位置失败',
+            icon: 'none'
+          });
+        }
+      }
+    });
+  },
+  
+  // 确认选择的位置并进行逆地址解析
+  confirmSelectedLocation: function() {
+    if (!this.data.selectedLocation) {
+      wx.showToast({
+        title: '请先选择位置',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    const selectedLocation = this.data.selectedLocation;
+    
+    // 显示加载中
+    wx.showLoading({
+      title: '解析地址信息...',
+    });
+    
+    // 这时才调用逆地址解析API
+    this.reverseGeocoding(selectedLocation.latitude, selectedLocation.longitude, selectedLocation);
+    
+    // 隐藏确认模态框
+    this.setData({
+      showLocationConfirmModal: false
+    });
+  },
+  
+  // 取消位置选择确认
+  cancelLocationConfirm: function() {
+    // 隐藏确认模态框，保留基本地址信息
+    this.setData({
+      showLocationConfirmModal: false
+    });
+    
+    // 更新完整地址
+    this.updateFullAddress();
+  },
+
+  // 使用腾讯地图逆地址解析API获取结构化地址信息
+  reverseGeocoding: function(latitude, longitude, selectedLocation) {
+    // 从配置文件中获取腾讯地图开发者密钥
+    const config = require('../../utils/config');
+    const key = config.apiKeys.qqMapKey;
+    
+    // 显示加载中
+    wx.showLoading({
+      title: '解析地址信息...',
+    });
+    
+    // 调用微信请求API访问腾讯地图逆地址解析服务
+    wx.request({
+      url: 'https://apis.map.qq.com/ws/geocoder/v1/',
+      data: {
+        location: `${latitude},${longitude}`,
+        key: key,
+        get_poi: 0
+      },
+      success: (res) => {
+        console.log('逆地址解析成功:', res);
+        
+        if (res.data && res.data.status === 0 && res.data.result) {
+          const addressComponent = res.data.result.address_component;
+          const formattedAddress = res.data.result.formatted_addresses ? 
+                                  res.data.result.formatted_addresses.recommend : 
+                                  res.data.result.address;
+          
+          // 提取省市区信息
+          const province = addressComponent.province || '北京市';
+          const city = addressComponent.city || '北京市';
+          const district = addressComponent.district || '海淀区';
+          
+          // 提取详细地址 (街道+门牌号)
+          let detailAddress = '';
+          if (addressComponent.street && addressComponent.street_number) {
+            detailAddress = addressComponent.street + addressComponent.street_number;
+          } else if (addressComponent.street) {
+            detailAddress = addressComponent.street;
+          }
+          
+          // 如果有位置名称，添加到详细地址
+          if (selectedLocation.name && selectedLocation.name !== formattedAddress && !detailAddress.includes(selectedLocation.name)) {
+            detailAddress = (detailAddress ? detailAddress + ' ' : '') + selectedLocation.name;
+          }
+          
+          // 如果详细地址为空，使用格式化地址
+          if (!detailAddress) {
+            detailAddress = formattedAddress;
+          }
+          
+          console.log('解析后的地址信息:', { province, city, district, detailAddress });
+          
+          // 更新地区选择器和详细地址
+          this.setData({
+            region: [province, city, district],
+            addressDetail: detailAddress,
+            locationCoords: {
+              latitude: latitude,
+              longitude: longitude
+            }
+          });
+          
+          // 更新完整地址
+          this.updateFullAddress();
+          
+          wx.showToast({
+            title: '位置解析成功',
+            icon: 'success'
+          });
+        } else {
+          console.error('逆地址解析返回错误:', res.data);
+          
+          // 解析失败，使用选择的地址
+          this.fallbackToSelectedAddress(selectedLocation);
+        }
+      },
+      fail: (err) => {
+        console.error('逆地址解析请求失败:', err);
+        
+        // 请求失败，使用选择的地址
+        this.fallbackToSelectedAddress(selectedLocation);
+      },
+      complete: () => {
+        wx.hideLoading();
+      }
+    });
+  },
+  
+  // 当逆地址解析失败时，回退到使用选择的地址
+  fallbackToSelectedAddress: function(selectedLocation) {
+    // 尝试从地址字符串中提取一些基本信息
+    let province = '北京市';
+    let city = '北京市';
+    let district = '海淀区';
+    let detailAddress = selectedLocation.address || '';
+    
+    // 如果有位置名称，添加到详细地址
+    if (selectedLocation.name && !detailAddress.includes(selectedLocation.name)) {
+      detailAddress = (detailAddress ? detailAddress + ' ' : '') + selectedLocation.name;
+    }
+    
+    this.setData({
+      region: [province, city, district],
+      addressDetail: detailAddress,
+      locationCoords: {
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude
+      }
+    });
+    
+    // 更新完整地址
+    this.updateFullAddress();
+    
+    wx.showToast({
+      title: '地址解析有限，请检查',
+      icon: 'none'
     });
   },
 
@@ -830,7 +1114,8 @@ Page({
       endTime: this.data.endTime,
       address: this.data.address,
       remarks: this.data.remarks,
-      price: parseFloat(this.data.totalPrice) // 添加价格参数
+      price: parseFloat(this.data.totalPrice), // 添加价格参数
+      locationCoords: this.data.locationCoords
     };
     
     // 调用创建订单接口

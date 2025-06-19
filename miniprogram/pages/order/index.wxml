@@ -20,6 +20,8 @@
       data-role="sitter"
     >
       我的接单
+      <!-- 如果用户不是伴宠专员，显示一个小图标 -->
+      <text wx:if="{{!isSitter}}" class="sitter-warning">!</text>
     </view>
   </view>
   
@@ -85,32 +87,79 @@
           
           <!-- 待支付状态下的按钮组 -->
           <block wx:if="{{item.status === 'accepted'}}">
-            <!-- 查看详情按钮 -->
-            <button 
-              class="btn-default" 
-              data-id="{{item.orderId}}"
-              bindtap="viewOrderDetail"
-            >查看详情</button>
-            
-            <!-- 取消订单按钮 -->
-            <button 
-              class="btn-cancel" 
-              data-id="{{item.orderId}}"
-              bindtap="cancelOrder"
-            >取消订单</button>
-            
-            <!-- 去支付按钮 -->
-            <button 
-              class="btn-pay" 
-              data-id="{{item.orderId}}"
-              bindtap="payOrder"
-            >去支付</button>
+            <view class="button-row">
+              <!-- 查看详情按钮 -->
+              <button 
+                class="btn-row-item btn-default" 
+                data-id="{{item.orderId}}"
+                bindtap="viewOrderDetail"
+              >查看详情</button>
+              
+              <!-- 取消订单按钮 -->
+              <button 
+                class="btn-row-item btn-cancel" 
+                data-id="{{item.orderId}}"
+                bindtap="cancelOrder"
+              >取消订单</button>
+              
+              <!-- 去支付按钮 -->
+              <button 
+                class="btn-row-item btn-pay" 
+                data-id="{{item.orderId}}"
+                bindtap="payOrder"
+              >去支付</button>
+            </view>
+          </block>
+          
+          <!-- 帮溜员"待服务"状态下的按钮组 -->
+          <block wx:if="{{currentRole === 'sitter' && item.status === 'paid'}}">
+            <view class="button-row">
+              <!-- 取消订单按钮 -->
+              <button 
+                class="btn-row-item btn-cancel" 
+                data-id="{{item.orderId}}"
+                bindtap="cancelOrder"
+              >取消订单</button>
+              
+              <!-- 查看详情按钮 -->
+              <button 
+                class="btn-row-item btn-default" 
+                data-id="{{item.orderId}}"
+                bindtap="viewOrderDetail"
+              >查看详情</button>
+              
+              <!-- 开始服务按钮 -->
+              <button 
+                class="btn-row-item btn-primary" 
+                data-id="{{item.orderId}}"
+                bindtap="startService"
+              >开始服务</button>
+            </view>
+          </block>
+          
+          <!-- 帮溜员"服务中"状态下的按钮组 -->
+          <block wx:if="{{currentRole === 'sitter' && item.status === 'ongoing'}}">
+            <view class="button-row">
+              <!-- 查看详情按钮 -->
+              <button 
+                class="btn-row-item btn-default" 
+                data-id="{{item.orderId}}"
+                bindtap="viewOrderDetail"
+              >查看详情</button>
+              
+              <!-- 完成服务按钮 -->
+              <button 
+                class="btn-row-item btn-primary" 
+                data-id="{{item.orderId}}"
+                bindtap="completeService"
+              >完成服务</button>
+            </view>
           </block>
           
           <!-- 其他状态只显示查看详情按钮 -->
           <button 
             class="btn-default" 
-            wx:if="{{item.status !== 'pending' && item.status !== 'accepted'}}"
+            wx:if="{{item.status !== 'accepted' && !(currentRole === 'sitter' && (item.status === 'paid' || item.status === 'ongoing'))}}"
             data-id="{{item.orderId}}"
             bindtap="viewOrderDetail"
           >查看详情</button>

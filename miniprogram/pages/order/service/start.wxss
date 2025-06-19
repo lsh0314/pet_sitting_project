@@ -1,0 +1,306 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f8f8f8;
+  padding-bottom: 30rpx;
+}
+
+/* 导航栏 */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background-color: #ffffff;
+  position: relative;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.back-btn {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  font-size: 40rpx;
+  color: #333;
+}
+
+.page-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #333;
+  margin-right: 60rpx; /* 为了标题居中 */
+}
+
+/* 订单信息卡片 */
+.order-info-card {
+  margin: 30rpx;
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.order-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.order-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 16rpx;
+}
+
+.label {
+  width: 160rpx;
+  color: #666;
+  font-size: 28rpx;
+}
+
+.value {
+  flex: 1;
+  color: #333;
+  font-size: 28rpx;
+}
+
+/* 拍照区域 */
+.photo-area {
+  margin: 30rpx;
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.photo-tip {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.camera-placeholder {
+  width: 100%;
+  height: 400rpx;
+  background-color: #f0f0f0;
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx dashed #ddd;
+}
+
+.camera-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+  color: #999;
+}
+
+.camera-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.photo-preview {
+  width: 100%;
+  position: relative;
+}
+
+.preview-image {
+  width: 100%;
+  height: 400rpx;
+  border-radius: 12rpx;
+  display: block;
+}
+
+.photo-actions {
+  margin-top: 20rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-retake {
+  font-size: 28rpx;
+  padding: 10rpx 30rpx;
+  background-color: #f0f0f0;
+  color: #666;
+  border-radius: 30rpx;
+  border: none;
+}
+
+/* 位置验证区域 */
+.location-area {
+  margin: 30rpx;
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.location-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.location-status {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.status-icon {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background-color: #ff9800;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16rpx;
+  font-size: 28rpx;
+}
+
+.status-icon.verified {
+  background-color: #4caf50;
+}
+
+.status-text {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.location-details {
+  background-color: #f9f9f9;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin: 10rpx 0 20rpx;
+}
+
+.distance {
+  font-weight: 500;
+}
+
+.distance.far {
+  color: #f44336; /* 红色，表示距离太远 */
+}
+
+.btn-verify-location {
+  background-color: #2196f3;
+  color: white;
+  font-size: 28rpx;
+  padding: 16rpx 0;
+  border-radius: 40rpx;
+  border: none;
+  margin-top: 10rpx;
+}
+
+.btn-verify-location.checking {
+  background-color: #90caf9;
+}
+
+/* 底部操作区 */
+.footer-action {
+  padding: 30rpx;
+  margin-top: auto;
+}
+
+.btn-primary {
+  width: 100%;
+  height: 90rpx;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 45rpx;
+  font-size: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.btn-disabled {
+  background-color: #cccccc;
+  color: #ffffff;
+}
+
+/* 加载状态 */
+.loading-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.loading-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border: 6rpx solid #f3f3f3;
+  border-top: 6rpx solid #4caf50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 错误状态 */
+.error-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+}
+
+.error-container text {
+  margin: 30rpx 0;
+  color: #666;
+}
+
+.btn-retry {
+  padding: 16rpx 40rpx;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  border: none;
+}

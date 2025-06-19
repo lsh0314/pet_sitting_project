@@ -71,6 +71,44 @@
       </view>
     </view>
     
+    <!-- 服务报告和打卡照片 -->
+    <view class="card report-card" wx:if="{{orderInfo.reports && orderInfo.reports.length > 0}}">
+      <view class="card-title">服务报告</view>
+      <view class="report-list">
+        <view class="report-item" wx:for="{{orderInfo.reports}}" wx:key="id">
+          <view class="report-time">{{item.createdAt}}</view>
+          <view class="report-text" wx:if="{{item.text}}">{{item.text}}</view>
+          
+          <!-- 照片列表 -->
+          <view class="report-images" wx:if="{{item.imageUrls && item.imageUrls.length > 0}}">
+            <view class="image-grid">
+              <image 
+                class="report-image" 
+                wx:for="{{item.imageUrls}}" 
+                wx:for-item="imageUrl" 
+                wx:key="*this" 
+                src="{{imageUrl}}"
+                mode="aspectFill"
+                bindtap="previewImage"
+                data-urls="{{item.imageUrls}}"
+                data-current="{{imageUrl}}"
+              ></image>
+            </view>
+          </view>
+          
+          <!-- 视频 -->
+          <view class="report-video" wx:if="{{item.videoUrl}}">
+            <video 
+              class="report-video-player" 
+              src="{{item.videoUrl}}"
+              object-fit="cover"
+              show-center-play-btn="true"
+            ></video>
+          </view>
+        </view>
+      </view>
+    </view>
+    
     <!-- 订单金额 -->
     <view class="card price-card">
       <view class="card-title">订单金额</view>
@@ -90,26 +128,49 @@
     <view class="footer-action">
       <!-- 宠物主操作按钮 -->
       <block wx:if="{{userRole === 'pet_owner'}}">
+        <!-- 待支付状态 -->
         <button 
           class="btn-primary" 
           wx:if="{{orderInfo.status === 'accepted'}}" 
           bindtap="onTapPay">去支付</button>
-        <button 
-          class="btn-primary" 
-          wx:if="{{orderInfo.status === 'completed'}}" 
-          bindtap="onTapConfirm">确认完成</button>
+        
+        <!-- 已完成状态，显示确认完成和评价按钮 -->
+        <block wx:if="{{orderInfo.status === 'completed'}}">
+          <button 
+            class="btn-primary" 
+            bindtap="onTapConfirm">确认完成</button>
+          <button 
+            class="btn-secondary" 
+            bindtap="onTapReview">评价服务</button>
+        </block>
       </block>
       
       <!-- 帮溜员操作按钮 -->
       <block wx:if="{{userRole === 'sitter'}}">
+        <!-- 待服务状态 -->
         <button 
           class="btn-primary" 
           wx:if="{{orderInfo.status === 'paid'}}" 
           bindtap="onTapStart">开始服务</button>
-        <button 
-          class="btn-primary" 
-          wx:if="{{orderInfo.status === 'in_progress'}}" 
-          bindtap="onTapComplete">完成服务</button>
+        
+        <!-- 服务中状态 -->
+        <block wx:if="{{orderInfo.status === 'ongoing'}}">
+          <!-- 上传照片/视频按钮 -->
+          <button 
+            class="btn-secondary" 
+            bindtap="onTapAddReport">上传照片/视频</button>
+          
+          <!-- 完成服务按钮 -->
+          <button 
+            class="btn-primary" 
+            bindtap="onTapComplete">完成服务</button>
+          
+          <!-- 遛狗服务显示记录轨迹按钮 -->
+          <button 
+            class="btn-secondary" 
+            wx:if="{{orderInfo.serviceType === 'walk'}}" 
+            bindtap="onTapTrackLocation">{{isTracking ? '停止记录轨迹' : '开始记录轨迹'}}</button>
+        </block>
       </block>
     </view>
   </view>

@@ -299,3 +299,61 @@
   font-size: 28rpx;
   padding: 15rpx 40rpx;
 }
+
+/* 服务报告和打卡照片样式 */
+.report-card {
+  margin-top: 30rpx;
+}
+
+.report-list {
+  padding: 0;
+}
+
+.report-item {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #eee;
+}
+
+.report-item:last-child {
+  border-bottom: none;
+}
+
+.report-time {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+}
+
+.report-text {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 20rpx;
+  line-height: 1.5;
+}
+
+.report-images {
+  margin-top: 20rpx;
+}
+
+.image-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.report-image {
+  width: 220rpx;
+  height: 220rpx;
+  margin-right: 10rpx;
+  margin-bottom: 10rpx;
+  border-radius: 8rpx;
+}
+
+.report-video {
+  margin-top: 20rpx;
+}
+
+.report-video-player {
+  width: 100%;
+  height: 400rpx;
+  border-radius: 8rpx;
+}

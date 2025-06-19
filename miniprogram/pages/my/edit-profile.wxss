@@ -1,0 +1,135 @@
+.container {
+  min-height: 100vh;
+  background-color: #f8f8f8;
+  padding-bottom: 40rpx;
+}
+
+.header {
+  background-color: #fde74c;
+  padding: 30rpx;
+  position: relative;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
+
+.form-container {
+  background-color: #fff;
+  margin: 20rpx;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.form-item {
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.form-item:last-child {
+  border-bottom: none;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 20rpx;
+}
+
+.form-input {
+  height: 80rpx;
+  font-size: 30rpx;
+  color: #333;
+  padding: 0 10rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+/* 头像样式 */
+.avatar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar-container {
+  position: relative;
+  margin: 20rpx 0;
+}
+
+.avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  border: 4rpx solid #fde74c;
+}
+
+.avatar-edit-icon {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 50rpx;
+  height: 50rpx;
+  background-color: #fde74c;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+}
+
+.edit-icon {
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 单选按钮组样式 */
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  margin-right: 60rpx;
+  margin-bottom: 20rpx;
+}
+
+.radio-label text {
+  font-size: 28rpx;
+  color: #333;
+  margin-left: 8rpx;
+}
+
+/* 提交按钮样式 */
+.button-container {
+  padding: 40rpx 20rpx;
+}
+
+.submit-button {
+  background-color: #fde74c;
+  color: #333;
+  font-size: 32rpx;
+  font-weight: bold;
+  height: 90rpx;
+  line-height: 90rpx;
+  border-radius: 45rpx;
+  box-shadow: 0 4rpx 12rpx rgba(253, 231, 76, 0.4);
+  transition: all 0.3s;
+}
+
+.submit-button:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 6rpx rgba(253, 231, 76, 0.4);
+}
+
+.submit-button[disabled] {
+  background-color: #f5f5f5;
+  color: #bbb;
+  box-shadow: none;
+}
