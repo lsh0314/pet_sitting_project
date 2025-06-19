@@ -119,16 +119,14 @@
           <el-descriptions v-if="currentWithdrawal" class="margin-top" :column="1" border>
             <el-descriptions-item label="用户信息">
               <div class="user-detail-info">
-                <el-avatar :size="64" :src="currentWithdrawal.avatar_url" />
-                <div class="user-text-info">
+                <el-avatar :size="64" :src="currentWithdrawal.avatar_url" />                <div class="user-text-info">
                   <div class="nickname">{{ currentWithdrawal.nickname }}</div>
-                  <div class="wechat">微信: {{ currentWithdrawal.wechat_openid }}</div>
+                  <div class="user-id">用户ID: {{ currentWithdrawal.sitter_user_id }}</div>
                 </div>
               </div>
             </el-descriptions-item>
-            
-            <el-descriptions-item label="提现金额">
-              ¥{{ currentWithdrawal.amount.toFixed(2) }}
+              <el-descriptions-item label="提现金额">
+              ¥{{ Number(currentWithdrawal.amount).toFixed(2) }}
             </el-descriptions-item>
             
             <el-descriptions-item label="提现方式">
@@ -144,9 +142,7 @@
                 {{ formatStatus(currentWithdrawal.status) }}
               </el-tag>
             </el-descriptions-item>
-          </el-descriptions>
-
-          <div v-if="currentWithdrawal && currentWithdrawal.status === 'processing'" class="drawer-footer">
+          </el-descriptions>          <div v-if="currentWithdrawal && ['processing', 'pending'].includes(currentWithdrawal.status)" class="drawer-footer">
             <el-button type="success" @click="handleApprove(currentWithdrawal)">通过审核</el-button>
             <el-button type="danger" @click="handleReject(currentWithdrawal)">拒绝审核</el-button>
           </div>
@@ -322,7 +318,13 @@ const handleView = async (row) => {
     // TODO: 替换为实际API
     const response = await axios.get(`/api/withdrawals/admin/${row.id}`)
     if (response.data.success) {
-      currentWithdrawal.value = response.data.data
+      // 格式化数据
+      const data = response.data.data;
+      currentWithdrawal.value = {
+        ...data,
+        created_at: new Date(data.created_at).toISOString(),
+        amount: data.amount || '0.00'
+      }
       detailDrawer.value = true
     } else {
       ElMessage.error(response.data.message || '获取详情失败')
@@ -346,7 +348,7 @@ const handleApprove = async (withdrawal) => {
     
     submitting.value = true
     // TODO: 替换为实际API
-    const response = await axios.post(`/api/withdrawals/admin/${withdrawal.id}/review`, {
+    const response = await axios.post(`/api/withdrawals/admin/${withdrawal.id}/approve`, {
       action: 'approve'
     })
     
@@ -389,7 +391,7 @@ const submitReject = async () => {
     
     submitting.value = true
     // TODO: 替换为实际API
-    await axios.post(`/api/withdrawals/admin/${currentWithdrawal.value.id}/review`, {
+    await axios.post(`/api/withdrawals/admin/${currentWithdrawal.value.id}/reject`, {
       action: 'reject',
       reason: rejectForm.reason.trim()
     })
