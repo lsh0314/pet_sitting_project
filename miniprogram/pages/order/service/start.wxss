@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f8f8f8;
+  background-color: #f5f7fa;
   padding-bottom: 30rpx;
 }
 
@@ -10,7 +10,8 @@
 .nav-bar {
   display: flex;
   align-items: center;
-  padding: 20rpx 30rpx;
+  padding: 30rpx;
+  padding-top: 80rpx; /* 增加顶部安全区域，防止被手机刘海挡住 */
   background-color: #ffffff;
   position: relative;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
@@ -32,8 +33,8 @@
 .page-title {
   flex: 1;
   text-align: center;
-  font-size: 34rpx;
-  font-weight: 500;
+  font-size: 36rpx;
+  font-weight: 600;
   color: #333;
   margin-right: 60rpx; /* 为了标题居中 */
 }
@@ -42,16 +43,18 @@
 .order-info-card {
   margin: 30rpx;
   background-color: #ffffff;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   padding: 30rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
 }
 
 .order-title {
   font-size: 32rpx;
-  font-weight: 500;
+  font-weight: 600;
   color: #333;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  padding-bottom: 16rpx;
 }
 
 .order-detail {
@@ -61,7 +64,8 @@
 
 .info-item {
   display: flex;
-  margin-bottom: 16rpx;
+  margin-bottom: 20rpx;
+  align-items: center;
 }
 
 .label {
@@ -74,18 +78,19 @@
   flex: 1;
   color: #333;
   font-size: 28rpx;
+  font-weight: 500;
 }
 
 /* 拍照区域 */
 .photo-area {
   margin: 30rpx;
   background-color: #ffffff;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   padding: 30rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
 }
 
 .photo-tip {
@@ -93,29 +98,36 @@
   color: #666;
   margin-bottom: 30rpx;
   text-align: center;
+  line-height: 1.5;
 }
 
 .camera-placeholder {
   width: 100%;
   height: 400rpx;
-  background-color: #f0f0f0;
-  border-radius: 12rpx;
+  background-color: #f8f9fa;
+  border-radius: 16rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   border: 2rpx dashed #ddd;
+  transition: all 0.3s;
+}
+
+.camera-placeholder:active {
+  background-color: #f0f0f0;
 }
 
 .camera-icon {
-  font-size: 80rpx;
+  font-size: 90rpx;
   margin-bottom: 20rpx;
-  color: #999;
+  color: #8c9eff;
 }
 
 .camera-text {
-  font-size: 28rpx;
-  color: #999;
+  font-size: 30rpx;
+  color: #666;
+  font-weight: 500;
 }
 
 .photo-preview {
@@ -126,52 +138,56 @@
 .preview-image {
   width: 100%;
   height: 400rpx;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   display: block;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
 }
 
 .photo-actions {
-  margin-top: 20rpx;
+  margin-top: 24rpx;
   display: flex;
   justify-content: center;
 }
 
 .btn-retake {
   font-size: 28rpx;
-  padding: 10rpx 30rpx;
-  background-color: #f0f0f0;
-  color: #666;
+  padding: 12rpx 36rpx;
+  background-color: #fde74c;
+  color: #333;
   border-radius: 30rpx;
   border: none;
+  box-shadow: 0 2rpx 8rpx rgba(253, 231, 76, 0.2);
 }
 
 /* 位置验证区域 */
 .location-area {
   margin: 30rpx;
   background-color: #ffffff;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   padding: 30rpx;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
 }
 
 .location-title {
   font-size: 32rpx;
-  font-weight: 500;
+  font-weight: 600;
   color: #333;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  padding-bottom: 16rpx;
 }
 
 .location-status {
   display: flex;
   align-items: center;
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
 }
 
 .status-icon {
-  width: 48rpx;
-  height: 48rpx;
+  width: 52rpx;
+  height: 52rpx;
   border-radius: 50%;
   background-color: #ff9800;
   color: white;
@@ -180,6 +196,7 @@
   justify-content: center;
   margin-right: 16rpx;
   font-size: 28rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
 }
 
 .status-icon.verified {
@@ -189,17 +206,18 @@
 .status-text {
   font-size: 28rpx;
   color: #333;
+  font-weight: 500;
 }
 
 .location-details {
-  background-color: #f9f9f9;
-  border-radius: 12rpx;
-  padding: 20rpx;
-  margin: 10rpx 0 20rpx;
+  background-color: #f8f9fa;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin: 16rpx 0 24rpx;
 }
 
 .distance {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .distance.far {
@@ -207,17 +225,25 @@
 }
 
 .btn-verify-location {
-  background-color: #2196f3;
-  color: white;
-  font-size: 28rpx;
-  padding: 16rpx 0;
+  background-color: #fde74c;
+  color: #333;
+  font-size: 30rpx;
+  font-weight: 500;
+  padding: 18rpx 0;
   border-radius: 40rpx;
   border: none;
-  margin-top: 10rpx;
+  margin-top: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(253, 231, 76, 0.3);
+  transition: all 0.3s;
+}
+
+.btn-verify-location:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 6rpx rgba(253, 231, 76, 0.3);
 }
 
 .btn-verify-location.checking {
-  background-color: #90caf9;
+  background-color: #fdeea0;
 }
 
 /* 底部操作区 */
@@ -228,20 +254,29 @@
 
 .btn-primary {
   width: 100%;
-  height: 90rpx;
-  background-color: #4caf50;
-  color: white;
-  border-radius: 45rpx;
-  font-size: 32rpx;
+  height: 94rpx;
+  background: linear-gradient(135deg, #fde74c, #f9ca24);
+  color: #333;
+  border-radius: 47rpx;
+  font-size: 34rpx;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
+  box-shadow: 0 6rpx 16rpx rgba(253, 231, 76, 0.3);
+  transition: all 0.3s;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 3rpx 8rpx rgba(253, 231, 76, 0.3);
 }
 
 .btn-disabled {
-  background-color: #cccccc;
-  color: #ffffff;
+  background: linear-gradient(135deg, #e0e0e0, #cccccc);
+  color: #999;
+  box-shadow: none;
 }
 
 /* 加载状态 */
@@ -251,18 +286,19 @@
   left: 0;
   right: 0;
   bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.9);
+  z-index: 100;
 }
 
 .loading-icon {
   width: 80rpx;
   height: 80rpx;
   border: 6rpx solid #f3f3f3;
-  border-top: 6rpx solid #4caf50;
+  border-top: 6rpx solid #3498db;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 20rpx;
@@ -284,23 +320,26 @@
   left: 0;
   right: 0;
   bottom: 0;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #ffffff;
+  z-index: 100;
 }
 
 .error-container text {
   margin: 30rpx 0;
   color: #666;
+  font-size: 30rpx;
 }
 
 .btn-retry {
-  padding: 16rpx 40rpx;
-  background-color: #4caf50;
-  color: white;
-  border-radius: 40rpx;
+  background-color: #fde74c;
+  color: #333;
   font-size: 28rpx;
+  padding: 16rpx 40rpx;
+  border-radius: 40rpx;
   border: none;
+  box-shadow: 0 4rpx 12rpx rgba(253, 231, 76, 0.3);
 }

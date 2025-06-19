@@ -18,21 +18,21 @@
       <view class="info-item">
         <text class="label">服务类型:</text>
         <text class="value">
-          <text wx:if="{{orderInfo.serviceType === 'walk'}}">遛狗</text>
-          <text wx:elif="{{orderInfo.serviceType === 'feed'}}">喂食</text>
-          <text wx:else>寄养</text>
+          <text wx:if="{{orderInfo.serviceType === 'walk'}}">🐕 遛狗</text>
+          <text wx:elif="{{orderInfo.serviceType === 'feed'}}">🍽️ 喂食</text>
+          <text wx:else>🏠 寄养</text>
         </text>
       </view>
       <view class="info-item">
         <text class="label">服务地址:</text>
-        <text class="value">{{orderInfo.address}}</text>
+        <text class="value">📍 {{orderInfo.address}}</text>
       </view>
     </view>
   </view>
 
   <!-- 拍照区域 -->
   <view class="photo-area">
-    <view class="photo-tip">请拍摄一张到达现场的照片作为服务开始的凭证</view>
+    <view class="photo-tip">📸 请拍摄一张到达现场的照片作为服务开始的凭证</view>
     
     <!-- 未拍照状态 -->
     <view class="camera-placeholder" wx:if="{{!photoTaken}}" bindtap="takePhoto">
@@ -71,13 +71,13 @@
     <view class="location-details" wx:if="{{currentLocation}}">
       <view class="info-item">
         <text class="label">当前位置:</text>
-        <text class="value">{{currentLocation.address || '未知地点'}}</text>
+        <text class="value">📍 {{currentLocation.address || '未知地点'}}</text>
       </view>
       <view class="info-item" wx:if="{{distance !== null}}">
         <text class="label">与服务地址距离:</text>
         <text class="value distance {{distance > 1000 ? 'far' : ''}}">
-          <block wx:if="{{distance > 1000}}">{{distanceDisplay}} 公里</block>
-          <block wx:else>{{distance}} 米</block>
+          <block wx:if="{{distance > 1000}}">🚨 {{distanceDisplay}} 公里</block>
+          <block wx:else>✅ {{distance}} 米</block>
         </text>
       </view>
     </view>
@@ -88,9 +88,9 @@
       bindtap="verifyLocation"
       disabled="{{locationChecking}}"
     >
-      <block wx:if="{{locationChecking}}">验证中...</block>
-      <block wx:elif="{{locationVerified}}">重新验证位置</block>
-      <block wx:else>验证位置</block>
+      <block wx:if="{{locationChecking}}">⏳ 验证中...</block>
+      <block wx:elif="{{locationVerified}}">🔄 重新验证位置</block>
+      <block wx:else>🔍 验证位置</block>
     </button>
   </view>
 
@@ -101,8 +101,8 @@
       disabled="{{!photoTaken || !locationVerified || uploading}}"
       bindtap="startService"
     >
-      <block wx:if="{{uploading}}">处理中...</block>
-      <block wx:else>确认开始服务</block>
+      <block wx:if="{{uploading}}">⏳ 处理中...</block>
+      <block wx:else>✅ 确认开始服务</block>
     </button>
   </view>
 

@@ -6,15 +6,16 @@ Page({
     orders: [],
     loading: false,
     currentTab: 0, // 0: 全部, 1: 待支付(宠物主)/待服务(帮溜员), 2: 待服务/服务中, 3: 待确认/待评价, 4: 已完成
-    petOwnerTabs: ['全部', '待支付', '待服务', '待确认', '已完成'],
+    petOwnerTabs: ['全部', '待支付', '待服务', '服务中', '待确认', '已完成'],
     sitterTabs: ['全部', '待服务', '服务中', '已完成'],
-    tabs: ['全部', '待支付', '待服务', '待确认', '已完成'], // 默认使用宠物主标签
+    tabs: ['全部', '待支付', '待服务', '服务中', '待确认', '已完成'], // 默认使用宠物主标签
     petOwnerStatusMap: {
       0: '', // 全部
       1: 'accepted', // 待支付
       2: 'paid', // 待服务
-      3: 'pending_confirm', // 待确认
-      4: 'pending_review,confirmed' // 待评价和已完成
+      3: 'ongoing', // 服务中
+      4: 'pending_confirm', // 待确认
+      5: 'pending_review,confirmed' // 待评价和已完成
     },
     sitterStatusMap: {
       0: '', // 全部
@@ -26,8 +27,9 @@ Page({
       0: '', // 全部
       1: 'accepted', // 待支付
       2: 'paid', // 待服务
-      3: 'pending_confirm', // 待确认
-      4: 'pending_review,confirmed' // 待评价和已完成
+      3: 'ongoing', // 服务中
+      4: 'pending_confirm', // 待确认
+      5: 'pending_review,confirmed' // 待评价和已完成
     },
     countdownTimers: {}, // 存储订单倒计时定时器
     currentRole: 'pet_owner', // 默认角色为宠物主

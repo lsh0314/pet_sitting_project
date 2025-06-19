@@ -102,8 +102,16 @@
 }
 
 /* 标签页 */
+.tab-scroll-view {
+  background-color: #fff;
+  white-space: nowrap;
+  width: 100%;
+}
+
 .tab-container {
-  display: flex;
+  display: inline-flex;
+  width: fit-content;
+  min-width: 100%;
   background-color: #fff;
   border-bottom: 2rpx solid #eee;
 }
@@ -111,10 +119,12 @@
 .tab-item {
   flex: 1;
   text-align: center;
-  padding: 24rpx 0;
+  padding: 24rpx 30rpx;
   font-size: 28rpx;
   color: #666;
   position: relative;
+  display: inline-block;
+  min-width: 120rpx;
 }
 
 .tab-item.active {

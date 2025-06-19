@@ -26,17 +26,19 @@
   </view>
   
   <!-- 标签页 -->
-  <view class="tab-container">
-    <view 
-      class="tab-item {{currentTab === index ? 'active' : ''}}" 
-      wx:for="{{tabs}}" 
-      wx:key="index" 
-      bindtap="switchTab" 
-      data-tab="{{index}}"
-    >
-      {{item}}
+  <scroll-view class="tab-scroll-view" scroll-x="true" enhanced="true" show-scrollbar="false">
+    <view class="tab-container">
+      <view 
+        class="tab-item {{currentTab === index ? 'active' : ''}}" 
+        wx:for="{{tabs}}" 
+        wx:key="index" 
+        bindtap="switchTab" 
+        data-tab="{{index}}"
+      >
+        {{item}}
+      </view>
     </view>
-  </view>
+  </scroll-view>
   
   <!-- 订单列表 -->
   <view class="order-list" wx:if="{{orders.length > 0}}">

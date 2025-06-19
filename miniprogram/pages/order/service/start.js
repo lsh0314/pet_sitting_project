@@ -45,14 +45,14 @@ Page({
       .then(res => {
         console.log('获取订单详情成功:', res);
         this.setData({
-          orderInfo: res,
+          orderInfo: res.data,
           loading: false
         });
         
         // 如果订单有坐标信息，保存下来
-        if (res.locationCoords) {
+        if (res.data && res.data.locationCoords) {
           this.setData({
-            orderCoords: res.locationCoords
+            orderCoords: res.data.locationCoords
           });
         } else {
           // 如果订单没有坐标信息，暂时无法解析坐标
