@@ -214,216 +214,572 @@ class Order {
     }
   }
 
+
   /**
+   * 开始服务
+   * @param {number} orderId - 订单ID
+   * @param {Object} reportData - 服务报告数据
+   * @param {Object} locationData - 位置数据（可选）
+   * @returns {Promise<boolean>} - 是否成功
+   */
+  static async startService(orderId, reportData, locationData = null) {
+    const connection = await db.getConnection();
+    
+    try {
+      // 开始事务
+      await connection.beginTransaction();
+      
+      // 更新订单状态为服务中
+      const [updateResult] = await connection.execute(
+        'UPDATE orders SET status = ? WHERE id = ? AND status = ?',
+        ['ongoing', orderId, 'paid']
+      );
+      
+      if (updateResult.affectedRows === 0) {
+        await connection.rollback();
+        return false;
+      }
+      
+      // 创建服务开始报告
+      const [reportResult] = await connection.execute(
+        `INSERT INTO order_reports (
+          order_id, text, image_urls, video_url
+        ) VALUES (?, ?, ?, ?)`,
+        [
+          orderId,
+          reportData.text,
+          reportData.imageUrls,
+          reportData.videoUrl
+        ]
+      );
+      
+      // 如果有位置数据，保存位置信息
+      if (locationData) {
+        await connection.execute(
+          `INSERT INTO order_tracks (
+            order_id, latitude, longitude, address, distance, type
+          ) VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            orderId,
+            locationData.latitude,
+            locationData.longitude,
+            locationData.address || null,
+            locationData.distance || null,
+            locationData.type || 'start'
+          ]
+        );
+      }
+      
+      // 提交事务
+      await connection.commit();
+      
+      return true;
+    } catch (error) {
+      // 回滚事务
+      await connection.rollback();
+      console.error('开始服务失败:', error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * 完成服务
+   * @param {number} orderId - 订单ID
+   * @param {Object} reportData - 服务报告数据
+   * @param {Object} locationData - 位置数据（可选）
+   * @returns {Promise<boolean>} - 是否成功
+   */
+  static async completeService(orderId, reportData, locationData = null) {
+    const connection = await db.getConnection();
+    
+    try {
+      // 开始事务
+      await connection.beginTransaction();
+      
+      // 更新订单状态为已完成
+      const [updateResult] = await connection.execute(
+        'UPDATE orders SET status = ? WHERE id = ? AND status = ?',
+        ['completed', orderId, 'ongoing']
+      );
+      
+      if (updateResult.affectedRows === 0) {
+        await connection.rollback();
+        return false;
+      }
+      
+      // 创建服务完成报告
+      const [reportResult] = await connection.execute(
+        `INSERT INTO order_reports (
+          order_id, text, image_urls, video_url
+        ) VALUES (?, ?, ?, ?)`,
+        [
+          orderId,
+          reportData.text,
+          reportData.imageUrls,
+          reportData.videoUrl
+        ]
+      );
+      
+      // 如果有位置数据，保存位置信息
+      if (locationData) {
+        await connection.execute(
+          `INSERT INTO order_tracks (
+            order_id, latitude, longitude, address, distance, type
+          ) VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            orderId,
+            locationData.latitude,
+            locationData.longitude,
+            locationData.address || null,
+            locationData.distance || null,
+            locationData.type || 'end'
+          ]
+        );
+      }
+      
+      // 更新帮溜员完成服务次数
+      const [orderInfo] = await connection.execute(
+        'SELECT sitter_user_id FROM orders WHERE id = ?',
+        [orderId]
+      );
+      
+      if (orderInfo.length > 0) {
+        const sitterId = orderInfo[0].sitter_user_id;
+        await connection.execute(
+          `UPDATE sitter_profiles 
+           SET total_services_completed = total_services_completed + 1 
+           WHERE user_id = ?`,
+          [sitterId]
+        );
+      }
+      
+      // 提交事务
+      await connection.commit();
+      
+      return true;
+    } catch (error) {
+      // 回滚事务
+      await connection.rollback();
+      console.error('完成服务失败:', error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * 添加服务报告
+   * @param {Object} reportData - 服务报告数据
+   * @returns {Promise<number|boolean>} - 返回报告ID或false
+   */
+  static async addReport(reportData) {
+    try {
+      const [result] = await db.execute(
+        `INSERT INTO order_reports (
+          order_id, text, image_urls, video_url
+        ) VALUES (?, ?, ?, ?)`,
+        [
+          reportData.orderId,
+          reportData.text || '',
+          reportData.imageUrls,
+          reportData.videoUrl
+        ]
+      );
+      
+      return result.insertId;
+    } catch (error) {
+      console.error('添加服务报告失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 添加轨迹点
+   * @param {Object} trackData - 轨迹点数据
+   * @returns {Promise<number|boolean>} - 返回轨迹点ID或false
+   */
+  static async addTrackPoint(trackData) {
+    try {
+      const [result] = await db.execute(
+        `INSERT INTO order_tracks (
+          order_id, latitude, longitude, address, distance, type
+        ) VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          trackData.orderId,
+          trackData.latitude,
+          trackData.longitude,
+          trackData.address || null,
+          trackData.distance || null,
+          trackData.type || 'track'
+        ]
+      );
+      
+      return result.insertId;
+    } catch (error) {
+      console.error('添加轨迹点失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取订单轨迹点列表
+   * @param {number} orderId - 订单ID
+   * @returns {Promise<Array>} - 返回轨迹点列表
+   */
+  static async getTrackPoints(orderId) {
+    try {
+      const [rows] = await db.execute(
+        `SELECT 
+          id, latitude, longitude, address, distance, type,
+          created_at as timestamp
+        FROM order_tracks
+        WHERE order_id = ?
+        ORDER BY created_at ASC`,
+        [orderId]
+      );
+      
+      return rows;
+    } catch (error) {
+      console.error('获取轨迹点列表失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取订单服务报告列表
+   * @param {number} orderId - 订单ID
+   * @returns {Promise<Array>} - 返回服务报告列表
+   */
+  static async getReports(orderId) {
+    try {
+      console.log(`获取订单 ${orderId} 的服务报告`);
+      
+      const [rows] = await db.execute(
+        `SELECT 
+          id, text, image_urls as imageUrls, video_url as videoUrl,
+          created_at as timestamp
+        FROM order_reports
+        WHERE order_id = ?
+        ORDER BY created_at ASC`,
+        [orderId]
+      );
+      
+      console.log('数据库查询结果:', JSON.stringify(rows));
+      
+      // 解析图片URL数组
+      const reports = rows.map(report => {
+        console.log(`处理报告 ID ${report.id}, imageUrls 原始值:`, report.imageUrls);
+        
+        if (report.imageUrls) {
+          try {
+            // 检查是否已经是数组
+            if (Array.isArray(report.imageUrls)) {
+              console.log('imageUrls 已经是数组:', report.imageUrls);
+            } else {
+              // 尝试解析 JSON 字符串
+              report.imageUrls = JSON.parse(report.imageUrls);
+              console.log('解析后的 imageUrls:', report.imageUrls);
+            }
+          } catch (e) {
+            console.error('解析 imageUrls 失败:', e);
+            report.imageUrls = [];
+          }
+        } else {
+          console.log('imageUrls 为空，设置为空数组');
+          report.imageUrls = [];
+        }
+        
+        return report;
+      });
+      
+      console.log('处理后的服务报告:', JSON.stringify(reports));
+      return reports;
+    } catch (error) {
+      console.error('获取服务报告列表失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 确认服务完成
+   * @param {number} orderId - 订单ID
+   * @returns {Promise<boolean>} - 是否成功
+   */
+  static async confirmService(orderId) {
+    const connection = await db.getConnection();
+    
+    try {
+      // 开始事务
+      await connection.beginTransaction();
+      
+      // 更新订单状态为已确认
+      const [updateResult] = await connection.execute(
+        'UPDATE orders SET status = ? WHERE id = ? AND status = ?',
+        ['confirmed', orderId, 'completed']
+      );
+      
+      if (updateResult.affectedRows === 0) {
+        await connection.rollback();
+        return false;
+      }
+      
+      // 获取订单信息
+      const [orderInfo] = await connection.execute(
+        'SELECT price, commission_rate, sitter_user_id FROM orders WHERE id = ?',
+        [orderId]
+      );
+      
+      if (orderInfo.length === 0) {
+        await connection.rollback();
+        return false;
+      }
+      
+      const order = orderInfo[0];
+      
+      // 计算帮溜员实际收入（订单金额 - 平台佣金）
+      const commissionAmount = order.price * order.commission_rate;
+      const sitterIncome = order.price - commissionAmount;
+      
+      // TODO: 在未来的迭代中，这里可以添加将钱转入帮溜员钱包的逻辑
+      
+      // 提交事务
+      await connection.commit();
+      return true;
+    } catch (error) {
+      // 回滚事务
+      await connection.rollback();
+      console.error('确认服务完成失败:', error);
+      throw error;
+    } finally {
+      // 释放连接
+      connection.release();
+    }
+  }
+
+  /**
+   * 添加订单评价
+   * @param {Object} reviewData - 评价数据
+   * @returns {Promise<number|boolean>} - 返回评价ID或false
+   */
+  static async addReview(reviewData) {
+    try {
+      // 检查是否已经评价过
+      const [existingReview] = await db.execute(
+        `SELECT id FROM reviews 
+         WHERE order_id = ? AND reviewer_user_id = ?`,
+        [reviewData.orderId, reviewData.reviewerUserId]
+      );
+      
+      if (existingReview.length > 0) {
+        return false; // 已经评价过
+      }
+      
+      // 插入评价
+      const [result] = await db.execute(
+        `INSERT INTO reviews (
+          order_id, reviewer_user_id, reviewee_user_id, 
+          rating, comment, tags, is_anonymous
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          reviewData.orderId,
+          reviewData.reviewerUserId,
+          reviewData.revieweeUserId,
+          reviewData.rating,
+          reviewData.comment || null,
+          reviewData.tags ? JSON.stringify(reviewData.tags) : null,
+          reviewData.isAnonymous || false
+        ]
+      );
+      
+      return result.insertId;
+    } catch (error) {
+      console.error('添加评价失败:', error);
+      throw error;
+    }
+  }
+
+
+    /**
    * 获取所有订单列表（管理员用）
    * @param {Object} options - 查询选项
    * @returns {Promise<Object>} - 返回订单列表和分页信息
    */
-  static async findAll(options) {
-  static async findAll(options) {
-    try {
-      const {
-        page = 1,
-        limit = 10,
-        orderId,
-        username,
-        serviceType,
-        status,
-        startDate,
-        endDate
-      } = options;
-
-      let whereClause = 'WHERE 1=1';
-      const params = [];
-
-      // 构建WHERE子句
-      if (orderId) {
-        whereClause += ' AND o.id = ?';
-        params.push(orderId);
+    static async findAll(options) {
+      try {
+        const {
+          page = 1,
+          limit = 10,
+          orderId,
+          username,
+          serviceType,
+          status,
+          startDate,
+          endDate
+        } = options;
+  
+        let whereClause = 'WHERE 1=1';
+        const params = [];
+  
+        // 构建WHERE子句
+        if (orderId) {
+          whereClause += ' AND o.id = ?';
+          params.push(orderId);
+        }
+        
+        if (username) {
+          whereClause += ' AND (owner.nickname LIKE ? OR sitter.nickname LIKE ?)';
+  
+          params.push(`%${username}%`, `%${username}%`);
+        }
+        
+        if (serviceType) {
+          whereClause += ' AND o.service_type = ?';
+          params.push(serviceType);
+        }
+        
+        if (status) {
+          whereClause += ' AND o.status = ?';
+          params.push(status);
+        }
+        
+        if (startDate) {
+          whereClause += ' AND DATE(o.created_at) >= ?';
+          params.push(startDate);
+        }
+        
+        if (endDate) {
+          whereClause += ' AND DATE(o.created_at) <= ?';
+          params.push(endDate);
+        }
+  
+        // 统计总数
+        const [countRows] = await db.execute(
+          `SELECT COUNT(*) as total
+           FROM orders o
+           LEFT JOIN users owner ON o.owner_user_id = owner.id
+           LEFT JOIN users sitter ON o.sitter_user_id = sitter.id
+           ${whereClause}`,
+          params
+        );
+  
+        // 查询订单列表
+        const [rows] = await db.execute(
+          `SELECT 
+            o.*,
+            owner.nickname as owner_nickname,
+            owner.avatar_url as owner_avatar,
+            sitter.nickname as sitter_nickname,
+            sitter.avatar_url as sitter_avatar,
+            p.name as pet_name,
+            p.photo_url as pet_photo
+           FROM orders o
+           LEFT JOIN users owner ON o.owner_user_id = owner.id
+           LEFT JOIN users sitter ON o.sitter_user_id = sitter.id
+           LEFT JOIN pets p ON o.pet_id = p.id
+           ${whereClause}
+           ORDER BY o.created_at DESC
+           LIMIT ? OFFSET ?`,
+          [...params, parseInt(limit), parseInt((page - 1) * limit)]
+        );
+  
+        return {
+          orders: rows.map(row => ({
+            ...row,
+            price: parseFloat(row.price)
+          })),
+          total: countRows[0].total
+        };
+      } catch (error) {
+        console.error('获取订单列表失败:', error);
+        throw error;
       }
-      
-      if (username) {
-        whereClause += ' AND (owner.nickname LIKE ? OR sitter.nickname LIKE ?)';
-
-        params.push(`%${username}%`, `%${username}%`);
-      }
-      
-      if (serviceType) {
-        whereClause += ' AND o.service_type = ?';
-        params.push(serviceType);
-      }
-      const {
-        page = 1,
-        limit = 10,
-        orderId,
-        username,
-        serviceType,
-        status,
-        startDate,
-        endDate
-      } = options;
-
-      let whereClause = 'WHERE 1=1';
-      const params = [];
-
-      // 构建WHERE子句
-      if (orderId) {
-        whereClause += ' AND o.id = ?';
-        params.push(orderId);
-      }
-      
-      if (username) {
-        whereClause += ' AND (owner.nickname LIKE ? OR sitter.nickname LIKE ?)';
-
-        params.push(`%${username}%`, `%${username}%`);
-      }
-      
-      if (serviceType) {
-        whereClause += ' AND o.service_type = ?';
-        params.push(serviceType);
-      }
-      
-      if (status) {
-        whereClause += ' AND o.status = ?';
-        params.push(status);
-      }
-      
-      if (startDate) {
-        whereClause += ' AND DATE(o.created_at) >= ?';
-        params.push(startDate);
-      }
-      
-      if (endDate) {
-        whereClause += ' AND DATE(o.created_at) <= ?';
-        params.push(endDate);
-      }
-
-      // 统计总数
-      const [countRows] = await db.execute(
-        `SELECT COUNT(*) as total
-         FROM orders o
-         LEFT JOIN users owner ON o.owner_user_id = owner.id
-         LEFT JOIN users sitter ON o.sitter_user_id = sitter.id
-         ${whereClause}`,
-        params
-      );
-
-      // 查询订单列表
-      const [rows] = await db.execute(
-        `SELECT 
-          o.*,
-          owner.nickname as owner_nickname,
-          owner.avatar_url as owner_avatar,
-          sitter.nickname as sitter_nickname,
-          sitter.avatar_url as sitter_avatar,
-          p.name as pet_name,
-          p.photo_url as pet_photo
-         FROM orders o
-         LEFT JOIN users owner ON o.owner_user_id = owner.id
-         LEFT JOIN users sitter ON o.sitter_user_id = sitter.id
-         LEFT JOIN pets p ON o.pet_id = p.id
-         ${whereClause}
-         ORDER BY o.created_at DESC
-         LIMIT ? OFFSET ?`,
-        [...params, parseInt(limit), parseInt((page - 1) * limit)]
-      );
-
-      return {
-        orders: rows.map(row => ({
+    }
+  
+    /**
+     * 导出订单数据（管理员用）
+     * @param {Object} options - 查询选项
+     * @returns {Promise<Array>} - 返回所有符合条件的订单
+     */
+    static async exportData(options) {
+      try {
+        const {
+          orderId,
+          username,
+          serviceType,
+          status,
+          startDate,
+          endDate
+        } = options;
+  
+        let whereClause = 'WHERE 1=1';
+        const params = [];
+  
+        // 构建WHERE子句
+        if (orderId) {
+          whereClause += ' AND o.id = ?';
+          params.push(orderId);
+        }
+        
+        if (username) {
+          whereClause += ' AND (owner.nickname LIKE ? OR sitter.nickname LIKE ?)';
+  
+          params.push(`%${username}%`, `%${username}%`);
+        }
+        
+        if (serviceType) {
+          whereClause += ' AND o.service_type = ?';
+          params.push(serviceType);
+        }
+        
+        if (status) {
+          whereClause += ' AND o.status = ?';
+          params.push(status);
+        }
+        
+        if (startDate) {
+          whereClause += ' AND DATE(o.created_at) >= ?';
+          params.push(startDate);
+        }
+        
+        if (endDate) {
+          whereClause += ' AND DATE(o.created_at) <= ?';
+          params.push(endDate);
+        }
+  
+        // 查询订单数据
+        const [rows] = await db.execute(
+          `SELECT 
+            o.id,
+            owner.nickname as username,
+            p.name as pet_name,
+            o.service_type,
+            o.service_date,
+            o.start_time,
+            o.end_time,
+            o.address,
+            o.price,
+            o.status,
+            o.created_at
+           FROM orders o
+           LEFT JOIN users owner ON o.owner_user_id = owner.id
+           LEFT JOIN pets p ON o.pet_id = p.id
+           ${whereClause}
+           ORDER BY o.created_at DESC`,
+          params
+        );
+  
+        return rows.map(row => ({
           ...row,
           price: parseFloat(row.price)
-        })),
-        total: countRows[0].total
-      };
-    } catch (error) {
-      console.error('获取订单列表失败:', error);
-      throw error;
+        }));
+      } catch (error) {
+        console.error('导出订单数据失败:', error);
+        throw error;
+      }
     }
-  }
-
-  /**
-   * 导出订单数据（管理员用）
-   * @param {Object} options - 查询选项
-   * @returns {Promise<Array>} - 返回所有符合条件的订单
-   */
-  static async exportData(options) {
-    try {
-      const {
-        orderId,
-        username,
-        serviceType,
-        status,
-        startDate,
-        endDate
-      } = options;
-
-      let whereClause = 'WHERE 1=1';
-      const params = [];
-
-      // 构建WHERE子句
-      if (orderId) {
-        whereClause += ' AND o.id = ?';
-        params.push(orderId);
-      }
-      
-      if (username) {
-        whereClause += ' AND (owner.nickname LIKE ? OR sitter.nickname LIKE ?)';
-
-        params.push(`%${username}%`, `%${username}%`);
-      }
-      
-      if (serviceType) {
-        whereClause += ' AND o.service_type = ?';
-        params.push(serviceType);
-      }
-      
-      if (status) {
-        whereClause += ' AND o.status = ?';
-        params.push(status);
-      }
-      
-      if (startDate) {
-        whereClause += ' AND DATE(o.created_at) >= ?';
-        params.push(startDate);
-      }
-      
-      if (endDate) {
-        whereClause += ' AND DATE(o.created_at) <= ?';
-        params.push(endDate);
-      }
-
-      // 查询订单数据
-      const [rows] = await db.execute(
-        `SELECT 
-          o.id,
-          owner.nickname as username,
-          p.name as pet_name,
-          o.service_type,
-          o.service_date,
-          o.start_time,
-          o.end_time,
-          o.address,
-          o.price,
-          o.status,
-          o.created_at
-         FROM orders o
-         LEFT JOIN users owner ON o.owner_user_id = owner.id
-         LEFT JOIN pets p ON o.pet_id = p.id
-         ${whereClause}
-         ORDER BY o.created_at DESC`,
-        params
-      );
-
-      return rows.map(row => ({
-        ...row,
-        price: parseFloat(row.price)
-      }));
-    } catch (error) {
-      console.error('导出订单数据失败:', error);
-      throw error;
-    }
-  }
-
+  
   /**
    * 更新订单状态
    * @param {number} orderId - 订单ID
@@ -566,5 +922,4 @@ class Order {
     }
   }
 }
-
-module.exports = Order;
+module.exports = Order; 
