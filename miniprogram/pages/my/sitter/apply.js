@@ -28,14 +28,57 @@ Page({
       { name: '其他证书', value: 'other_cert' }
     ],
     // 证书类型索引
-    certificateTypeIndex: 0
+    certificateTypeIndex: 0,
+    // 上次申请状态
+    lastApplication: null,
+    // 是否显示上次申请结果
+    showLastResult: false
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    // 页面加载时执行
+    // 获取用户最新的认证申请记录
+    this.fetchLastVerification();
+  },
+
+  /**
+   * 获取用户最新的认证申请记录
+   */
+  fetchLastVerification: function() {
+    api.get('/api/verification/status')
+      .then(res => {
+        console.log('获取认证状态成功:', res);
+        if (res.data && res.data.id) {
+          // 格式化日期
+          if (res.data.updated_at) {
+            res.data.updated_at = this.formatDate(new Date(res.data.updated_at));
+          }
+          
+          // 设置上次申请状态
+          this.setData({
+            lastApplication: res.data,
+            showLastResult: true
+          });
+        }
+      })
+      .catch(err => {
+        console.error('获取认证状态失败:', err);
+      });
+  },
+
+  /**
+   * 格式化日期为 YYYY-MM-DD HH:MM 格式
+   */
+  formatDate: function(date) {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
   },
 
   /**

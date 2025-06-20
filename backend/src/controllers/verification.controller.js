@@ -103,6 +103,47 @@ const submitVerification = async (req, res) => {
 };
 
 /**
+ * 获取当前用户的认证状态
+ */
+const getUserVerificationStatus = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // 查询用户是否有已通过的认证
+    const verification = await Verification.findPendingOrApprovedByUserId(userId);
+    
+    if (!verification) {
+      return res.json({
+        success: true,
+        data: {
+          status: 'none',
+          message: '未提交认证申请'
+        }
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: {
+        id: verification.id,
+        type: verification.type,
+        status: verification.status,
+        created_at: verification.created_at,
+        updated_at: verification.updated_at,
+        admin_comment: verification.admin_comment || ''
+      }
+    });
+    
+  } catch (error) {
+    console.error('获取用户认证状态失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取用户认证状态失败: ' + error.message
+    });
+  }
+};
+
+/**
  * 获取认证列表
  */
 const getVerifications = async (req, res) => {
@@ -232,17 +273,18 @@ const reviewVerification = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('审核认证失败:', error);
+    console.error('审核认证申请失败:', error);
     res.status(500).json({
       success: false,
-      message: '审核认证失败: ' + error.message
+      message: '审核认证申请失败: ' + error.message
     });
   }
 };
 
 module.exports = {
+  submitVerification,
+  getUserVerificationStatus,
   getVerifications,
   getVerificationDetail,
-  reviewVerification,
-  submitVerification
+  reviewVerification
 };

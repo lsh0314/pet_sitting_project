@@ -7,6 +7,9 @@ const adminMiddleware = require('../middlewares/admin.middleware');
 // 用户提交认证申请
 router.post('/apply', authMiddleware, verificationController.submitVerification);
 
+// 获取当前用户的认证状态
+router.get('/status', authMiddleware, verificationController.getUserVerificationStatus);
+
 // 获取认证列表
 router.get('/admin/list', authMiddleware, adminMiddleware, verificationController.getVerifications);
 

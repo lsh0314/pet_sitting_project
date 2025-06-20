@@ -4,6 +4,22 @@
     <view class="subtitle">提交您的实名认证和专业资质，通过审核后即可成为伴宠专员</view>
   </view>
 
+  <!-- 上次申请审核结果 -->
+  <view class="last-result-container" wx:if="{{showLastResult}}">
+    <view class="last-result-title">上次申请审核结果</view>
+    <view class="last-result-content">
+      <view class="last-result-status {{lastApplication.status}}">
+        <text wx:if="{{lastApplication.status === 'pending'}}">待审核</text>
+        <text wx:elif="{{lastApplication.status === 'approved'}}">已通过</text>
+        <text wx:elif="{{lastApplication.status === 'rejected'}}">被驳回</text>
+      </view>
+      <view class="last-result-time">更新时间：{{lastApplication.updated_at}}</view>
+      <view class="last-result-reason" wx:if="{{lastApplication.status === 'rejected' && lastApplication.admin_comment}}">
+        驳回原因：{{lastApplication.admin_comment}}
+      </view>
+    </view>
+  </view>
+
   <view class="form-container">
     <!-- 实名认证部分 -->
     <view class="form-section">

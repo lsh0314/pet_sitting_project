@@ -1,5 +1,6 @@
 // pages/my/index.js
 const app = getApp();
+const api = require('../../utils/api');
 
 Page({
   data: {
@@ -79,6 +80,27 @@ Page({
     });
   },
 
+  // 检查用户认证状态
+  checkVerificationStatus: function() {
+    return new Promise((resolve, reject) => {
+      // 调用API获取用户认证状态
+      api.get('/api/verification/status')
+        .then(res => {
+          console.log('获取认证状态成功:', res);
+          // 如果有认证记录且类型为certificate且状态为approved，则允许访问
+          if (res.data && res.data.type === 'certificate' && res.data.status === 'approved') {
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        })
+        .catch(err => {
+          console.error('获取认证状态失败:', err);
+          resolve(false);
+        });
+    });
+  },
+
   // 跳转到登录页
   navigateToLogin: function() {
     wx.navigateTo({
@@ -130,8 +152,29 @@ Page({
       return;
     }
     
-    wx.navigateTo({
-      url: '/pages/my/sitter/profile'
+    // 检查用户认证状态
+    this.checkVerificationStatus().then(isApproved => {
+      if (isApproved) {
+        // 认证通过，允许访问帮溜主页
+        wx.navigateTo({
+          url: '/pages/my/sitter/profile'
+        });
+      } else {
+        // 认证未通过，弹窗提示
+        wx.showModal({
+          title: '提示',
+          content: '您还不是伴宠专员，是否申请？',
+          success: (res) => {
+            if (res.confirm) {
+              // 确定，跳转到申请页面
+              wx.navigateTo({
+                url: '/pages/my/sitter/apply'
+              });
+            }
+            // 取消则不做任何操作，弹窗关闭
+          }
+        });
+      }
     });
   },
 

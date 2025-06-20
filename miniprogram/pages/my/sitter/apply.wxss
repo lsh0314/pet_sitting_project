@@ -212,3 +212,57 @@
   margin-bottom: 10rpx;
   line-height: 1.5;
 }
+
+/* 上次申请审核结果样式 */
+.last-result-container {
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  margin: 0 20rpx 30rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.last-result-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.last-result-content {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.last-result-status {
+  font-size: 30rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.last-result-status.pending {
+  color: #ff9800;
+}
+
+.last-result-status.approved {
+  color: #4caf50;
+}
+
+.last-result-status.rejected {
+  color: #f44336;
+}
+
+.last-result-time {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 10rpx;
+}
+
+.last-result-reason {
+  background-color: #fff3f3;
+  border-left: 4rpx solid #f44336;
+  padding: 16rpx;
+  margin-top: 10rpx;
+  border-radius: 4rpx;
+  color: #555;
+}

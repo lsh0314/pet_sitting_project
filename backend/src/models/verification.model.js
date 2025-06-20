@@ -219,8 +219,8 @@ class Verification {
     try {
       const [rows] = await pool.execute(
         `SELECT * FROM verifications 
-         WHERE user_id = ? AND status IN ('pending', 'approved')
-         ORDER BY created_at DESC LIMIT 1`,
+         WHERE user_id = ?
+         ORDER BY updated_at DESC LIMIT 1`,
         [userId]
       );
       
