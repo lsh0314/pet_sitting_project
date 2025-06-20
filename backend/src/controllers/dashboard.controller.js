@@ -29,12 +29,10 @@ class DashboardController {
       res.json({
         success: true,
         data: {
-          data: {
             totalUsers,
             totalOrders,
             totalSitters,
             totalRevenue
-          }
         }
       })
     } catch (error) {

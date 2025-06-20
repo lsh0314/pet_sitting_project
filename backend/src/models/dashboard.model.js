@@ -71,6 +71,7 @@ class DashboardModel {
    */
   static async getRecentOrders(limit = 10) {
     try {
+      const numericLimit = Number(limit);
       const [rows] = await db.execute(
         `SELECT 
           o.id, o.status, o.service_type as serviceType,
@@ -81,8 +82,7 @@ class DashboardModel {
         FROM orders o
         JOIN users u ON o.owner_user_id = u.id
         ORDER BY o.created_at DESC
-        LIMIT ?`,
-        [limit]
+        LIMIT ${numericLimit}`
       );
       return rows;
     } catch (error) {

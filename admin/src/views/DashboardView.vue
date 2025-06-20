@@ -120,9 +120,9 @@
             </template>
           </el-table-column>
           <el-table-column prop="amount" label="金额">
-            <template #default="scope">
-              ¥{{ scope.row.amount.toFixed(2) }}
-            </template>
+<template #default="scope">
+  ¥{{ (scope.row.amount || 0).toFixed(2) }}
+</template>
           </el-table-column>
           <el-table-column prop="status" label="状态">
             <template #default="scope">
@@ -151,8 +151,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted, watch, nextTick } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import * as echarts from 'echarts'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
@@ -164,6 +164,7 @@ import {
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const route = useRoute()
 
 // 数据
 const statistics = reactive({
@@ -393,17 +394,35 @@ const navigateToOrders = () => {
 }
 
 const viewOrderDetail = (orderId) => {
-  router.push({ name: 'orders', query: { id: orderId } })
+  router.push({ 
+    name: 'order-detail',
+    params: { id: orderId }
+  })
 }
 
+
 // 生命周期钩子
-onMounted(() => {
+const loadAllData = () => {
   initCharts()
   loadStatistics()
   loadRecentOrders()
   loadOrderChart()
   loadServiceChart()
+}
+
+onMounted(() => {
+  loadAllData()
 })
+
+// 监听路由变化
+watch(
+  () => route.path,
+  (newPath, oldPath) => {
+    if (newPath === '/' && newPath !== oldPath) {
+      loadAllData()
+    }
+  }
+)
 </script>
 
 <style scoped lang="scss">

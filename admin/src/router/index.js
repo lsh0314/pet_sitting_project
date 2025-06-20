@@ -5,18 +5,18 @@ import { useAuthStore } from '../stores/auth'
 import AdminLayout from '../layouts/AdminLayout.vue'
 
 // 路由懒加载
-const LoginView = () => import('../views/LoginView.vue')
-const DashboardView = () => import('../views/DashboardView.vue')
+const LoginView = () => import('../views/LoginView.vue').catch(() => import('../views/NotFoundView.vue'))
+const DashboardView = () => import('../views/DashboardView.vue').catch(() => import('../views/NotFoundView.vue'))
 
-const OrdersView = () => import('../views/OrdersView.vue')
-const OrderDetailView = () => import('../views/OrderDetailView.vue')
-const UsersView = () => import('../views/UsersView.vue')
-const VerificationsView = () => import('../views/VerificationsView.vue')
-const WithdrawalsView = () => import('../views/WithdrawalsView.vue')
-const ComplaintsView = () => import('../views/ComplaintsView.vue')
-const ComplaintDetailView = () => import('../views/ComplaintDetailView.vue')
-const ReviewsView = () => import('../views/ReviewsView.vue')
-const ConfigView = () => import('../views/ConfigView.vue')
+const OrdersView = () => import('../views/OrdersView.vue').catch(() => import('../views/NotFoundView.vue'))
+const OrderDetailView = () => import('../views/OrderDetailView.vue').catch(() => import('../views/NotFoundView.vue'))
+const UsersView = () => import('../views/UsersView.vue').catch(() => import('../views/NotFoundView.vue'))
+const VerificationsView = () => import('../views/VerificationsView.vue').catch(() => import('../views/NotFoundView.vue'))
+const WithdrawalsView = () => import('../views/WithdrawalsView.vue').catch(() => import('../views/NotFoundView.vue'))
+const ComplaintsView = () => import('../views/ComplaintsView.vue').catch(() => import('../views/NotFoundView.vue'))
+const ComplaintDetailView = () => import('../views/ComplaintDetailView.vue').catch(() => import('../views/NotFoundView.vue'))
+const ReviewsView = () => import('../views/ReviewsView.vue').catch(() => import('../views/NotFoundView.vue'))
+const ConfigView = () => import('../views/ConfigView.vue').catch(() => import('../views/NotFoundView.vue'))
 const NotFoundView = () => import('../views/NotFoundView.vue')
 
 const router = createRouter({
@@ -124,4 +124,4 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-export default router 
+export default router
