@@ -142,9 +142,8 @@ Page({
       return;
     }
     
-    wx.showToast({
-      title: '申请功能开发中',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/my/sitter/apply'
     });
   },
 

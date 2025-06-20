@@ -1,0 +1,145 @@
+<view class="container">
+  <view class="header">
+    <view class="title">申请成为伴宠专员</view>
+    <view class="subtitle">提交您的实名认证和专业资质，通过审核后即可成为伴宠专员</view>
+  </view>
+
+  <view class="form-container">
+    <!-- 实名认证部分 -->
+    <view class="form-section">
+      <view class="section-title">实名认证</view>
+      
+      <!-- 姓名 -->
+      <view class="form-item">
+        <view class="form-label">真实姓名</view>
+        <input 
+          class="form-input" 
+          placeholder="请输入您的真实姓名" 
+          value="{{formData.name}}" 
+          bindinput="onInputChange" 
+          data-field="name"
+        />
+      </view>
+      
+      <!-- 身份证号 -->
+      <view class="form-item">
+        <view class="form-label">身份证号码</view>
+        <input 
+          class="form-input" 
+          placeholder="请输入您的身份证号码" 
+          value="{{formData.idCardNumber}}" 
+          bindinput="onInputChange" 
+          data-field="idCardNumber"
+          type="idcard"
+        />
+      </view>
+      
+      <!-- 身份证照片 -->
+      <view class="form-item">
+        <view class="form-label">身份证正面照片</view>
+        <view class="upload-container">
+          <view class="upload-box" bindtap="uploadIdCardFront" wx:if="{{!idCardFrontUrl}}">
+            <view class="upload-icon">+</view>
+            <view class="upload-text">上传照片</view>
+          </view>
+          <view class="image-preview" wx:else>
+            <image 
+              class="preview-image" 
+              src="{{idCardFrontUrl}}" 
+              mode="aspectFill" 
+              bindtap="previewImage" 
+              data-url="{{idCardFrontUrl}}"
+            />
+            <view class="delete-icon" catchtap="deleteImage" data-type="idCardFront">×</view>
+          </view>
+        </view>
+      </view>
+      
+      <view class="form-item">
+        <view class="form-label">身份证背面照片</view>
+        <view class="upload-container">
+          <view class="upload-box" bindtap="uploadIdCardBack" wx:if="{{!idCardBackUrl}}">
+            <view class="upload-icon">+</view>
+            <view class="upload-text">上传照片</view>
+          </view>
+          <view class="image-preview" wx:else>
+            <image 
+              class="preview-image" 
+              src="{{idCardBackUrl}}" 
+              mode="aspectFill" 
+              bindtap="previewImage" 
+              data-url="{{idCardBackUrl}}"
+            />
+            <view class="delete-icon" catchtap="deleteImage" data-type="idCardBack">×</view>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 专业资质部分 -->
+    <view class="form-section">
+      <view class="section-title">专业资质 <text class="optional-tag">(可选)</text></view>
+      
+      <!-- 证书类型 -->
+      <view class="form-item">
+        <view class="form-label">证书类型</view>
+        <picker 
+          mode="selector" 
+          range="{{certificateTypes}}" 
+          range-key="name" 
+          value="{{certificateTypeIndex}}" 
+          bindchange="onCertificateTypeChange"
+        >
+          <view class="picker-view">
+            <text wx:if="{{formData.certificateType}}">
+              {{certificateTypes[certificateTypeIndex].name}}
+            </text>
+            <text wx:else class="placeholder">请选择证书类型</text>
+            <view class="picker-arrow">></view>
+          </view>
+        </picker>
+      </view>
+      
+      <!-- 证书照片 -->
+      <view class="form-item">
+        <view class="form-label">证书照片</view>
+        <view class="upload-container">
+          <view class="upload-box" bindtap="uploadCertificate" wx:if="{{!certificateUrl}}">
+            <view class="upload-icon">+</view>
+            <view class="upload-text">上传照片</view>
+          </view>
+          <view class="image-preview" wx:else>
+            <image 
+              class="preview-image" 
+              src="{{certificateUrl}}" 
+              mode="aspectFill" 
+              bindtap="previewImage" 
+              data-url="{{certificateUrl}}"
+            />
+            <view class="delete-icon" catchtap="deleteImage" data-type="certificate">×</view>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 提交按钮 -->
+    <button 
+      class="submit-btn" 
+      bindtap="submitForm" 
+      loading="{{submitting}}" 
+      disabled="{{submitting || uploading}}"
+    >
+      提交申请
+    </button>
+    
+    <!-- 提示说明 -->
+    <view class="tips">
+      <view class="tips-title">申请说明：</view>
+      <view class="tips-item">1. 请确保上传的证件照片清晰可见，否则可能导致审核失败</view>
+      <view class="tips-item">2. 提交后平台将在1-3个工作日内完成审核</view>
+      <view class="tips-item">3. 身份证认证是必须的，专业资质证书可以增加您的专业性</view>
+      <view class="tips-item">4. 如果您提供了专业证书，审核通过后将直接成为伴宠专员</view>
+      <view class="tips-item">5. 如有疑问，请联系客服</view>
+    </view>
+  </view>
+</view> 

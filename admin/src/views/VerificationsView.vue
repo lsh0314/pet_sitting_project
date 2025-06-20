@@ -459,14 +459,52 @@ const parseMaterials = (materials) => {
   if (!materials) return []
   
   try {
-    const parsedMaterials = typeof materials === 'string' ? JSON.parse(materials) : materials
-    return parsedMaterials.map(material => {
-      return {
-        title: material.title || '认证材料',
-        type: material.type || 'text',
-        content: material.content || ''
+    // 解析JSON字符串
+    const parsedData = typeof materials === 'string' ? JSON.parse(materials) : materials
+    const result = []
+    
+    // 添加身份证信息
+    if (parsedData.name && parsedData.id_card_number) {
+      result.push({
+        title: '身份信息',
+        type: 'text',
+        content: `姓名: ${parsedData.name}, 身份证号: ${parsedData.id_card_number}`
+      })
+    }
+    
+    // 添加身份证照片
+    if (parsedData.id_card_front || parsedData.id_card_back) {
+      const images = []
+      if (parsedData.id_card_front) images.push(parsedData.id_card_front)
+      if (parsedData.id_card_back) images.push(parsedData.id_card_back)
+      
+      result.push({
+        title: '身份证照片',
+        type: 'image',
+        content: images
+      })
+    }
+    
+    // 添加证书信息
+    if (parsedData.certificate_type && parsedData.certificate_name) {
+      result.push({
+        title: '证书信息',
+        type: 'text',
+        content: `证书类型: ${parsedData.certificate_name} (${parsedData.certificate_type})`
+      })
+      
+      // 查找对应的证书照片
+      const certKey = parsedData.certificate_type
+      if (parsedData[certKey]) {
+        result.push({
+          title: '证书照片',
+          type: 'image',
+          content: [parsedData[certKey]]
+        })
       }
-    })
+    }
+    
+    return result
   } catch (error) {
     console.error('解析认证材料失败:', error)
     return []
