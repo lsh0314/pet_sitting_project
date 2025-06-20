@@ -1,1 +1,391 @@
- 
+/* 页面容器 */
+.page-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8f8f8;
+}
+
+/* 安全区域 */
+.safe-area-top {
+  height: 40rpx; /* 顶部安全区域高度 */
+  width: 100%;
+  background-color: #fff;
+}
+
+.safe-area-bottom {
+  height: 30rpx; /* 底部安全区域高度 */
+  width: 100%;
+}
+
+/* 整体容器 */
+.container {
+  padding: 0;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  padding-top: 80rpx; /* 增加顶部留白，避免刘海屏遮挡 */
+}
+
+/* 导航栏 */
+.nav-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 90rpx;
+  background-color: #fff;
+  padding: 0 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  margin-bottom: 20rpx;
+  border-radius: 0 0 30rpx 30rpx; /* 底部圆角 */
+}
+
+.back-btn {
+  padding: 15rpx;
+  margin-right: 20rpx;
+}
+
+.back-icon {
+  font-size: 36rpx;
+  color: #333;
+}
+
+.page-title {
+  font-size: 34rpx;
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+  text-align: center;
+  margin-right: 50rpx; /* 为了标题居中 */
+}
+
+/* 评价表单 */
+.review-form {
+  padding: 30rpx;
+}
+
+/* 帮溜员信息 */
+.sitter-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 0;
+  margin-bottom: 30rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 2rpx 15rpx rgba(0, 0, 0, 0.05);
+}
+
+.sitter-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  margin-bottom: 20rpx;
+  border: 4rpx solid #ffd54f; /* 黄色边框 */
+}
+
+.sitter-name {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.order-service {
+  font-size: 26rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+
+/* 各个评价区块通用样式 */
+.rating-section,
+.tags-section,
+.comment-section,
+.anonymous-section,
+.reviewer-info {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 15rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+}
+
+.section-title::before {
+  content: "";
+  display: inline-block;
+  width: 8rpx;
+  height: 30rpx;
+  background-color: #ffb700; /* 与按钮渐变色匹配 */
+  margin-right: 16rpx;
+  border-radius: 4rpx;
+}
+
+/* 星级评分 */
+.rating-stars {
+  display: flex;
+  justify-content: center;
+  padding: 20rpx 0;
+}
+
+.star {
+  font-size: 60rpx;
+  color: #ddd;
+  margin: 0 10rpx;
+  transition: transform 0.2s ease;
+}
+
+.star.active {
+  color: #ffb700; /* 更改为与按钮渐变色匹配的黄色 */
+}
+
+.star:active {
+  transform: scale(1.2);
+}
+
+/* 只读模式的星星不显示点击效果 */
+.star.readonly:active {
+  transform: none;
+}
+
+/* 评价标签 */
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 20rpx;
+}
+
+.tag {
+  padding: 15rpx 30rpx;
+  margin: 10rpx;
+  background-color: #f5f5f5;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  color: #666;
+  border: 1rpx solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tag.active {
+  background-color: #fff9e6 !important; /* 浅黄色背景，与按钮渐变色协调 */
+  color: #ffb700 !important; /* 深黄色文字，与按钮渐变色匹配 */
+  border: 1rpx solid #fde74c !important; /* 黄色边框，与按钮渐变色匹配 */
+}
+
+/* 只读模式的标签不显示点击效果 */
+.tag.readonly:active {
+  transform: none;
+}
+
+/* 暂无评价标签的样式 */
+.no-tags {
+  width: 100%;
+  padding: 20rpx 0;
+  text-align: center;
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 评价内容 */
+.comment-input {
+  width: 100%;
+  height: 200rpx;
+  padding: 20rpx;
+  box-sizing: border-box;
+  border: 1rpx solid #eee;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  background-color: #f9f9f9;
+}
+
+.comment-count {
+  text-align: right;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 10rpx;
+}
+
+/* 查看模式下的评价内容 */
+.comment-text {
+  padding: 20rpx;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.6;
+  background-color: #f9f9f9;
+  border-radius: 16rpx;
+  min-height: 100rpx;
+}
+
+/* 匿名评价 */
+.anonymous-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.anonymous-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 提交按钮 */
+.submit-btn {
+  margin-top: 40rpx;
+  margin-bottom: 30rpx;
+  background: linear-gradient(to right, #fde74c, #ffb700);
+  color: #333;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  padding: 20rpx 0;
+  font-weight: 500;
+  box-shadow: 0 4rpx 10rpx rgba(253, 231, 76, 0.3);
+}
+
+.submit-btn:active {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+.submit-btn[disabled] {
+  background-color: #ccc !important;
+  color: #fff !important;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300rpx;
+  margin-top: 100rpx;
+}
+
+.loading-icon {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #f3f3f3;
+  border-top: 4rpx solid #fde74c; /* 与按钮渐变色匹配 */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 评分文字描述 */
+.rating-text {
+  text-align: center;
+  margin-top: 10rpx;
+  font-size: 28rpx;
+  color: #ffb700; /* 更改为与按钮渐变色匹配的黄色 */
+  font-weight: 500;
+}
+
+/* 标签数量提示 */
+.tags-hint {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 10rpx;
+}
+
+/* 评价者信息 */
+.reviewer-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.reviewer-section {
+  margin-bottom: 20rpx;
+}
+
+.reviewer-section:last-child {
+  margin-bottom: 0;
+}
+
+.reviewer-text,
+.reviewer-name {
+  font-size: 28rpx;
+  color: #666;
+  padding: 0 10rpx;
+}
+
+/* 无评价状态 */
+.empty-review {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 0;
+  margin-top: 100rpx;
+}
+
+.empty-icon {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 30rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #999;
+}
+
+/* 提交成功动画 */
+.success-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  z-index: 1000;
+}
+
+.success-icon {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: linear-gradient(to right, #fde74c, #ffb700); /* 使用渐变色 */
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60rpx;
+  margin-bottom: 30rpx;
+  animation: pop 0.3s ease;
+}
+
+.success-text {
+  font-size: 32rpx;
+  color: #ffb700; /* 更改为与按钮渐变色匹配的黄色 */
+  font-weight: 500;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

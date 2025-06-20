@@ -86,17 +86,8 @@ Page({
         console.log('获取位置成功:', res);
         const { latitude, longitude } = res;
         
-        // 保存当前位置信息
-        this.setData({
-          currentLocation: {
-            latitude,
-            longitude,
-            address: '当前位置' // 简化处理，不再调用逆地址解析
-          }
-        });
-        
-        // 计算与服务地址的距离
-        this.calculateDistance(latitude, longitude);
+        // 使用腾讯地图SDK进行逆地址解析
+        this.reverseGeocoding(latitude, longitude);
       },
       fail: (err) => {
         console.error('获取位置失败:', err);
@@ -128,6 +119,79 @@ Page({
         this.setData({
           locationChecking: false
         });
+      }
+    });
+  },
+  
+  // 使用腾讯地图逆地址解析API获取结构化地址信息
+  reverseGeocoding: function(latitude, longitude) {
+    // 从配置文件中获取腾讯地图开发者密钥
+    const config = require('../../../utils/config');
+    const key = config.apiKeys.qqMapKey;
+    
+    // 调用微信请求API访问腾讯地图逆地址解析服务
+    wx.request({
+      url: 'https://apis.map.qq.com/ws/geocoder/v1/',
+      data: {
+        location: `${latitude},${longitude}`,
+        key: key,
+        get_poi: 0
+      },
+      success: (res) => {
+        console.log('逆地址解析成功:', res);
+        
+        if (res.data && res.data.status === 0 && res.data.result) {
+          const formattedAddress = res.data.result.formatted_addresses ? 
+                                  res.data.result.formatted_addresses.recommend : 
+                                  res.data.result.address;
+          
+          // 保存当前位置信息
+          this.setData({
+            currentLocation: {
+              latitude,
+              longitude,
+              address: formattedAddress
+            },
+            locationVerified: true,
+            locationMessage: '位置验证成功'
+          });
+          
+          // 计算与服务地址的距离
+          this.calculateDistance(latitude, longitude);
+        } else {
+          console.error('逆地址解析返回错误:', res.data);
+          
+          // 解析失败，使用基本位置信息
+          this.setData({
+            currentLocation: {
+              latitude,
+              longitude,
+              address: '当前位置'
+            },
+            locationVerified: true,
+            locationMessage: '位置验证成功'
+          });
+          
+          // 计算与服务地址的距离
+          this.calculateDistance(latitude, longitude);
+        }
+      },
+      fail: (err) => {
+        console.error('逆地址解析请求失败:', err);
+        
+        // 请求失败，使用基本位置信息
+        this.setData({
+          currentLocation: {
+            latitude,
+            longitude,
+            address: '当前位置'
+          },
+          locationVerified: true,
+          locationMessage: '位置验证成功'
+        });
+        
+        // 计算与服务地址的距离
+        this.calculateDistance(latitude, longitude);
       }
     });
   },

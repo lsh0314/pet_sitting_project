@@ -5,23 +5,25 @@ Page({
   data: {
     orders: [],
     loading: false,
-    currentTab: 0, // 0: 全部, 1: 待支付(宠物主)/待服务(帮溜员), 2: 待服务/服务中, 3: 待确认/待评价, 4: 已完成
-    petOwnerTabs: ['全部', '待支付', '待服务', '服务中', '待确认', '已完成'],
-    sitterTabs: ['全部', '待服务', '服务中', '已完成'],
-    tabs: ['全部', '待支付', '待服务', '服务中', '待确认', '已完成'], // 默认使用宠物主标签
+    currentTab: 0, // 0: 全部, 1: 待支付(宠物主)/待服务(帮溜员), 2: 待服务, 3: 服务中, 4: 待确认, 5: 待评价, 6: 已完成
+    petOwnerTabs: ['全部', '待支付', '待服务', '服务中', '待确认', '待评价', '已完成'],
+    sitterTabs: ['全部', '待服务', '服务中', '待确认', '已完成'],
+    tabs: ['全部', '待支付', '待服务', '服务中', '待确认', '待评价', '已完成'], // 默认使用宠物主标签
     petOwnerStatusMap: {
       0: '', // 全部
       1: 'accepted', // 待支付
       2: 'paid', // 待服务
       3: 'ongoing', // 服务中
       4: 'pending_confirm', // 待确认
-      5: 'pending_review,confirmed' // 待评价和已完成
+      5: 'pending_review', // 待评价
+      6: 'completed' // 已完成（移除confirmed，因为confirmed已不再使用）
     },
     sitterStatusMap: {
       0: '', // 全部
       1: 'paid', // 待服务
       2: 'ongoing', // 服务中
-      3: 'pending_confirm,pending_review,confirmed' // 待确认、待评价和已完成
+      3: 'pending_confirm', // 待确认
+      4: 'completed' // 已完成
     },
     statusMap: {
       0: '', // 全部
@@ -29,7 +31,8 @@ Page({
       2: 'paid', // 待服务
       3: 'ongoing', // 服务中
       4: 'pending_confirm', // 待确认
-      5: 'pending_review,confirmed' // 待评价和已完成
+      5: 'pending_review', // 待评价
+      6: 'completed' // 已完成（移除confirmed，因为confirmed已不再使用）
     },
     countdownTimers: {}, // 存储订单倒计时定时器
     currentRole: 'pet_owner', // 默认角色为宠物主
@@ -68,8 +71,17 @@ Page({
     // 检查用户是否是伴宠专员（每次页面显示时都检查）
     this.checkSitterStatus();
     
-    // 获取订单列表
-    this.getOrderList();
+    // 检查是否需要刷新订单列表
+    const app = getApp();
+    if (app.globalData && app.globalData.orderListNeedRefresh) {
+      console.log('检测到订单列表需要刷新');
+      app.globalData.orderListNeedRefresh = false;
+      // 获取订单列表
+      this.getOrderList();
+    } else {
+      // 获取订单列表
+      this.getOrderList();
+    }
   },
   
   onHide: function() {
@@ -310,6 +322,7 @@ Page({
               case 'ongoing': statusText = '服务中'; break;
               case 'pending_confirm': statusText = '待确认'; break;
               case 'pending_review': statusText = '待评价'; break;
+              case 'completed': statusText = '已完成'; break;
               case 'confirmed': statusText = '已完成'; break;
               default: statusText = '未知状态';
             }
@@ -594,32 +607,9 @@ Page({
       success: (res) => {
         if (res.confirm) {
           // 跳转到服务完成打卡页面
-          // 实际项目中应该有一个服务完成打卡页面
-          // 这里暂时直接调用API
-          wx.showLoading({
-            title: '处理中...',
-            mask: true
+          wx.navigateTo({
+            url: `/pages/order/service/complete?id=${orderId}`
           });
-          
-          // 调用完成服务API
-          api.post(`/api/order/${orderId}/complete`)
-            .then(() => {
-              wx.hideLoading();
-              wx.showToast({
-                title: '服务已完成',
-                icon: 'success'
-              });
-              // 刷新订单列表
-              this.getOrderList();
-            })
-            .catch(err => {
-              wx.hideLoading();
-              console.error('完成服务失败:', err);
-              wx.showToast({
-                title: '操作失败，请重试',
-                icon: 'none'
-              });
-            });
         }
       }
     });
@@ -678,6 +668,16 @@ Page({
     // 跳转到评价页面
     wx.navigateTo({
       url: `/pages/order/review?id=${orderId}`
+    });
+  },
+  
+  // 查看评价
+  viewReview: function(e) {
+    const orderId = e.currentTarget.dataset.id;
+    
+    // 跳转到查看评价页面
+    wx.navigateTo({
+      url: `/pages/order/review?id=${orderId}&mode=view`
     });
   }
 }) 

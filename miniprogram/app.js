@@ -73,6 +73,7 @@ App({
     // apiBaseUrl: 'https://api.petsitting.com', // 生产环境API地址
     isLoggedIn: false,
     userInfo: null,
-    selectedServiceType: null // 用户从首页选择的服务类型
+    selectedServiceType: null, // 用户从首页选择的服务类型
+    orderListNeedRefresh: false // 标记订单列表是否需要刷新
   }
 }) 

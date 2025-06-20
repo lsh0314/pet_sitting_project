@@ -151,19 +151,8 @@
       
       <!-- 帮溜员操作按钮 -->
       <block wx:if="{{userRole === 'sitter'}}">
-        <!-- 待服务状态 -->
-        <button 
-          class="btn-primary" 
-          wx:if="{{orderInfo.status === 'paid'}}" 
-          bindtap="onTapStart">开始服务</button>
-        
         <!-- 服务中状态 -->
         <block wx:if="{{orderInfo.status === 'ongoing'}}">
-          <!-- 完成服务按钮 -->
-          <button 
-            class="btn-primary center-btn" 
-            bindtap="onTapComplete">完成服务</button>
-          
           <!-- 遛狗服务显示记录轨迹按钮 -->
           <button 
             class="btn-secondary" 

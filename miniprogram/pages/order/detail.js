@@ -17,6 +17,7 @@ Page({
       'ongoing': '服务中',
       'pending_confirm': '待确认',
       'pending_review': '待评价',
+      'completed': '已完成',
       'confirmed': '已完成',
       'cancelled': '已取消',
       'rejected': '已拒绝'

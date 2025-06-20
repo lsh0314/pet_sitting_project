@@ -7,67 +7,102 @@
     <view class="page-title">服务完成打卡</view>
   </view>
 
-  <!-- 页面内容 -->
-  <view class="content" wx:if="{{!loading && orderInfo}}">
-    <view class="card">
-      <view class="card-title">服务信息</view>
+  <!-- 订单信息 -->
+  <view class="order-info-card" wx:if="{{!loading && orderInfo}}">
+    <view class="order-title">订单信息</view>
+    <view class="order-detail">
       <view class="info-item">
-        <view class="info-label">服务类型</view>
-        <view class="info-value">
-          <text wx:if="{{orderInfo.serviceType === 'walk'}}">遛狗</text>
-          <text wx:elif="{{orderInfo.serviceType === 'feed'}}">喂食</text>
-          <text wx:else>寄养</text>
-        </view>
+        <text class="label">宠物名称:</text>
+        <text class="value">{{orderInfo.pet.name}}</text>
       </view>
       <view class="info-item">
-        <view class="info-label">宠物名称</view>
-        <view class="info-value">{{orderInfo.pet.name}}</view>
+        <text class="label">服务类型:</text>
+        <text class="value">
+          <text wx:if="{{orderInfo.serviceType === 'walk'}}">🐕 遛狗</text>
+          <text wx:elif="{{orderInfo.serviceType === 'feed'}}">🍽️ 喂食</text>
+          <text wx:else>🏠 寄养</text>
+        </text>
       </view>
       <view class="info-item">
-        <view class="info-label">服务地址</view>
-        <view class="info-value">{{orderInfo.address}}</view>
+        <text class="label">服务地址:</text>
+        <text class="value">📍 {{orderInfo.address}}</text>
       </view>
     </view>
+  </view>
 
-    <!-- 位置验证 -->
-    <view class="card">
-      <view class="card-title">位置验证</view>
-      <view class="location-status {{locationVerified ? 'success' : ''}}">
-        <view class="status-text">{{locationMessage || '请验证您的位置'}}</view>
-        <view class="distance-text" wx:if="{{distance !== null}}">
-          距离服务地点: {{distance > 1000 ? distanceDisplay + '公里' : distance + '米'}}
-        </view>
-      </view>
-      <button class="btn-verify {{locationChecking ? 'loading' : ''}}" bindtap="verifyLocation" disabled="{{locationChecking}}">
-        {{locationVerified ? '重新验证位置' : '验证位置'}}
-      </button>
+  <!-- 拍照区域 -->
+  <view class="photo-area">
+    <view class="photo-tip">📸 请拍摄一张服务完成的照片作为服务结束的凭证</view>
+    
+    <!-- 未拍照状态 -->
+    <view class="camera-placeholder" wx:if="{{!photoTaken}}" bindtap="takePhoto">
+      <view class="camera-icon">📷</view>
+      <view class="camera-text">点击拍照</view>
     </view>
-
-    <!-- 拍照打卡 -->
-    <view class="card">
-      <view class="card-title">拍照打卡</view>
-      <view class="photo-area">
-        <block wx:if="{{!photoTaken}}">
-          <view class="photo-placeholder" bindtap="takePhoto">
-            <view class="placeholder-icon">+</view>
-            <view class="placeholder-text">点击拍照</view>
-          </view>
-        </block>
-        <block wx:else>
-          <image class="photo-preview" src="{{photoPath}}" mode="aspectFill"></image>
-          <view class="photo-actions">
-            <button class="btn-retake" bindtap="retakePhoto">重新拍照</button>
-          </view>
-        </block>
+    
+    <!-- 已拍照状态 -->
+    <view class="photo-preview" wx:if="{{photoTaken}}">
+      <image class="preview-image" src="{{photoPath}}" mode="aspectFill"></image>
+      <view class="photo-actions">
+        <button class="btn-retake" bindtap="retakePhoto">重新拍照</button>
       </view>
     </view>
+  </view>
 
-    <!-- 提交按钮 -->
+  <!-- 位置验证区域 -->
+  <view class="location-area">
+    <view class="location-title">位置验证</view>
+    
+    <!-- 位置状态 -->
+    <view class="location-status">
+      <view class="status-icon {{locationVerified ? 'verified' : ''}}">
+        <text wx:if="{{locationVerified}}">✓</text>
+        <text wx:elif="{{locationChecking}}">⟳</text>
+        <text wx:else>!</text>
+      </view>
+      <view class="status-text">
+        <text wx:if="{{locationVerified}}">位置已验证</text>
+        <text wx:elif="{{locationChecking}}">正在验证位置...</text>
+        <text wx:else>{{locationMessage || '请验证您的位置'}}</text>
+      </view>
+    </view>
+    
+    <!-- 位置详情 -->
+    <view class="location-details" wx:if="{{currentLocation}}">
+      <view class="info-item">
+        <text class="label">当前位置:</text>
+        <text class="value">📍 {{currentLocation.address || '未知地点'}}</text>
+      </view>
+      <view class="info-item" wx:if="{{distance !== null}}">
+        <text class="label">与服务地址距离:</text>
+        <text class="value distance {{distance > 1000 ? 'far' : ''}}">
+          <block wx:if="{{distance > 1000}}">🚨 {{distanceDisplay}} 公里</block>
+          <block wx:else>✅ {{distance}} 米</block>
+        </text>
+      </view>
+    </view>
+    
+    <!-- 位置验证按钮 -->
     <button 
-      class="btn-submit {{(photoTaken && locationVerified) ? '' : 'disabled'}}" 
+      class="btn-verify-location {{locationChecking ? 'checking' : ''}}" 
+      bindtap="verifyLocation"
+      disabled="{{locationChecking}}"
+    >
+      <block wx:if="{{locationChecking}}">⏳ 验证中...</block>
+      <block wx:elif="{{locationVerified}}">🔄 重新验证位置</block>
+      <block wx:else>🔍 验证位置</block>
+    </button>
+  </view>
+
+  <!-- 底部操作区 -->
+  <view class="footer-action">
+    <button 
+      class="btn-primary {{(!photoTaken || !locationVerified || uploading) ? 'btn-disabled' : ''}}" 
+      disabled="{{!photoTaken || !locationVerified || uploading}}"
       bindtap="completeService"
-      disabled="{{!photoTaken || !locationVerified || uploading}}">
-      {{uploading ? '提交中...' : '完成服务'}}
+    >
+      <block wx:if="{{uploading}}">⏳ 处理中...</block>
+      <block wx:else>✅ 确认完成服务</block>
     </button>
   </view>
 

@@ -1014,7 +1014,7 @@ class OrderController {
       }
       
       // 验证订单状态是否为已确认或已完成
-      const validStatuses = ['completed', 'confirmed'];
+      const validStatuses = ['completed', 'confirmed', 'pending_review'];
       if (!validStatuses.includes(order.status)) {
         return res.status(400).json({
           success: false,
@@ -1058,6 +1058,8 @@ class OrderController {
         // TODO: 更新帮溜员的平均评分（未来迭代）
       }
       
+      // 注意：订单状态更新已经在 Order.addReview 方法中处理
+      
       // 返回成功响应
       res.status(201).json({
         success: true,
@@ -1074,6 +1076,62 @@ class OrderController {
     }
   }
 
+  /**
+   * 获取订单评价
+   * @param {Object} req - Express请求对象
+   * @param {Object} res - Express响应对象
+   */
+  static async getOrderReview(req, res) {
+    try {
+      // 获取订单ID
+      const orderId = req.params.id;
+      
+      // 获取当前用户ID
+      const userId = req.user.id;
+      
+      // 获取订单详情
+      const order = await Order.findById(orderId);
+      
+      // 验证订单是否存在
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: '订单不存在'
+        });
+      }
+      
+      // 验证用户是否有权限查看该订单（必须是订单的宠物主或帮溜员）
+      if (order.ownerUserId !== userId && order.sitterUserId !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: '您无权查看此订单评价'
+        });
+      }
+      
+      // 获取订单评价
+      const review = await Order.getReview(orderId);
+      
+      if (!review) {
+        return res.status(404).json({
+          success: false,
+          message: '该订单暂无评价'
+        });
+      }
+      
+      // 返回成功响应
+      res.status(200).json({
+        success: true,
+        data: review
+      });
+    } catch (error) {
+      console.error('获取订单评价失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取订单评价失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
 
   /**
    * 获取订单详情（管理员）
