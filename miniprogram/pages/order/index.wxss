@@ -324,6 +324,15 @@
   font-weight: bold !important;
 }
 
+/* 查看评价按钮 */
+.btn-row-item.btn-review {
+  background: linear-gradient(to right, #fde74c, #ffb700) !important;
+  color: #333 !important;
+  border: none !important;
+  font-weight: bold !important;
+  box-shadow: 0 4rpx 8rpx rgba(253, 231, 76, 0.3) !important;
+}
+
 /* 覆盖原有按钮样式中的margin-left */
 .action-btns .btn-row-item {
   margin-left: 2rpx !important;

@@ -669,5 +669,15 @@ Page({
     wx.navigateTo({
       url: `/pages/order/review?id=${orderId}`
     });
+  },
+  
+  // 查看评价
+  viewReview: function(e) {
+    const orderId = e.currentTarget.dataset.id;
+    
+    // 跳转到查看评价页面
+    wx.navigateTo({
+      url: `/pages/order/review?id=${orderId}&mode=view`
+    });
   }
 }) 

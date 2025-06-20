@@ -1,100 +1,146 @@
-<view class="container">
-  <!-- 顶部导航栏 -->
-  <view class="nav-bar">
-    <view class="back-btn" bindtap="goBack">
-      <text class="back-icon">←</text>
-    </view>
-    <view class="page-title">评价服务</view>
-  </view>
-
-  <!-- 评价表单 -->
-  <view class="review-form" wx:if="{{!loading && orderInfo}}">
-    <!-- 帮溜员信息 -->
-    <view class="sitter-info">
-      <image class="sitter-avatar" src="{{orderInfo.sitter.avatar || '/static/images/default-avatar.png'}}"></image>
-      <view class="sitter-name">{{orderInfo.sitter.nickname}}</view>
-      <view class="order-service">{{orderInfo.service.name || '宠物服务'}}</view>
-    </view>
-    
-    <!-- 星级评分 -->
-    <view class="rating-section">
-      <view class="section-title">服务评分</view>
-      <view class="rating-stars">
-        <view 
-          class="star {{rating >= 1 ? 'active' : ''}}" 
-          data-rating="1" 
-          bindtap="onRatingChange">★</view>
-        <view 
-          class="star {{rating >= 2 ? 'active' : ''}}" 
-          data-rating="2" 
-          bindtap="onRatingChange">★</view>
-        <view 
-          class="star {{rating >= 3 ? 'active' : ''}}" 
-          data-rating="3" 
-          bindtap="onRatingChange">★</view>
-        <view 
-          class="star {{rating >= 4 ? 'active' : ''}}" 
-          data-rating="4" 
-          bindtap="onRatingChange">★</view>
-        <view 
-          class="star {{rating >= 5 ? 'active' : ''}}" 
-          data-rating="5" 
-          bindtap="onRatingChange">★</view>
-      </view>
-      <view class="rating-text">
-        {{ratingText}}
-      </view>
-    </view>
-    
-    <!-- 评价标签 -->
-    <view class="tags-section">
-      <view class="section-title">
-        评价标签
-        <text class="tags-hint">(请选择符合的标签)</text>
-      </view>
-      <view class="tags-container">
-        <view 
-          wx:for="{{availableTags}}" 
-          wx:key="*this"
-          class="tag {{tagActiveStates[item] ? 'active' : ''}}"
-          data-tag="{{item}}"
-          bindtap="onTagTap">{{item}}</view>
-      </view>
-    </view>
-    
-    <!-- 评价内容 -->
-    <view class="comment-section">
-      <view class="section-title">评价内容</view>
-      <textarea 
-        class="comment-input" 
-        placeholder="请输入您对本次服务的评价内容（选填）" 
-        value="{{comment}}"
-        maxlength="200"
-        bindinput="onCommentInput"></textarea>
-      <view class="comment-count">{{comment.length}}/200</view>
-    </view>
-    
-    <!-- 匿名评价 -->
-    <view class="anonymous-section">
-      <view class="anonymous-label">匿名评价</view>
-      <switch checked="{{isAnonymous}}" bindchange="onAnonymousChange" color="#4CAF50" />
-    </view>
-    
-    <!-- 提交按钮 -->
-    <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
-      {{submitting ? '提交中...' : '提交评价'}}
-    </button>
-  </view>
+<view class="page-container">
+  <!-- 安全区域顶部 -->
+  <view class="safe-area-top"></view>
   
-  <!-- 加载中状态 -->
-  <view class="loading-container" wx:if="{{loading}}">
-    <view class="loading-icon"></view>
-    <text>正在加载...</text>
-  </view>
+  <view class="container">
+    <!-- 顶部导航栏 -->
+    <view class="nav-bar">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">←</text>
+      </view>
+      <view class="page-title">{{isViewMode ? '评价详情' : '评价服务'}}</view>
+    </view>
 
-  <!-- 提交成功动画 -->
-  <view class="success-animation" wx:if="{{showSuccess}}">
-    <view class="success-icon">✓</view>
-    <view class="success-text">评价提交成功</view>
+    <!-- 评价表单 -->
+    <view class="review-form" wx:if="{{!loading && orderInfo}}">
+      <!-- 帮溜员信息 -->
+      <view class="sitter-info">
+        <image class="sitter-avatar" src="{{orderInfo.sitter.avatar || '/static/images/default-avatar.png'}}"></image>
+        <view class="sitter-name">{{orderInfo.sitter.nickname}}</view>
+        <view class="order-service">{{orderInfo.service.name || '宠物服务'}}</view>
+      </view>
+      
+      <!-- 星级评分 -->
+      <view class="rating-section">
+        <view class="section-title">服务评分</view>
+        <view class="rating-stars">
+          <view 
+            class="star {{rating >= 1 ? 'active' : ''}} {{isViewMode ? 'readonly' : ''}}" 
+            data-rating="1" 
+            bindtap="onRatingChange">★</view>
+          <view 
+            class="star {{rating >= 2 ? 'active' : ''}} {{isViewMode ? 'readonly' : ''}}" 
+            data-rating="2" 
+            bindtap="onRatingChange">★</view>
+          <view 
+            class="star {{rating >= 3 ? 'active' : ''}} {{isViewMode ? 'readonly' : ''}}" 
+            data-rating="3" 
+            bindtap="onRatingChange">★</view>
+          <view 
+            class="star {{rating >= 4 ? 'active' : ''}} {{isViewMode ? 'readonly' : ''}}" 
+            data-rating="4" 
+            bindtap="onRatingChange">★</view>
+          <view 
+            class="star {{rating >= 5 ? 'active' : ''}} {{isViewMode ? 'readonly' : ''}}" 
+            data-rating="5" 
+            bindtap="onRatingChange">★</view>
+        </view>
+        <view class="rating-text">
+          {{ratingText}}
+        </view>
+      </view>
+      
+      <!-- 评价标签 -->
+      <view class="tags-section">
+        <view class="section-title">
+          评价标签
+          <text class="tags-hint" wx:if="{{!isViewMode}}">(请选择符合的标签)</text>
+        </view>
+        <view class="tags-container">
+          <block wx:if="{{isViewMode && selectedTags && selectedTags.length > 0}}">
+            <view 
+              wx:for="{{selectedTags}}" 
+              wx:key="*this"
+              class="tag active readonly">{{item}}</view>
+          </block>
+          <block wx:elif="{{isViewMode && (!selectedTags || selectedTags.length === 0)}}">
+            <view class="no-tags">暂无评价标签</view>
+          </block>
+          <block wx:else>
+            <view 
+              wx:for="{{availableTags}}" 
+              wx:key="*this"
+              class="tag {{tagActiveStates[item] ? 'active' : ''}}"
+              data-tag="{{item}}"
+              bindtap="onTagTap">{{item}}</view>
+          </block>
+        </view>
+      </view>
+      
+      <!-- 评价内容 -->
+      <view class="comment-section">
+        <view class="section-title">评价内容</view>
+        <block wx:if="{{isViewMode}}">
+          <view class="comment-text">{{comment || '暂无评价内容'}}</view>
+        </block>
+        <block wx:else>
+          <textarea 
+            class="comment-input" 
+            placeholder="请输入您对本次服务的评价内容（选填）" 
+            value="{{comment}}"
+            maxlength="200"
+            bindinput="onCommentInput"></textarea>
+          <view class="comment-count">{{comment.length}}/200</view>
+        </block>
+      </view>
+      
+      <!-- 匿名评价 -->
+      <view class="anonymous-section" wx:if="{{!isViewMode}}">
+        <view class="anonymous-label">匿名评价</view>
+        <switch checked="{{isAnonymous}}" bindchange="onAnonymousChange" color="#FFC107" />
+      </view>
+      
+      <!-- 评价者信息 -->
+      <view class="reviewer-info" wx:if="{{isViewMode && reviewData}}">
+        <view class="reviewer-section">
+          <view class="section-title">评价时间</view>
+          <view class="reviewer-text">{{reviewData.createdAt || '未知时间'}}</view>
+        </view>
+        <view class="reviewer-section" wx:if="{{!reviewData.anonymous}}">
+          <view class="section-title">评价者</view>
+          <view class="reviewer-name">{{reviewData.reviewerNickname || '未知用户'}}</view>
+        </view>
+        <view class="reviewer-section" wx:else>
+          <view class="section-title">评价者</view>
+          <view class="reviewer-name">匿名用户</view>
+        </view>
+      </view>
+      
+      <!-- 提交按钮 -->
+      <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}" wx:if="{{!isViewMode}}">
+        {{submitting ? '提交中...' : '提交评价'}}
+      </button>
+      
+      <!-- 底部安全区域 -->
+      <view class="safe-area-bottom"></view>
+    </view>
+    
+    <!-- 加载中状态 -->
+    <view class="loading-container" wx:if="{{loading}}">
+      <view class="loading-icon"></view>
+      <text>正在加载...</text>
+    </view>
+
+    <!-- 提交成功动画 -->
+    <view class="success-animation" wx:if="{{showSuccess}}">
+      <view class="success-icon">✓</view>
+      <view class="success-text">评价提交成功</view>
+    </view>
+    
+    <!-- 无评价状态 -->
+    <view class="empty-review" wx:if="{{isViewMode && !loading && !reviewData}}">
+      <image class="empty-icon" src="/static/images/empty-cat.png"></image>
+      <view class="empty-text">暂无评价信息</view>
+    </view>
   </view>
 </view> 

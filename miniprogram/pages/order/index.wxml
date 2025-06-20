@@ -196,10 +196,29 @@
             </view>
           </block>
           
+          <!-- 已完成订单的按钮组 -->
+          <block wx:if="{{item.status === 'completed' || item.status === 'confirmed'}}">
+            <view class="button-row">
+              <!-- 查看详情按钮 -->
+              <button 
+                class="btn-row-item btn-default" 
+                data-id="{{item.orderId}}"
+                bindtap="viewOrderDetail"
+              >查看详情</button>
+              
+              <!-- 查看评价按钮 -->
+              <button 
+                class="btn-row-item btn-review" 
+                data-id="{{item.orderId}}"
+                bindtap="viewReview"
+              >查看评价</button>
+            </view>
+          </block>
+          
           <!-- 其他状态只显示查看详情按钮 -->
           <button 
             class="btn-default" 
-            wx:if="{{item.status !== 'accepted' && !(currentRole === 'sitter' && (item.status === 'paid' || item.status === 'ongoing')) && !(currentRole === 'pet_owner' && (item.status === 'pending_confirm' || item.status === 'pending_review'))}}"
+            wx:if="{{item.status !== 'accepted' && item.status !== 'completed' && item.status !== 'confirmed' && !(currentRole === 'sitter' && (item.status === 'paid' || item.status === 'ongoing')) && !(currentRole === 'pet_owner' && (item.status === 'pending_confirm' || item.status === 'pending_review'))}}"
             data-id="{{item.orderId}}"
             bindtap="viewOrderDetail"
           >查看详情</button>

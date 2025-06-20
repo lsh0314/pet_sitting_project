@@ -639,6 +639,60 @@ class Order {
       connection.release();
     }
   }
+
+  /**
+   * 获取订单评价
+   * @param {number} orderId - 订单ID
+   * @returns {Promise<Object|null>} - 返回评价数据或null
+   */
+  static async getReview(orderId) {
+    try {
+      // 查询评价数据
+      const [reviews] = await db.execute(
+        `SELECT r.id, r.order_id, r.reviewer_user_id, r.reviewee_user_id,
+                r.rating, r.comment, r.tags, r.is_anonymous as anonymous,
+                r.created_at as createdAt,
+                u.nickname as reviewerNickname, u.avatar_url as reviewerAvatar
+         FROM reviews r
+         LEFT JOIN users u ON r.reviewer_user_id = u.id
+         WHERE r.order_id = ?
+         LIMIT 1`,
+        [orderId]
+      );
+      
+      if (reviews.length === 0) {
+        return null;
+      }
+      
+      const review = reviews[0];
+      
+      // 处理标签数据
+      if (review.tags) {
+        try {
+          // 检查是否已经是数组
+          if (Array.isArray(review.tags)) {
+            // 已经是数组，不需要解析
+            console.log('标签已经是数组格式:', review.tags);
+          } else {
+            // 尝试解析JSON字符串
+            console.log('原始标签数据(字符串):', review.tags);
+            review.tags = JSON.parse(review.tags);
+            console.log('解析后的标签数据:', review.tags);
+          }
+        } catch (e) {
+          console.error('解析评价标签失败:', e);
+          review.tags = [];
+        }
+      } else {
+        review.tags = [];
+      }
+      
+      return review;
+    } catch (error) {
+      console.error('获取订单评价失败:', error);
+      throw error;
+    }
+  }
   
     /**
      * 导出订单数据（管理员用）

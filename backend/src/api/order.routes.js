@@ -34,6 +34,9 @@ router.post('/:id/confirm', authMiddleware, OrderController.confirmService);
 // 评价订单（需要认证）
 router.post('/:id/review', authMiddleware, OrderController.addReview);
 
+// 获取订单评价（需要认证）
+router.get('/:id/review', authMiddleware, OrderController.getOrderReview);
+
 // 管理员订单管理接口
 router.get('/admin/list', authMiddleware, adminMiddleware, OrderController.getAllOrders);
 router.get('/admin/:id', authMiddleware, adminMiddleware, OrderController.getAdminOrderDetail);

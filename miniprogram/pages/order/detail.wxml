@@ -147,8 +147,6 @@
             class="btn-primary" 
             bindtap="onTapReview">评价服务</button>
         </block>
-        
-        <!-- 已完成状态，可以添加查看评价等功能（如果有） -->
       </block>
       
       <!-- 帮溜员操作按钮 -->
