@@ -42,6 +42,12 @@
     
     <view class="menu-item" bindtap="navigateToSitterApply">
       <image class="menu-icon" src="/static/images/icon-sitter.png"></image>
+      <view class="menu-name">我的帮溜主页</view>
+      <view class="menu-arrow"></view>
+    </view>
+    
+    <view class="menu-item" bindtap="navigateToApplySitter">
+      <image class="menu-icon" src="/static/images/icon-sitter.png"></image>
       <view class="menu-name">申请伴宠专员</view>
       <view class="menu-arrow"></view>
     </view>

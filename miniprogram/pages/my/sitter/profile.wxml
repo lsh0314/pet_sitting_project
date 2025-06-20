@@ -53,7 +53,7 @@
               checked="{{item.checked}}" 
               bindchange="onServiceCheckChange" 
               data-index="{{index}}"
-              color="#1296db"
+              color="#FFBA00"
             />
             <text class="service-name">{{item.name}}</text>
           </view>
@@ -76,14 +76,18 @@
     <!-- 可服务日期 -->
     <view class="form-section">
       <view class="section-title">可服务日期</view>
-      <view class="date-selector" bindtap="showDatePicker">
-        <view class="date-placeholder" wx:if="{{selectedDates.length === 0}}">
-          点击选择可服务日期
+      <view class="weekday-selector">
+        <view class="weekday-options">
+          <view 
+            class="weekday-item {{item.checked ? 'selected' : ''}}" 
+            wx:for="{{weekdayOptions}}" 
+            wx:key="value"
+            bindtap="onWeekdayChange"
+            data-index="{{index}}"
+          >
+            {{item.value}}
+          </view>
         </view>
-        <view class="selected-dates" wx:else>
-          已选择 {{selectedDates.length}} 天
-        </view>
-        <view class="date-arrow">></view>
       </view>
     </view>
 
@@ -94,35 +98,7 @@
       loading="{{isSubmitting}}" 
       disabled="{{isSubmitting}}"
     >
-      保存资料
+      <text>保存资料</text>
     </button>
-  </view>
-
-  <!-- 日期选择器弹窗 -->
-  <view class="date-picker-modal" wx:if="{{datePickerVisible}}">
-    <view class="date-picker-container">
-      <view class="date-picker-header">
-        <view class="date-picker-title">选择可服务日期</view>
-        <view class="date-picker-close" bindtap="closeDatePicker">×</view>
-      </view>
-      <view class="date-picker-content">
-        <!-- 使用预先生成的日期数组 -->
-        <view class="date-list">
-          <view 
-            class="date-item {{selectedDates.includes(date) ? 'selected' : ''}}"
-            bindtap="onDateSelect"
-            data-date="{{date}}"
-            wx:for="{{futureDates}}"
-            wx:for-item="date"
-            wx:key="*this"
-          >
-            {{date}}
-          </view>
-        </view>
-      </view>
-      <view class="date-picker-footer">
-        <button class="date-picker-btn" bindtap="closeDatePicker">确定</button>
-      </view>
-    </view>
   </view>
 </view> 

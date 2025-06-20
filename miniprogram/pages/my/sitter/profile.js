@@ -33,9 +33,16 @@ Page({
       { service_type: 'feed', name: '喂食', price: '', checked: false },
       { service_type: 'boarding', name: '寄养', price: '', checked: false }
     ],
-    datePickerVisible: false,
+    weekdayOptions: [
+      { value: '周一', checked: false },
+      { value: '周二', checked: false },
+      { value: '周三', checked: false },
+      { value: '周四', checked: false },
+      { value: '周五', checked: false },
+      { value: '周六', checked: false },
+      { value: '周日', checked: false }
+    ],
     selectedDates: [],
-    futureDates: [], // 未来30天的日期数组
     isSubmitting: false,
     error: null,
     isLoading: true
@@ -45,28 +52,8 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    // 生成未来30天的日期
-    this.generateFutureDates();
     // 获取帮溜员资料
     this.fetchSitterProfile();
-  },
-
-  /**
-   * 生成未来30天的日期
-   */
-  generateFutureDates: function() {
-    const dates = [];
-    const now = new Date();
-    
-    for (let i = 0; i < 30; i++) {
-      const date = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
-      const dateString = date.toISOString().split('T')[0]; // 格式：YYYY-MM-DD
-      dates.push(dateString);
-    }
-    
-    this.setData({
-      futureDates: dates
-    });
   },
 
   /**
@@ -108,11 +95,20 @@ Page({
               }
             }
             
+            // 更新星期几选项的选中状态
+            const updatedWeekdayOptions = this.data.weekdayOptions.map(option => {
+              return {
+                ...option,
+                checked: availableDates.includes(option.value)
+              };
+            });
+            
             this.setData({
               'profileData.bio': profile.bio || '',
               'profileData.service_area': profile.service_area || '',
               selectedDates: availableDates || [],
-              'profileData.available_dates': availableDates || []
+              'profileData.available_dates': availableDates || [],
+              weekdayOptions: updatedWeekdayOptions
             });
           }
           
@@ -192,40 +188,22 @@ Page({
   },
 
   /**
-   * 显示日期选择器
+   * 星期几选择处理
    */
-  showDatePicker: function () {
-    this.setData({
-      datePickerVisible: true
-    });
-  },
-
-  /**
-   * 日期选择处理
-   */
-  onDateSelect: function (e) {
-    const date = e.currentTarget.dataset.date;
-    const selectedDates = [...this.data.selectedDates];
+  onWeekdayChange: function (e) {
+    const index = e.currentTarget.dataset.index;
+    const weekdayOptions = [...this.data.weekdayOptions];
+    weekdayOptions[index].checked = !weekdayOptions[index].checked;
     
-    const index = selectedDates.indexOf(date);
-    if (index > -1) {
-      selectedDates.splice(index, 1);
-    } else {
-      selectedDates.push(date);
-    }
+    // 更新选中的日期
+    const selectedDates = weekdayOptions
+      .filter(option => option.checked)
+      .map(option => option.value);
     
     this.setData({
+      weekdayOptions,
       selectedDates,
       'profileData.available_dates': selectedDates
-    });
-  },
-
-  /**
-   * 关闭日期选择器
-   */
-  closeDatePicker: function () {
-    this.setData({
-      datePickerVisible: false
     });
   },
 

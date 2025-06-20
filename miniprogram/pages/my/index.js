@@ -135,6 +135,19 @@ Page({
     });
   },
 
+  // 跳转到申请伴宠专员页面
+  navigateToApplySitter: function() {
+    if (!this.data.isLoggedIn) {
+      this.navigateToLogin();
+      return;
+    }
+    
+    wx.showToast({
+      title: '申请功能开发中',
+      icon: 'none'
+    });
+  },
+
   // 跳转到宠物领养页面（示例）
   navigateToPetAdoption: function() {
     wx.showToast({
