@@ -594,32 +594,9 @@ Page({
       success: (res) => {
         if (res.confirm) {
           // 跳转到服务完成打卡页面
-          // 实际项目中应该有一个服务完成打卡页面
-          // 这里暂时直接调用API
-          wx.showLoading({
-            title: '处理中...',
-            mask: true
+          wx.navigateTo({
+            url: `/pages/order/service/complete?id=${orderId}`
           });
-          
-          // 调用完成服务API
-          api.post(`/api/order/${orderId}/complete`)
-            .then(() => {
-              wx.hideLoading();
-              wx.showToast({
-                title: '服务已完成',
-                icon: 'success'
-              });
-              // 刷新订单列表
-              this.getOrderList();
-            })
-            .catch(err => {
-              wx.hideLoading();
-              console.error('完成服务失败:', err);
-              wx.showToast({
-                title: '操作失败，请重试',
-                icon: 'none'
-              });
-            });
         }
       }
     });
