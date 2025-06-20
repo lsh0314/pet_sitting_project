@@ -119,12 +119,12 @@
 .tab-item {
   flex: 1;
   text-align: center;
-  padding: 24rpx 30rpx;
+  padding: 24rpx 20rpx;
   font-size: 28rpx;
   color: #666;
   position: relative;
   display: inline-block;
-  min-width: 120rpx;
+  min-width: 100rpx;
 }
 
 .tab-item.active {

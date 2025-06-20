@@ -132,6 +132,18 @@ class Order {
         const whereClause = role === 'pet_owner' 
           ? `o.owner_user_id = ${userId}` 
           : `o.sitter_user_id = ${userId}`;
+        
+        // 处理多状态查询
+        let statusCondition = '';
+        if (status) {
+          // 如果状态包含逗号，说明是多状态查询
+          if (status.includes(',')) {
+            const statusArray = status.split(',');
+            statusCondition = `AND o.status IN ('${statusArray.join("','")}')`;
+          } else {
+            statusCondition = `AND o.status = '${status}'`;
+          }
+        }
           
         sql = `SELECT 
             o.id, o.status, o.service_type as serviceType,
@@ -145,13 +157,13 @@ class Order {
           JOIN users u1 ON o.owner_user_id = u1.id
           LEFT JOIN users u2 ON o.sitter_user_id = u2.id
           JOIN pets p ON o.pet_id = p.id
-          WHERE ${whereClause} ${status ? `AND o.status = '${status}'` : ''}
+          WHERE ${whereClause} ${statusCondition}
           ORDER BY o.created_at DESC
           LIMIT ${limit} OFFSET ${offset}`;
           
         countSql = `SELECT COUNT(*) as total 
           FROM orders o 
-          WHERE ${whereClause} ${status ? `AND o.status = '${status}'` : ''}`;
+          WHERE ${whereClause} ${statusCondition}`;
       }
       
       // 执行查询
@@ -564,20 +576,26 @@ class Order {
    * @returns {Promise<number|boolean>} - 返回评价ID或false
    */
   static async addReview(reviewData) {
+    const connection = await db.getConnection();
+    
     try {
+      // 开始事务
+      await connection.beginTransaction();
+      
       // 检查是否已经评价过
-      const [existingReview] = await db.execute(
+      const [existingReview] = await connection.execute(
         `SELECT id FROM reviews 
          WHERE order_id = ? AND reviewer_user_id = ?`,
         [reviewData.orderId, reviewData.reviewerUserId]
       );
       
       if (existingReview.length > 0) {
+        await connection.rollback();
         return false; // 已经评价过
       }
       
       // 插入评价
-      const [result] = await db.execute(
+      const [result] = await connection.execute(
         `INSERT INTO reviews (
           order_id, reviewer_user_id, reviewee_user_id, 
           rating, comment, tags, is_anonymous
@@ -593,10 +611,32 @@ class Order {
         ]
       );
       
+      // 获取当前订单状态
+      const [orderResult] = await connection.execute(
+        `SELECT status FROM orders WHERE id = ?`,
+        [reviewData.orderId]
+      );
+      
+      if (orderResult.length > 0 && orderResult[0].status === 'pending_review') {
+        // 更新订单状态为已完成
+        await connection.execute(
+          `UPDATE orders SET status = 'completed', updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+          [reviewData.orderId]
+        );
+      }
+      
+      // 提交事务
+      await connection.commit();
+      
       return result.insertId;
     } catch (error) {
+      // 回滚事务
+      await connection.rollback();
       console.error('添加评价失败:', error);
       throw error;
+    } finally {
+      // 释放连接
+      connection.release();
     }
   }
   

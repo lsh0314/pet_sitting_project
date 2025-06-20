@@ -1014,7 +1014,7 @@ class OrderController {
       }
       
       // 验证订单状态是否为已确认或已完成
-      const validStatuses = ['completed', 'confirmed'];
+      const validStatuses = ['completed', 'confirmed', 'pending_review'];
       if (!validStatuses.includes(order.status)) {
         return res.status(400).json({
           success: false,
@@ -1057,6 +1057,8 @@ class OrderController {
       if (userId === order.ownerUserId) {
         // TODO: 更新帮溜员的平均评分（未来迭代）
       }
+      
+      // 注意：订单状态更新已经在 Order.addReview 方法中处理
       
       // 返回成功响应
       res.status(201).json({

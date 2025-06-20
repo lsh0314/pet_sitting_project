@@ -13,6 +13,7 @@
     <view class="sitter-info">
       <image class="sitter-avatar" src="{{orderInfo.sitter.avatar || '/static/images/default-avatar.png'}}"></image>
       <view class="sitter-name">{{orderInfo.sitter.nickname}}</view>
+      <view class="order-service">{{orderInfo.service.name || '宠物服务'}}</view>
     </view>
     
     <!-- 星级评分 -->
@@ -40,16 +41,22 @@
           data-rating="5" 
           bindtap="onRatingChange">★</view>
       </view>
+      <view class="rating-text">
+        {{ratingText}}
+      </view>
     </view>
     
     <!-- 评价标签 -->
     <view class="tags-section">
-      <view class="section-title">评价标签</view>
+      <view class="section-title">
+        评价标签
+        <text class="tags-hint">(请选择符合的标签)</text>
+      </view>
       <view class="tags-container">
         <view 
           wx:for="{{availableTags}}" 
           wx:key="*this"
-          class="tag {{tags.includes(item) ? 'active' : ''}}"
+          class="tag {{tagActiveStates[item] ? 'active' : ''}}"
           data-tag="{{item}}"
           bindtap="onTagTap">{{item}}</view>
       </view>
@@ -60,9 +67,11 @@
       <view class="section-title">评价内容</view>
       <textarea 
         class="comment-input" 
-        placeholder="请输入您的评价内容（选填）" 
+        placeholder="请输入您对本次服务的评价内容（选填）" 
         value="{{comment}}"
+        maxlength="200"
         bindinput="onCommentInput"></textarea>
+      <view class="comment-count">{{comment.length}}/200</view>
     </view>
     
     <!-- 匿名评价 -->
@@ -72,8 +81,8 @@
     </view>
     
     <!-- 提交按钮 -->
-    <button class="submit-btn" bindtap="onSubmit" disabled="{{loading}}">
-      {{loading ? '提交中...' : '提交评价'}}
+    <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
+      {{submitting ? '提交中...' : '提交评价'}}
     </button>
   </view>
   
@@ -81,5 +90,11 @@
   <view class="loading-container" wx:if="{{loading}}">
     <view class="loading-icon"></view>
     <text>正在加载...</text>
+  </view>
+
+  <!-- 提交成功动画 -->
+  <view class="success-animation" wx:if="{{showSuccess}}">
+    <view class="success-icon">✓</view>
+    <view class="success-text">评价提交成功</view>
   </view>
 </view> 
