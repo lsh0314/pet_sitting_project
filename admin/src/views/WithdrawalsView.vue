@@ -96,17 +96,21 @@
           </div>
 
           <!-- 分页 -->
-          <div class="pagination-container">
-            <el-pagination
-              :current-page="currentPage"
-              :page-size="pageSize"
-              :page-sizes="[10, 20, 50, 100]"
-              :total="total"
-              layout="total, sizes, prev, pager, next"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-            />
-          </div>
+      <div class="pagination-container">
+        <el-pagination
+          v-if="total > 0"
+          :key="currentPage + '-' + pageSize"
+          :current-page="currentPage"
+          :page-size="pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50, 100]"
+          :background="true"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+        <div v-else class="no-data">暂无数据</div>
+      </div>
         </el-card>
 
         <!-- 详情抽屉 -->
@@ -460,7 +464,7 @@ onMounted(() => {
 
 .pagination-container {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   margin-top: 20px;
 }
 
