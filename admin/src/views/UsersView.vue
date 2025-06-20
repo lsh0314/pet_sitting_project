@@ -29,17 +29,30 @@
           </template>
         </el-input>
         
-        <el-select v-model="filters.role" placeholder="用户角色" clearable @change="handleSearch">
+        <el-select 
+          v-model="filters.role" 
+          placeholder="用户角色" 
+          clearable 
+          @change="handleSearch"
+          style="width: 160px"
+        >
           <el-option label="全部角色" value="" />
           <el-option
             v-for="(label, value) in roleMap"
             :key="value"
             :label="label"
             :value="value"
+            
           />
         </el-select>
         
-        <el-select v-model="filters.status" placeholder="用户状态" clearable @change="handleSearch">
+        <el-select 
+          v-model="filters.status" 
+          placeholder="用户状态" 
+          clearable 
+          @change="handleSearch"
+          style="width: 160px"
+        >
           <el-option label="全部状态" value="" />
           <el-option
             v-for="(label, value) in statusMap"

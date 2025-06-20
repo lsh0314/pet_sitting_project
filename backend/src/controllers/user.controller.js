@@ -323,11 +323,12 @@ class UserController {
       const csvContent = csvHeader + csvRows;
       
       // 设置响应头
-      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
       res.setHeader('Content-Disposition', 'attachment; filename=users_export.csv');
       
-      // 发送CSV内容
-      res.send(csvContent);
+      // 添加UTF-8 BOM头并发送CSV内容
+      const csvWithBOM = '\uFEFF' + csvContent;
+      res.send(Buffer.from(csvWithBOM, 'utf8'));
     } catch (err) {
       console.error('导出用户数据失败:', err);
       return error(res, '导出用户数据失败', 500);

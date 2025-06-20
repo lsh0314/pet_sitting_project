@@ -793,7 +793,9 @@ class Order {
       // 如果没有数据，直接返回空结果
       if (total === 0) {
         return { rows: [], total: 0 };
-      }      // 计算分页参数
+      }
+
+      // 计算分页参数
       const pageNum = Math.max(1, parseInt(page) || 1);
       const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
       const offsetNum = (pageNum - 1) * limitNum;
@@ -825,4 +827,5 @@ class Order {
     }
   }
 }
-module.exports = Order; 
+
+module.exports = Order;

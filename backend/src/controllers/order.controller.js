@@ -144,7 +144,7 @@ class OrderController {
           'pending_confirm': '待确认',
           'pending_review': '待评价',
           'completed': '已完成',
-          'confirmed': '已完成',
+          'confirmed': '已确定',
           'cancelled': '已取消'
         };
         
@@ -244,7 +244,7 @@ class OrderController {
         'pending_confirm': '待确认',
         'pending_review': '待评价',
         'completed': '已完成',
-        'confirmed': '已完成',
+        'confirmed': '已确定',
         'cancelled': '已取消'
       };
       
@@ -1105,7 +1105,7 @@ class OrderController {
         'pending_confirm': '待确认',
         'pending_review': '待评价',
         'completed': '已完成',
-        'confirmed': '已完成',
+        'confirmed': '已确定',
         'cancelled': '已取消'
       };
       
@@ -1363,9 +1363,10 @@ class OrderController {
     // 设置响应头
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename=orders-${new Date().toISOString()}.csv`);
+    res.charset = 'utf-8'; // 明确设置字符集
 
     // 发送CSV数据
-    res.send('\ufeff' + csv); // 添加BOM标记以支持中文
+    res.send(Buffer.from('\ufeff' + csv, 'utf-8')); // 使用Buffer确保编码正确
   } catch (error) {
     console.error('导出订单数据失败:', error);
     res.status(500).json({
@@ -1378,4 +1379,4 @@ class OrderController {
 
 }
 
-module.exports = OrderController; 
+module.exports = OrderController;
