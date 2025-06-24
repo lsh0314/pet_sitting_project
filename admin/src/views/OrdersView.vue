@@ -95,38 +95,39 @@
           border
           ref="orderTable"
           @hook:mounted="onTableMounted"
+          v-if="orders.length > 0"
         >
-          <el-table-column prop="id" label="订单号" width="80" />
-          <el-table-column label="用户信息" width="120">
+          <el-table-column prop="id" label="订单号" min-width="80" />
+          <el-table-column label="用户信息" min-width="120">
             <template #default="scope">
               <el-tooltip :content="scope.row.ownerName || '未知用户'" placement="top">
                 <span>{{ scope.row.ownerName || '未知用户' }}</span>
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column label="宠物信息" width="120">
+          <el-table-column label="宠物信息" min-width="120">
             <template #default="scope">
               <el-tooltip :content="scope.row.petName || '未知宠物'" placement="top">
                 <span>{{ scope.row.petName || '未知宠物' }}</span>
               </el-tooltip>
             </template>
           </el-table-column>
-          <el-table-column prop="serviceType" label="服务类型" width="100">
+          <el-table-column prop="serviceType" label="服务类型" min-width="100">
             <template #default="scope">
               {{ formatServiceType(scope.row.serviceType) }}
             </template>
           </el-table-column>
-          <el-table-column label="服务时间" width="200">
+          <el-table-column label="服务时间" min-width="200">
             <template #default="scope">
               {{ formatDate(scope.row.serviceDate) }}
             </template>
           </el-table-column>
-          <el-table-column label="金额" width="100">
+          <el-table-column label="金额" min-width="100">
             <template #default="scope">
               ¥{{ parseFloat(scope.row.price).toFixed(2) }}
             </template>
           </el-table-column>
-          <el-table-column prop="status" label="状态" width="100">
+          <el-table-column prop="status" label="状态" min-width="100">
             <template #default="scope">
               <el-tag 
                 :class="`${scope.row.status}-tag`"
@@ -135,12 +136,12 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="创建时间" width="180">
+          <el-table-column label="创建时间" min-width="180">
             <template #default="scope">
               {{ formatDate(scope.row.createdAt) }}
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="160" fixed="right">
+          <el-table-column label="操作" min-width="160" fixed="right">
             <template #default="scope">
               <el-button size="small" @click="viewOrderDetail(scope.row.id)">
                 查看
@@ -158,22 +159,21 @@
         </el-table>
         
         <!-- 分页 -->
-        <el-pagination
-          v-if="total > 0"
-          :current-page="currentPage"
-          :page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-        
-        <!-- 空状态 -->
-        <el-empty
-          v-if="!loading && orders.length === 0"
-          description="暂无订单数据"
-        />
+        <div class="pagination-container">
+          <el-pagination
+            v-if="total > 0"
+            :key="currentPage + '-' + pageSize"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            :total="total"
+            :page-sizes="[10, 20, 50, 100]"
+            :background="true"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+          <div v-else class="no-data">暂无数据</div>
+        </div>
       </div>
     </el-card>
   </div>
@@ -260,7 +260,9 @@ const formatOrderStatus = (status) => {
     'cancelled': '已取消',
     'refunded': '已退款',
     'accepted': '已接受',
-    'confirmed': '已确认'
+    'confirmed': '已确认',
+    'pending_confirm': '待确认',
+    'pending_review': '待评价'
   }
   return statusMap[status] || status
 }
@@ -475,11 +477,17 @@ const viewOrderDetail = (orderId) => {
 .pagination-container {
   margin-top: 20px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   background: white;
   padding: 15px;
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.no-data {
+  color: #909399;
+  text-align: center;
+  padding: 10px;
 }
 
 .date-picker-group {

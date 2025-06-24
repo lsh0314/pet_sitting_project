@@ -33,6 +33,7 @@ app.use('/api/upload', require('./src/api/upload.routes'));
 app.use('/api/verification', require('./src/api/verification.routes'));
 app.use('/api/verifications', require('./src/api/verification.routes'));
 app.use('/api/withdrawals', require('./src/api/withdrawal.routes'));
+app.use('/api/dashboard', require('./src/api/dashboard.routes'));
 
 // 全局错误处理中间件
 app.use((err, req, res, next) => {
