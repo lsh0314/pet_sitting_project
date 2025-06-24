@@ -43,9 +43,20 @@ App({
         wx.hideLoading()
         
         // Token有效，更新用户信息
-        this.globalData.userInfo = res.data
-        wx.setStorageSync('userInfo', res.data)
-        console.log('自动登录成功，用户信息已更新')
+        if (res.data) {
+          // 确保保留原有头像信息（如果新数据中没有）
+          const oldUserInfo = this.globalData.userInfo || {};
+          if (!res.data.avatar_url && oldUserInfo.avatar_url) {
+            res.data.avatar_url = oldUserInfo.avatar_url;
+          }
+          if (!res.data.avatar && oldUserInfo.avatar) {
+            res.data.avatar = oldUserInfo.avatar;
+          }
+          
+          this.globalData.userInfo = res.data;
+          wx.setStorageSync('userInfo', res.data);
+          console.log('自动登录成功，用户信息已更新:', res.data);
+        }
       })
       .catch(err => {
         // 隐藏加载提示

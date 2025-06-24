@@ -111,6 +111,16 @@ Page({
               // 登录成功，保存token和用户信息
               const { token, user } = res.data;
               
+              // 确保用户信息中包含头像
+              if (user && !user.avatar_url && userInfo.avatarUrl) {
+                user.avatar_url = userInfo.avatarUrl;
+              }
+              if (user && !user.avatar && userInfo.avatarUrl) {
+                user.avatar = userInfo.avatarUrl;
+              }
+              
+              console.log('登录成功，用户信息:', user);
+              
               wx.setStorageSync('token', token);
               wx.setStorageSync('userInfo', user);
               

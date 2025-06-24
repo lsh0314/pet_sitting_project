@@ -45,10 +45,35 @@ Page({
     }
     
     // 获取登录状态和用户信息
+    const userInfo = app.globalData.userInfo;
+    console.log('我的页面显示，获取用户信息:', userInfo);
+    
     this.setData({
       isLoggedIn: app.globalData.isLoggedIn,
-      userInfo: app.globalData.userInfo
+      userInfo: userInfo
     });
+    
+    // 如果已登录但没有头像，尝试从本地存储获取
+    if (this.data.isLoggedIn && userInfo && (!userInfo.avatar_url || !userInfo.avatar)) {
+      console.log('用户已登录但缺少头像信息，尝试从本地存储获取');
+      const storedUserInfo = wx.getStorageSync('userInfo');
+      if (storedUserInfo && (storedUserInfo.avatar_url || storedUserInfo.avatar)) {
+        console.log('从本地存储获取到头像:', storedUserInfo.avatar_url || storedUserInfo.avatar);
+        
+        // 更新app全局数据
+        if (storedUserInfo.avatar_url) {
+          app.globalData.userInfo.avatar_url = storedUserInfo.avatar_url;
+        }
+        if (storedUserInfo.avatar) {
+          app.globalData.userInfo.avatar = storedUserInfo.avatar;
+        }
+        
+        // 更新页面数据
+        this.setData({
+          userInfo: app.globalData.userInfo
+        });
+      }
+    }
     
     // 如果已登录，获取宠物列表
     if (this.data.isLoggedIn) {
@@ -286,5 +311,53 @@ Page({
     wx.navigateTo({
       url: '/pages/my/edit-profile'
     });
+  },
+
+  // 处理头像加载错误
+  handleAvatarError: function(e) {
+    console.error('头像加载失败，尝试使用备用头像');
+    
+    // 获取本地存储的用户信息
+    const storedUserInfo = wx.getStorageSync('userInfo');
+    
+    // 构建新的用户信息对象
+    const userInfo = this.data.userInfo || {};
+    let hasUpdate = false;
+    
+    // 尝试从本地存储获取头像
+    if (storedUserInfo) {
+      // 如果本地存储有avatar字段但当前没有
+      if (storedUserInfo.avatar && !userInfo.avatar) {
+        userInfo.avatar = storedUserInfo.avatar;
+        hasUpdate = true;
+      }
+      
+      // 如果本地存储有avatar_url字段但当前没有
+      if (storedUserInfo.avatar_url && !userInfo.avatar_url) {
+        userInfo.avatar_url = storedUserInfo.avatar_url;
+        hasUpdate = true;
+      }
+    }
+    
+    // 如果有更新，则更新页面数据和全局数据
+    if (hasUpdate) {
+      console.log('使用备用头像:', userInfo.avatar || userInfo.avatar_url);
+      
+      this.setData({
+        userInfo: userInfo
+      });
+      
+      // 更新全局数据
+      if (app.globalData.userInfo) {
+        if (userInfo.avatar) {
+          app.globalData.userInfo.avatar = userInfo.avatar;
+        }
+        if (userInfo.avatar_url) {
+          app.globalData.userInfo.avatar_url = userInfo.avatar_url;
+        }
+      }
+    } else {
+      console.log('没有找到可用的备用头像，将使用默认头像');
+    }
   }
 }) 
