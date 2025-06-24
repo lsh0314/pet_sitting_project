@@ -505,13 +505,9 @@ watch(
       align-items: center;
     }
     
-    .chart-wrapper {
+    .chart {
+      width: 100%;
       height: 300px;
-      
-      .chart {
-        width: 100%;
-        height: 100%;
-      }
     }
   }
   

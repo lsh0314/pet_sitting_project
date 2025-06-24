@@ -119,9 +119,15 @@ class DashboardModel {
       
       while (currentDate <= endDate) {
         const dateStr = currentDate.toISOString().split('T')[0];
-        const found = result.find(item => item.date === dateStr);
+        const formattedDateStr = dateStr.replace(/(\d{4})-(\d{2})-(\d{2})/, '$2-$3');
+        const found = result.find(item => {
+          const itemDate = item.date instanceof Date ? 
+            item.date.toISOString().split('T')[0] : 
+            new Date(item.date).toISOString().split('T')[0];
+          return itemDate === dateStr;
+        });
         
-        dates.push(dateStr);
+        dates.push(formattedDateStr);
         counts.push(found ? parseInt(found.count) : 0);
         
         currentDate.setDate(currentDate.getDate() + 1);
@@ -151,7 +157,8 @@ class DashboardModel {
       const serviceTypes = {
         walk: '遛狗',
         feed: '喂食',
-        care: '寄养'
+        care: '寄养',
+        boarding: '寄养'
       };
 
       return result.map(item => ({
