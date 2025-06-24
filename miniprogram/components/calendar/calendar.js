@@ -51,6 +51,7 @@ Component({
     initCalendar() {
       const year = this.data.currentYear;
       const month = this.data.currentMonth;
+      console.log(`初始化日历: ${year}年${month}月, daysColor长度: ${this.properties.daysColor ? this.properties.daysColor.length : 0}`);
       const days = this.calculateDays(year, month);
       this.setData({ days });
     },
@@ -221,6 +222,8 @@ Component({
         year: currentYear,
         month: currentMonth
       });
+      
+      console.log('日历切换到上个月:', currentYear, currentMonth);
     },
 
     /**
@@ -246,6 +249,8 @@ Component({
         year: currentYear,
         month: currentMonth
       });
+      
+      console.log('日历切换到下个月:', currentYear, currentMonth);
     }
   },
 
@@ -263,6 +268,10 @@ Component({
    */
   observers: {
     'selected, daysColor': function() {
+      console.log('日历属性变化，重新初始化日历', {
+        selected: this.properties.selected,
+        daysColorLength: this.properties.daysColor ? this.properties.daysColor.length : 0
+      });
       this.initCalendar();
     }
   }

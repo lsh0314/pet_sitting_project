@@ -1195,15 +1195,33 @@ Page({
     
     // 更新处理可用日期，基于新的月份
     this.processAvailableDatesForMonth(year, month);
+    
+    // 触发强制更新
+    console.log(`月份变更后强制更新: ${year}年${month}月`);
+    this.forceUpdate();
   },
   
   // 处理指定月份的可用日期
   processAvailableDatesForMonth: function(year, month) {
-    if (!this.data.sitterInfo || 
-        !this.data.sitterInfo.availableDates || 
-        !Array.isArray(this.data.sitterInfo.availableDates)) {
+    console.log(`开始处理${year}年${month}月的可用日期`);
+    
+    if (!this.data.sitterInfo) {
+      console.log('没有帮溜员信息，无法处理可用日期');
       return;
     }
+    
+    // 检查是否有原始的可用日期数据
+    if (!this.data.sitterInfo.originalAvailableDates && 
+        (!this.data.sitterInfo.availableDates || !Array.isArray(this.data.sitterInfo.availableDates))) {
+      console.log('没有可用日期数据，无法处理');
+      return;
+    }
+    
+    // 优先使用原始的星期几数据
+    const originalAvailableDates = this.data.sitterInfo.originalAvailableDates || 
+                                  this.data.sitterInfo.availableDates || [];
+    
+    console.log('原始可用日期数据:', originalAvailableDates);
     
     // 将中文星期几转换为数字 (0-6，0表示周日)
     const weekdayMap = {
@@ -1219,14 +1237,19 @@ Page({
     // 将可用日期转换为星期几的数字集合
     const availableWeekdays = new Set();
     
-    // 保存原始的可用星期几文本
-    const originalAvailableDates = [...this.data.sitterInfo.availableDates];
-    
     originalAvailableDates.forEach(day => {
       if (weekdayMap[day] !== undefined) {
         availableWeekdays.add(weekdayMap[day]);
+      } else if (day.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        // 如果是日期格式 (YYYY-MM-DD)，提取星期几
+        const dateObj = new Date(day);
+        if (!isNaN(dateObj.getTime())) {
+          availableWeekdays.add(dateObj.getDay());
+        }
       }
     });
+    
+    console.log('可用星期几集合:', Array.from(availableWeekdays));
     
     // 生成日期颜色配置
     const daysColor = [];
@@ -1275,6 +1298,7 @@ Page({
     }
     
     console.log(`${year}年${month}月实际可用日期:`, actualAvailableDates);
+    console.log('生成的日期颜色配置:', daysColor);
     
     // 更新日期颜色配置和可用日期
     this.setData({ 
