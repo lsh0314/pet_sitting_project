@@ -8,6 +8,7 @@ class Review {
     const offset = (page - 1) * limit;
     const [rows] = await pool.query(`
       SELECT r.id, r.rating, r.comment, r.created_at,
+        r.reviewer_user_id, r.reviewee_user_id,
         ru.nickname AS reviewer_nickname, ru.avatar_url AS reviewer_avatar,
         reu.nickname AS reviewee_nickname, reu.avatar_url AS reviewee_avatar,
         o.id AS order_no
@@ -24,10 +25,12 @@ class Review {
     const formattedRows = rows.map(row => ({
       ...row,
       user: {
+        id: row.reviewer_user_id,
         nickname: row.reviewer_nickname,
         avatar_url: row.reviewer_avatar
       },
       sitter: {
+        id: row.reviewee_user_id,
         nickname: row.reviewee_nickname,
         avatar_url: row.reviewee_avatar
       },
@@ -136,6 +139,7 @@ class Review {
   static async findById(id) {
     const [rows] = await pool.query(`
       SELECT r.id, r.rating, r.comment, r.created_at,
+        r.reviewer_user_id, r.reviewee_user_id,
         ru.nickname AS reviewer_nickname, ru.avatar_url AS reviewer_avatar,
         reu.nickname AS reviewee_nickname, reu.avatar_url AS reviewee_avatar,
         o.id AS order_no, o.service_date

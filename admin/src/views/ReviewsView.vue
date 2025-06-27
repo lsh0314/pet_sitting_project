@@ -108,7 +108,9 @@
                 {{ (row.user && row.user.nickname && row.user.nickname.charAt(0)) || 'U' }}
               </el-avatar>
               <div class="user-details">
-                <div class="nickname">{{ (row.user && row.user.nickname) || '未知用户' }}</div>
+                <div class="nickname" @click="handleUserClick(row.user)" style="cursor: pointer; color: #409EFF">
+                  {{ (row.user && row.user.nickname) || '未知用户' }}
+                </div>
                 <div class="time">评价时间: {{ formatDate(row.created_at) }}</div>
               </div>
           </div>
@@ -127,8 +129,14 @@
               {{ (row.sitter && row.sitter.nickname && row.sitter.nickname.charAt(0)) || 'S' }}
             </el-avatar>
             <div class="user-details">
-              <div class="nickname">{{ (row.sitter && row.sitter.nickname) || '未知帮溜员' }}</div>
-              <div class="order">订单号: {{ (row.order && row.order.order_no) || '未知' }}</div>
+                <div class="nickname" @click="handleSitterClick(row.sitter)" style="cursor: pointer; color: #409EFF">
+                {{ (row.sitter && row.sitter.nickname) || '未知帮溜员' }}
+              </div>
+              <div class="order">订单号: 
+                <span @click="goToOrderDetail(row.order && row.order.order_no)" style="cursor: pointer; color: #409EFF">
+                  {{ (row.order && row.order.order_no) || '未知' }}
+                </span>
+              </div>
             </div>
           </div>
         </template>
@@ -269,14 +277,70 @@
         </div>
       </div>
     </el-drawer>
+
+    <!-- 用户详情抽屉 -->
+    <el-drawer
+      v-model="userDetailVisible"
+      :title="userDetailTitle"
+      size="500px"
+      destroy-on-close
+    >
+      <div v-if="currentUserDetail" class="user-detail">
+        <div class="detail-section">
+          <h3>基本信息</h3>
+          <div class="user-info">
+            <el-avatar 
+              :size="80" 
+              :src="currentUserDetail.avatar_url"
+              shape="circle"
+            />
+            <div class="user-details">
+              <div class="nickname">{{ currentUserDetail.nickname }}</div>
+              <div class="id">用户ID: {{ currentUserDetail.id }}</div>
+              <div class="role">角色: {{ currentUserDetail.role === 'pet_owner' ? '宠物主人' : '帮溜员' }}</div>
+              <div class="status">状态: {{ currentUserDetail.status === 'active' ? '活跃' : '禁用' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>详细信息</h3>
+          <el-descriptions :column="1" border>
+            <el-descriptions-item label="注册时间">{{ formatDate(currentUserDetail.created_at) }}</el-descriptions-item>
+            <el-descriptions-item label="性别">{{ currentUserDetail.gender === 'male' ? '男' : currentUserDetail.gender === 'female' ? '女' : '未知' }}</el-descriptions-item>
+            <el-descriptions-item label="手机号">{{ currentUserDetail.phone || '未绑定' }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+
+        <div v-if="currentUserDetail.role === 'sitter'" class="detail-section">
+          <h3>帮溜员信息</h3>
+          <el-descriptions :column="1" border>
+            <el-descriptions-item label="服务区域">{{ currentUserDetail.service_area || '未设置' }}</el-descriptions-item>
+            <el-descriptions-item label="服务次数">{{ currentUserDetail.service_count || 0 }}</el-descriptions-item>
+            <el-descriptions-item label="评分">
+              <el-rate
+                v-model="currentUserDetail.rating"
+                disabled
+                show-score
+                text-color="#ff9900"
+                score-template="{value} 星"
+              />
+            </el-descriptions-item>
+          </el-descriptions>
+        </div>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
+
+const router = useRouter()
 
 // 状态定义
 const loading = ref(false)
@@ -284,6 +348,11 @@ const reviewList = ref([])
 const reviewDetailVisible = ref(false)
 const currentReview = ref(null)
 const tableKey = ref(0)
+
+// 用户详情抽屉
+const userDetailVisible = ref(false)
+const currentUserId = ref(null)
+const currentUserDetail = ref(null)
 
 // 筛选条件
 const filters = reactive({
@@ -476,6 +545,83 @@ const submitReply = async () => {
   } catch (err) {
     console.error('回复失败:', err)
     ElMessage.error('保存失败')
+  }
+}
+
+// 打开用户详情抽屉
+const userDetailTitle = computed(() => {
+  return `用户详情 - ${currentUserDetail.value?.nickname || ''}`
+})
+
+const openUserDetail = async (userId) => {
+  console.log('点击用户ID:', userId)
+  if (!userId) {
+    ElMessage.warning('无效的用户ID')
+    return
+  }
+  
+  try {
+    loading.value = true
+    currentUserId.value = userId
+    
+    // 获取用户详情 - 修改API路径为绝对路径
+    const response = await axios.get(`/api/user/admin/${userId}/detail`)
+    console.log('用户详情响应:', response.data)
+    
+    if (response.data && response.data.data) {
+      currentUserDetail.value = response.data.data
+      userDetailVisible.value = true
+    } else {
+      throw new Error(response.data?.message || '无效的响应数据')
+    }
+  } catch (err) {
+    console.error('获取用户详情失败:', {
+      error: err,
+      response: err.response,
+      config: err.config
+    })
+    ElMessage.error(`获取用户详情失败: ${err.response?.data?.message || err.message}`)
+  } finally {
+    loading.value = false
+  }
+}
+
+// 跳转到订单详情
+const handleUserClick = (user) => {
+  console.log('用户数据:', user)
+  if (!user) {
+    console.error('用户数据为空:', user)
+    ElMessage.warning('用户数据为空')
+    return
+  }
+  if (!user.id) {
+    console.error('用户ID为空:', user)
+    ElMessage.warning('用户ID为空')
+    return
+  }
+  console.log('准备打开用户详情，ID:', user.id)
+  openUserDetail(user.id)
+}
+
+const handleSitterClick = (sitter) => {
+  console.log('帮溜员数据:', sitter)
+  if (!sitter) {
+    console.error('帮溜员数据为空:', sitter)
+    ElMessage.warning('帮溜员数据为空')
+    return
+  }
+  if (!sitter.id) {
+    console.error('帮溜员ID为空:', sitter)
+    ElMessage.warning('帮溜员ID为空')
+    return
+  }
+  console.log('准备打开帮溜员详情，ID:', sitter.id)
+  openUserDetail(sitter.id)
+}
+
+const goToOrderDetail = (orderNo) => {
+  if (orderNo) {
+    router.push(`/orders/${orderNo}`)  // 修改为后端实际路由
   }
 }
 
