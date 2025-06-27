@@ -30,8 +30,18 @@
     </view>
   </view>
 
+  <!-- 上传类型切换 -->
+  <view class="upload-type-tabs">
+    <view class="tab {{uploadType === 'photo' ? 'active' : ''}}" bindtap="switchUploadType" data-type="photo">
+      📷 拍照打卡
+    </view>
+    <view class="tab {{uploadType === 'video' ? 'active' : ''}}" bindtap="switchUploadType" data-type="video">
+      🎥 视频打卡
+    </view>
+  </view>
+
   <!-- 拍照区域 -->
-  <view class="photo-area">
+  <view class="photo-area" wx:if="{{uploadType === 'photo'}}">
     <view class="photo-tip">📸 请拍摄一张服务完成的照片作为服务结束的凭证</view>
     
     <!-- 未拍照状态 -->
@@ -49,56 +59,58 @@
     </view>
   </view>
 
+  <!-- 视频区域 -->
+  <view class="video-area" wx:if="{{uploadType === 'video'}}">
+    <view class="video-tip">🎥 请拍摄一段服务完成的视频作为服务结束的凭证 (最长30秒)</view>
+    
+    <!-- 未拍视频状态 -->
+    <view class="camera-placeholder" wx:if="{{!videoTaken}}" bindtap="takeVideo">
+      <view class="camera-icon">🎥</view>
+      <view class="camera-text">点击拍视频</view>
+    </view>
+    
+    <!-- 已拍视频状态 -->
+    <view class="video-preview" wx:if="{{videoTaken}}">
+      <video class="preview-video" src="{{videoPath}}" controls></video>
+      <view class="video-actions">
+        <button class="btn-retake" bindtap="retakeVideo">重新拍摄</button>
+      </view>
+    </view>
+  </view>
+
   <!-- 位置验证区域 -->
   <view class="location-area">
-    <view class="location-title">位置验证</view>
-    
-    <!-- 位置状态 -->
-    <view class="location-status">
-      <view class="status-icon {{locationVerified ? 'verified' : ''}}">
-        <text wx:if="{{locationVerified}}">✓</text>
-        <text wx:elif="{{locationChecking}}">⟳</text>
-        <text wx:else>!</text>
-      </view>
-      <view class="status-text">
-        <text wx:if="{{locationVerified}}">位置已验证</text>
-        <text wx:elif="{{locationChecking}}">正在验证位置...</text>
-        <text wx:else>{{locationMessage || '请验证您的位置'}}</text>
+    <view class="location-header">
+      <view class="location-title">位置验证</view>
+      <view class="location-status {{locationVerified ? 'verified' : ''}}">
+        {{locationVerified ? '✅ 已验证' : '⏳ 未验证'}}
       </view>
     </view>
     
-    <!-- 位置详情 -->
-    <view class="location-details" wx:if="{{currentLocation}}">
-      <view class="info-item">
-        <text class="label">当前位置:</text>
-        <text class="value">📍 {{currentLocation.address || '未知地点'}}</text>
-      </view>
-      <view class="info-item" wx:if="{{distance !== null}}">
-        <text class="label">与服务地址距离:</text>
-        <text class="value distance {{distance > 1000 ? 'far' : ''}}">
-          <block wx:if="{{distance > 1000}}">🚨 {{distanceDisplay}} 公里</block>
-          <block wx:else>✅ {{distance}} 米</block>
+    <view class="location-info" wx:if="{{currentLocation}}">
+      <view class="location-address">📍 {{currentLocation.address || '获取地址中...'}}</view>
+      <view class="location-distance" wx:if="{{distance !== null}}">
+        距服务地点: {{distance}}米
+        <text class="distance-tag {{distance < 500 ? 'good' : 'bad'}}">
+          {{distance < 500 ? '✅ 在范围内' : '⚠️ 距离较远'}}
         </text>
       </view>
     </view>
     
-    <!-- 位置验证按钮 -->
     <button 
-      class="btn-verify-location {{locationChecking ? 'checking' : ''}}" 
+      class="btn-verify-location {{locationVerified ? 'btn-disabled' : ''}}" 
+      disabled="{{locationVerified}}"
       bindtap="verifyLocation"
-      disabled="{{locationChecking}}"
     >
-      <block wx:if="{{locationChecking}}">⏳ 验证中...</block>
-      <block wx:elif="{{locationVerified}}">🔄 重新验证位置</block>
-      <block wx:else>🔍 验证位置</block>
+      {{locationVerified ? '已完成位置验证' : '确认位置'}}
     </button>
   </view>
 
   <!-- 底部操作区 -->
   <view class="footer-action">
     <button 
-      class="btn-primary {{(!photoTaken || !locationVerified || uploading) ? 'btn-disabled' : ''}}" 
-      disabled="{{!photoTaken || !locationVerified || uploading}}"
+      class="btn-primary {{((!photoTaken && !videoTaken) || !locationVerified || uploading) ? 'btn-disabled' : ''}}" 
+      disabled="{{(!photoTaken && !videoTaken) || !locationVerified || uploading}}"
       bindtap="completeService"
     >
       <block wx:if="{{uploading}}">⏳ 处理中...</block>

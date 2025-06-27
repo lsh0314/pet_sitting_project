@@ -85,6 +85,7 @@ App({
     isLoggedIn: false,
     userInfo: null,
     selectedServiceType: null, // 用户从首页选择的服务类型
-    orderListNeedRefresh: false // 标记订单列表是否需要刷新
+    orderListNeedRefresh: false, // 标记订单列表是否需要刷新
+    sitterListNeedRefresh: false // 标记帮溜员列表是否需要刷新
   }
 }) 

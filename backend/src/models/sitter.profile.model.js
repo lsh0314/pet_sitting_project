@@ -74,6 +74,50 @@ class SitterProfile {
   }
 
   /**
+   * 更新帮溜员的评分和完成服务数量
+   * @param {number} sitterId - 帮溜员用户ID
+   * @param {number} rating - 新的评分
+   * @returns {Promise<boolean>} 是否更新成功
+   */
+  static async updateRatingAndServices(sitterId, rating) {
+    try {
+      // 获取帮溜员当前的评分和服务数量
+      const [currentData] = await pool.query(
+        `SELECT rating, total_services_completed 
+         FROM sitter_profiles 
+         WHERE user_id = ?`,
+        [sitterId]
+      );
+      
+      if (currentData.length === 0) {
+        return false; // 帮溜员资料不存在
+      }
+      
+      const current = currentData[0];
+      const currentRating = current.rating || 5.0; // 默认5.0
+      const currentServices = current.total_services_completed || 0;
+      
+      // 计算新的平均评分
+      // 新平均分 = (旧平均分 * 旧服务数 + 新评分) / (旧服务数 + 1)
+      const newServices = currentServices + 1;
+      const newRating = ((currentRating * currentServices) + rating) / newServices;
+      
+      // 更新帮溜员资料
+      const [result] = await pool.query(
+        `UPDATE sitter_profiles
+         SET rating = ?, total_services_completed = ?, updated_at = CURRENT_TIMESTAMP
+         WHERE user_id = ?`,
+        [newRating, newServices, sitterId]
+      );
+      
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error('更新帮溜员评分和服务数量失败:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 获取所有帮溜员列表
    * @param {Object} options - 查询选项
    * @param {number} options.offset - 偏移量
@@ -154,6 +198,92 @@ class SitterProfile {
       };
     } catch (error) {
       console.error('查询帮溜员列表失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取帮溜员的评价列表
+   * @param {number} sitterId - 帮溜员用户ID
+   * @param {number} offset - 分页偏移量
+   * @param {number} limit - 每页数量
+   * @returns {Promise<{reviews: Array, total: number}>} 评价列表和总数
+   */
+  static async getReviews(sitterId, offset = 0, limit = 10) {
+    try {
+      // 获取总评价数
+      const [totalRows] = await pool.query(
+        `SELECT COUNT(*) as total
+         FROM reviews r
+         JOIN orders o ON r.order_id = o.id
+         WHERE o.sitter_user_id = ? AND r.reviewer_user_id = o.owner_user_id`,
+        [sitterId]
+      );
+      
+      const total = totalRows[0].total || 0;
+      
+      // 如果没有评价，直接返回空数组
+      if (total === 0) {
+        return { reviews: [], total: 0 };
+      }
+      
+      // 获取评价列表
+      const [reviewRows] = await pool.query(
+        `SELECT 
+           r.id, r.order_id as orderId, r.rating, r.comment, r.tags,
+           r.is_anonymous as isAnonymous, r.created_at as createdAt,
+           CASE 
+             WHEN r.is_anonymous = 1 THEN '匿名用户'
+             ELSE u.nickname
+           END as reviewerName,
+           CASE
+             WHEN r.is_anonymous = 1 THEN NULL
+             ELSE u.avatar_url
+           END as reviewerAvatar,
+           o.service_type as serviceType
+         FROM reviews r
+         JOIN orders o ON r.order_id = o.id
+         JOIN users u ON r.reviewer_user_id = u.id
+         WHERE o.sitter_user_id = ? AND r.reviewer_user_id = o.owner_user_id
+         ORDER BY r.created_at DESC
+         LIMIT ? OFFSET ?`,
+        [sitterId, limit, offset]
+      );
+      
+      // 处理评价数据
+      const reviews = reviewRows.map(review => {
+        // 处理标签数据
+        let tags = [];
+        if (review.tags) {
+          try {
+            // 检查是否已经是数组
+            if (Array.isArray(review.tags)) {
+              tags = review.tags;
+            } else {
+              // 尝试解析JSON字符串
+              tags = JSON.parse(review.tags);
+            }
+          } catch (e) {
+            console.error('解析评价标签失败:', e);
+          }
+        }
+        
+        // 格式化时间
+        let createdAt = review.createdAt;
+        if (createdAt instanceof Date) {
+          createdAt = createdAt.toISOString();
+        }
+        
+        return {
+          ...review,
+          tags,
+          createdAt
+        };
+      });
+      
+      return { reviews, total };
+    } catch (error) {
+      console.error('获取帮溜员评价列表失败:', error);
       throw error;
     }
   }

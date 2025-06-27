@@ -522,15 +522,15 @@ class OrderController {
       const sitterId = req.user.id;
       
       // 获取请求体中的数据
-      const { photoUrl, location } = req.body;
+      const { photoUrl, videoUrl, location } = req.body;
       
       console.log('完成服务请求数据:', req.body);
       
-      // 验证必填字段
-      if (!photoUrl) {
+      // 验证必填字段 - 照片或视频至少有一个
+      if (!photoUrl && !videoUrl) {
         return res.status(400).json({
           success: false,
-          message: '缺少必填字段：photoUrl'
+          message: '缺少必填字段：photoUrl或videoUrl至少提供一个'
         });
       }
       
@@ -565,8 +565,8 @@ class OrderController {
       const reportData = {
         orderId,
         text: '服务完成打卡',
-        imageUrls: JSON.stringify([photoUrl]), // 确保是JSON字符串
-        videoUrl: null
+        imageUrls: photoUrl ? JSON.stringify([photoUrl]) : null,
+        videoUrl: videoUrl || null
       };
       
       console.log('服务报告数据:', reportData);
@@ -1053,9 +1053,9 @@ class OrderController {
         });
       }
       
-      // 如果是宠物主评价帮溜员，更新帮溜员的评分
+      // 如果是宠物主评价帮溜员，更新帮溜员的评分和完成服务数量
       if (userId === order.ownerUserId) {
-        // TODO: 更新帮溜员的平均评分（未来迭代）
+        await SitterProfile.updateRatingAndServices(order.sitterUserId, rating);
       }
       
       // 注意：订单状态更新已经在 Order.addReview 方法中处理

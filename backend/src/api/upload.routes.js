@@ -62,4 +62,38 @@ router.post('/image', authMiddleware, upload.single('photo'), (req, res) => {
   }
 });
 
+// 视频上传接口
+router.post('/video', authMiddleware, upload.single('video'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: '没有上传视频文件'
+      });
+    }
+    
+    // 构建文件URL
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}`;
+    const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    
+    console.log('上传视频成功，URL:', fileUrl);
+    
+    // 返回文件URL
+    res.json({
+      success: true,
+      url: fileUrl,
+      message: '视频上传成功'
+    });
+  } catch (error) {
+    console.error('视频上传失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '视频上传失败',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 module.exports = router; 

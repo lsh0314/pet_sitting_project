@@ -12,6 +12,7 @@ Page({
     error: false, // 错误状态
     currentPage: 1, // 当前页码
     hasMore: true, // 是否还有更多数据
+    lastRefreshTime: 0, // 上次刷新时间戳
   },
 
   /**
@@ -29,6 +30,31 @@ Page({
       this.getTabBar().setData({
         selected: 0 // 选中首页
       });
+    }
+    
+    // 检查是否需要刷新数据
+    // 如果距离上次刷新超过30秒，或者从评价页面返回，则刷新数据
+    const currentTime = new Date().getTime();
+    const needRefresh = currentTime - this.data.lastRefreshTime > 30000 || 
+                        (app.globalData && (app.globalData.orderListNeedRefresh || app.globalData.sitterListNeedRefresh));
+    
+    if (needRefresh) {
+      // 重置数据并重新获取
+      this.setData({
+        sitters: [],
+        currentPage: 1,
+        hasMore: true,
+        lastRefreshTime: currentTime
+      });
+      
+      // 重新加载数据
+      this.fetchSitters();
+      
+      // 重置全局刷新标志
+      if (app.globalData) {
+        app.globalData.orderListNeedRefresh = false;
+        app.globalData.sitterListNeedRefresh = false;
+      }
     }
   },
 

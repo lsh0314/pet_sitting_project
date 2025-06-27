@@ -17,4 +17,10 @@ router.put('/profile', authMiddleware, SitterController.updateProfile);
 // 公开接口 - 获取指定帮溜员的公开资料
 router.get('/:id([0-9]+)', SitterController.getSitterById);
 
+// 获取帮溜员详情
+router.get('/:id', SitterController.getSitterDetail);
+
+// 获取帮溜员评价列表
+router.get('/:id/reviews', SitterController.getSitterReviews);
+
 module.exports = router; 

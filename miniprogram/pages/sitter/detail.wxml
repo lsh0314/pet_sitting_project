@@ -31,6 +31,66 @@
           </view>
         </view>
         
+        <!-- 历史评价 -->
+        <view class="section">
+          <view class="section-title">历史评价</view>
+          <view class="section-content">
+            <block wx:if="{{latestReview}}">
+              <!-- 最新一条评价 -->
+              <view class="review-item">
+                <view class="review-header">
+                  <image class="reviewer-avatar" src="{{latestReview.reviewerAvatar || '/static/images/default-avatar.png'}}"></image>
+                  <view class="reviewer-info">
+                    <view class="reviewer-name">{{latestReview.reviewerName || '匿名用户'}}</view>
+                    <view class="review-date">{{latestReview.createdAtFormatted}}</view>
+                  </view>
+                  <view class="review-rating">
+                    <text class="icon-star">★</text>
+                    <text>{{latestReview.rating}}</text>
+                  </view>
+                </view>
+                <view class="review-content">{{latestReview.comment || '该用户未留下评价内容'}}</view>
+                <view class="review-tags" wx:if="{{latestReview.tags && latestReview.tags.length > 0}}">
+                  <text class="review-tag" wx:for="{{latestReview.tags}}" wx:key="*this">{{item}}</text>
+                </view>
+              </view>
+              
+              <!-- 查看更多评价按钮 -->
+              <view class="view-more" bindtap="toggleReviews" wx:if="{{reviewsTotal > 1}}">
+                <text>{{showAllReviews ? '收起' : '查看更多评价'}}</text>
+                <text class="arrow">{{showAllReviews ? '↑' : '↓'}}</text>
+              </view>
+              
+              <!-- 更多评价列表 -->
+              <view class="more-reviews" wx:if="{{showAllReviews && reviews.length > 1}}">
+                <view class="review-item" wx:for="{{reviews}}" wx:key="id" wx:if="{{index > 0}}">
+                  <view class="review-header">
+                    <image class="reviewer-avatar" src="{{item.reviewerAvatar || '/static/images/default-avatar.png'}}"></image>
+                    <view class="reviewer-info">
+                      <view class="reviewer-name">{{item.reviewerName || '匿名用户'}}</view>
+                      <view class="review-date">{{item.createdAtFormatted}}</view>
+                    </view>
+                    <view class="review-rating">
+                      <text class="icon-star">★</text>
+                      <text>{{item.rating}}</text>
+                    </view>
+                  </view>
+                  <view class="review-content">{{item.comment || '该用户未留下评价内容'}}</view>
+                  <view class="review-tags" wx:if="{{item.tags && item.tags.length > 0}}">
+                    <text class="review-tag" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this">{{tag}}</text>
+                  </view>
+                </view>
+                
+                <!-- 加载更多按钮 -->
+                <view class="load-more" bindtap="loadMoreReviews" wx:if="{{reviews.length < reviewsTotal}}">
+                  <text>{{reviewsLoading ? '加载中...' : '加载更多'}}</text>
+                </view>
+              </view>
+            </block>
+            <view wx:else class="no-reviews">暂无评价</view>
+          </view>
+        </view>
+        
         <!-- 服务区域 -->
         <view class="section">
           <view class="section-title">服务区域</view>

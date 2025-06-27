@@ -234,6 +234,74 @@ class SitterController {
       });
     }
   }
+
+  /**
+   * 获取帮溜员详情（兼容旧版本接口）
+   */
+  static async getSitterDetail(req, res) {
+    try {
+      const sitterId = req.params.id;
+      
+      // 获取帮溜员基本资料
+      const profile = await SitterProfile.findByUserId(sitterId);
+      
+      if (!profile) {
+        return res.status(404).json({
+          success: false,
+          message: '未找到对应帮溜员'
+        });
+      }
+      
+      // 获取帮溜员服务项目
+      const services = await SitterService.findByUserId(sitterId);
+      
+      // 返回组合数据（旧版本格式）
+      res.json({
+        profile,
+        services: services || []
+      });
+    } catch (error) {
+      console.error('获取帮溜员详情失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取帮溜员详情失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 获取帮溜员评价列表
+   */
+  static async getSitterReviews(req, res) {
+    try {
+      const sitterId = req.params.id;
+      const { page = 1, size = 10 } = req.query;
+      
+      // 计算分页参数
+      const offset = (page - 1) * size;
+      const limit = parseInt(size);
+      
+      // 获取帮溜员评价列表
+      const { reviews, total } = await SitterProfile.getReviews(sitterId, offset, limit);
+      
+      res.json({
+        success: true,
+        data: reviews,
+        total,
+        page: parseInt(page),
+        size: parseInt(size),
+        totalPages: Math.ceil(total / size)
+      });
+    } catch (error) {
+      console.error('获取帮溜员评价列表失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取帮溜员评价列表失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
 }
 
 module.exports = SitterController; 

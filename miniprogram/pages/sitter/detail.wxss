@@ -313,3 +313,108 @@
   height: 70rpx;
   line-height: 70rpx;
 }
+
+/* 评价相关样式 */
+.review-item {
+  background-color: #fff;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.review-item:last-child {
+  border-bottom: none;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.reviewer-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+}
+
+.reviewer-info {
+  flex: 1;
+}
+
+.reviewer-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4rpx;
+}
+
+.review-date {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.review-rating {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+.review-content {
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: #333;
+  margin: 10rpx 0;
+}
+
+.review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 12rpx;
+}
+
+.review-tag {
+  font-size: 24rpx;
+  color: #ff9800;
+  background-color: #fff8e1;
+  padding: 6rpx 16rpx;
+  border-radius: 6rpx;
+  margin-right: 12rpx;
+  margin-bottom: 8rpx;
+  border: 1rpx solid #ffecb3;
+}
+
+.view-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 0 0;
+  color: #ffb800;
+  font-size: 28rpx;
+}
+
+.arrow {
+  margin-left: 8rpx;
+}
+
+.more-reviews {
+  margin-top: 20rpx;
+  border-top: 1rpx dashed #f0f0f0;
+  padding-top: 20rpx;
+}
+
+.load-more {
+  text-align: center;
+  padding: 20rpx 0 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.no-reviews {
+  color: #999;
+  font-size: 28rpx;
+  padding: 20rpx 0;
+  text-align: center;
+}

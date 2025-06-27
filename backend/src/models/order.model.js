@@ -351,21 +351,8 @@ class Order {
         );
       }
       
-      // 更新帮溜员完成服务次数
-      const [orderInfo] = await connection.execute(
-        'SELECT sitter_user_id FROM orders WHERE id = ?',
-        [orderId]
-      );
-      
-      if (orderInfo.length > 0) {
-        const sitterId = orderInfo[0].sitter_user_id;
-        await connection.execute(
-          `UPDATE sitter_profiles 
-           SET total_services_completed = total_services_completed + 1 
-           WHERE user_id = ?`,
-          [sitterId]
-        );
-      }
+      // 注意：移除了更新帮溜员完成服务次数的代码
+      // 现在只在评价时更新帮溜员的评分和完成服务次数
       
       // 提交事务
       await connection.commit();

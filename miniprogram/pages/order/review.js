@@ -298,8 +298,10 @@ Page({
         showSuccess: true
       });
       
-      // 设置全局变量，标记订单列表需要刷新
-      getApp().globalData.orderListNeedRefresh = true;
+      // 设置全局变量，标记订单列表和帮溜员列表需要刷新
+      const app = getApp();
+      app.globalData.orderListNeedRefresh = true;
+      app.globalData.sitterListNeedRefresh = true;
       
       // 显示成功动画后返回
       setTimeout(() => {

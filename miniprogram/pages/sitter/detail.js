@@ -7,7 +7,15 @@ Page({
     sitterId: null,
     sitterInfo: null,
     loading: true,
-    error: false
+    error: false,
+    // 添加评价相关数据
+    reviews: [],
+    latestReview: null,
+    reviewsTotal: 0,
+    reviewsPage: 1,
+    reviewsSize: 10,
+    reviewsLoading: false,
+    showAllReviews: false
   },
 
   onLoad: function (options) {
@@ -17,6 +25,8 @@ Page({
         sitterId: options.id
       });
       this.fetchSitterDetail();
+      // 获取评价列表
+      this.fetchSitterReviews(1);
     } else {
       wx.showToast({
         title: '参数错误',
@@ -105,6 +115,76 @@ Page({
           icon: 'none'
         });
       });
+  },
+
+  // 获取帮溜员评价列表
+  fetchSitterReviews: function (page = 1, append = false) {
+    if (this.data.reviewsLoading) return;
+    
+    this.setData({ reviewsLoading: true });
+    
+    api.get(`/api/sitter/${this.data.sitterId}/reviews`, {
+      page: page,
+      size: this.data.reviewsSize
+    }, false)
+      .then(res => {
+        if (res.success && res.data) {
+          const reviews = res.data;
+          
+          // 处理评价数据
+          const formattedReviews = reviews.map(review => {
+            // 格式化时间
+            let createdAt = '未知时间';
+            if (review.createdAt) {
+              try {
+                const date = new Date(review.createdAt);
+                createdAt = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+              } catch (e) {
+                console.error('日期格式化失败:', e);
+              }
+            }
+            
+            return {
+              ...review,
+              createdAtFormatted: createdAt
+            };
+          });
+          
+          // 更新数据
+          this.setData({
+            reviews: append ? [...this.data.reviews, ...formattedReviews] : formattedReviews,
+            latestReview: formattedReviews.length > 0 ? formattedReviews[0] : null,
+            reviewsTotal: res.total || 0,
+            reviewsPage: page,
+            reviewsLoading: false
+          });
+        } else {
+          this.setData({ reviewsLoading: false });
+        }
+      })
+      .catch(err => {
+        console.error('获取帮溜员评价失败:', err);
+        this.setData({ reviewsLoading: false });
+      });
+  },
+
+  // 加载更多评价
+  loadMoreReviews: function () {
+    if (this.data.reviewsLoading) return;
+    
+    const nextPage = this.data.reviewsPage + 1;
+    const totalPages = Math.ceil(this.data.reviewsTotal / this.data.reviewsSize);
+    
+    if (nextPage <= totalPages) {
+      this.fetchSitterReviews(nextPage, true);
+    }
+  },
+
+  // 切换显示全部评价
+  toggleReviews: function() {
+    this.setData({
+      showAllReviews: !this.data.showAllReviews
+    });
   },
 
   // 点击下单按钮

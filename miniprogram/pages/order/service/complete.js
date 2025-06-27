@@ -1,4 +1,5 @@
 const api = require('../../../utils/api');
+const app = getApp();
 
 Page({
   data: {
@@ -8,7 +9,8 @@ Page({
     error: false,
     photoTaken: false,
     photoPath: '',
-    uploading: false,
+    videoTaken: false,
+    videoPath: '',
     
     // 位置相关
     locationVerified: false,  // 位置是否已验证
@@ -18,7 +20,13 @@ Page({
     distance: null,           // 与服务地址的距离（米）
     distanceDisplay: '',      // 格式化后的距离显示（公里）
     maxDistance: 1000,        // 最大允许距离（米）
-    orderCoords: null         // 订单地址的坐标
+    orderCoords: null,        // 订单地址的坐标
+    
+    // 提交状态
+    uploading: false,         // 是否正在上传
+    
+    // 上传类型选择
+    uploadType: 'photo',      // 默认上传类型：photo或video
   },
 
   onLoad: function (options) {
@@ -315,11 +323,45 @@ Page({
     });
   },
 
+  // 拍摄视频
+  takeVideo: function () {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['video'],
+      sourceType: ['camera'],
+      maxDuration: 30, // 最长30秒
+      camera: 'back',
+      success: (res) => {
+        const tempFilePath = res.tempFiles[0].tempFilePath;
+        this.setData({
+          videoTaken: true,
+          videoPath: tempFilePath
+        });
+      },
+      fail: (err) => {
+        console.error('视频拍摄失败:', err);
+        wx.showToast({
+          title: '视频拍摄失败，请重试',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  // 重新拍摄视频
+  retakeVideo: function () {
+    this.setData({
+      videoTaken: false,
+      videoPath: ''
+    });
+  },
+
   // 完成服务
   completeService: function () {
-    if (!this.data.photoTaken) {
+    // 检查是否已拍照或拍视频
+    if (!this.data.photoTaken && !this.data.videoTaken) {
       wx.showToast({
-        title: '请先拍照打卡',
+        title: '请先拍照或拍视频',
         icon: 'none'
       });
       return;
@@ -335,30 +377,50 @@ Page({
 
     this.setData({ uploading: true });
 
-    // 先上传照片
-    this.uploadPhoto()
-      .then(photoUrl => {
-        // 构建请求数据
-        const requestData = {
-          photoUrl: photoUrl
-        };
-        
-        // 如果有位置信息，一并提交
-        if (this.data.currentLocation) {
-          requestData.location = {
-            latitude: this.data.currentLocation.latitude,
-            longitude: this.data.currentLocation.longitude,
-            address: this.data.currentLocation.address
-          };
-          
-          if (this.data.distance !== null) {
-            requestData.distance = this.data.distance;
-          }
-        }
-        
-        // 调用完成服务API
-        return api.post(`/api/order/${this.data.orderId}/complete`, requestData);
-      })
+    // 根据上传类型选择上传照片或视频
+    if (this.data.photoTaken) {
+      this.uploadPhoto()
+        .then(photoUrl => this.submitService({ photoUrl }))
+        .catch(err => {
+          this.setData({ uploading: false });
+          wx.showToast({
+            title: '上传照片失败，请重试',
+            icon: 'none'
+          });
+        });
+    } else if (this.data.videoTaken) {
+      this.uploadVideo()
+        .then(videoUrl => this.submitService({ videoUrl }))
+        .catch(err => {
+          this.setData({ uploading: false });
+          wx.showToast({
+            title: '上传视频失败，请重试',
+            icon: 'none'
+          });
+        });
+    }
+  },
+
+  // 提交服务完成信息
+  submitService: function(mediaData) {
+    // 构建请求数据
+    const requestData = { ...mediaData };
+    
+    // 如果有位置信息，一并提交
+    if (this.data.currentLocation) {
+      requestData.location = {
+        latitude: this.data.currentLocation.latitude,
+        longitude: this.data.currentLocation.longitude,
+        address: this.data.currentLocation.address
+      };
+      
+      if (this.data.distance !== null) {
+        requestData.distance = this.data.distance;
+      }
+    }
+    
+    // 调用完成服务API
+    api.post(`/api/order/${this.data.orderId}/complete`, requestData)
       .then(() => {
         this.setData({ uploading: false });
         wx.showToast({
@@ -434,8 +496,63 @@ Page({
     });
   },
 
+  // 上传视频
+  uploadVideo: function () {
+    return new Promise((resolve, reject) => {
+      wx.showLoading({
+        title: '正在上传视频...',
+      });
+
+      console.log('开始上传视频...');
+      console.log('视频临时路径:', this.data.videoPath);
+
+      // 使用微信上传文件API
+      wx.uploadFile({
+        url: `${api.getBaseUrl()}/api/upload/video`,
+        filePath: this.data.videoPath,
+        name: 'video',
+        header: {
+          'Authorization': `Bearer ${wx.getStorageSync('token')}`
+        },
+        success: (res) => {
+          wx.hideLoading();
+          console.log('上传响应:', res.data);
+          
+          try {
+            const data = JSON.parse(res.data);
+            console.log('解析后的响应:', data);
+            
+            if (data.success && data.url) {
+              console.log('上传成功，URL:', data.url);
+              resolve(data.url);
+            } else {
+              console.error('上传失败:', data);
+              reject(new Error('上传失败'));
+            }
+          } catch (e) {
+            console.error('解析响应失败:', e);
+            reject(e);
+          }
+        },
+        fail: (err) => {
+          wx.hideLoading();
+          console.error('上传请求失败:', err);
+          reject(err);
+        }
+      });
+    });
+  },
+
   // 返回
   goBack: function () {
     wx.navigateBack();
-  }
+  },
+
+  // 切换上传类型
+  switchUploadType: function(e) {
+    const type = e.currentTarget.dataset.type;
+    this.setData({
+      uploadType: type
+    });
+  },
 }); 
