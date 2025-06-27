@@ -22,4 +22,7 @@ router.post('/admin/:id/update', authMiddleware, adminMiddleware, ReviewControll
 // 导出评价数据
 router.get('/admin/export', authMiddleware, adminMiddleware, ReviewController.exportReviews)
 
+// 切换评价显示状态
+router.post('/admin/:id/toggle-visibility', authMiddleware, adminMiddleware, ReviewController.toggleVisibility)
+
 module.exports = router

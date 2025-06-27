@@ -7,7 +7,7 @@ class Review {
   static async find({ page = 1, limit = 10 }) {
     const offset = (page - 1) * limit;
     const [rows] = await pool.query(`
-      SELECT r.id, r.rating, r.comment, r.created_at,
+      SELECT r.id, r.rating, r.comment, r.created_at, r.is_anonymous,
         r.reviewer_user_id, r.reviewee_user_id,
         ru.nickname AS reviewer_nickname, ru.avatar_url AS reviewer_avatar,
         reu.nickname AS reviewee_nickname, reu.avatar_url AS reviewee_avatar,
@@ -51,11 +51,11 @@ class Review {
    * @param {number} [options.page=1] - 当前页码
    * @param {number} [options.limit=10] - 每页数量
    */
-  static async search({ keyword, min_rating, max_rating, page = 1, limit = 10 }) {
+  static async search({ keyword, min_rating, max_rating, is_anonymous, page = 1, limit = 10 }) {
     // 基础查询语句，连接了 reviews, users (评价者), sitters (帮溜员)
     const baseQuery = `
       SELECT
-        r.id, r.comment, r.rating, r.created_at,
+        r.id, r.comment, r.rating, r.created_at, r.is_anonymous,
         ru.id AS user_id, ru.nickname AS user_nickname, ru.avatar_url AS user_avatar,
         reu.id AS sitter_id, reu.nickname AS sitter_nickname, reu.avatar_url AS sitter_avatar,
         o.id AS order_no
@@ -90,6 +90,13 @@ class Review {
       queryParams.push(Number(max_rating));
       console.log('应用最大评分条件:', Number(max_rating));
     }
+
+    // 4. 评价状态筛选
+    if (is_anonymous !== undefined && is_anonymous !== '') {
+      whereConditions.push('r.is_anonymous = ?');
+      queryParams.push(is_anonymous === 'true');
+      console.log('应用评价状态条件:', is_anonymous === 'true');
+    }
     
     let whereClause = '';
     if (whereConditions.length > 0) {
@@ -114,6 +121,7 @@ class Review {
       comment: row.comment,
       rating: row.rating,
       created_at: row.created_at,
+      is_anonymous: row.is_anonymous,
       user: {
         id: row.user_id,
         nickname: row.user_nickname,
@@ -138,7 +146,7 @@ class Review {
    */
   static async findById(id) {
     const [rows] = await pool.query(`
-      SELECT r.id, r.rating, r.comment, r.created_at,
+      SELECT r.id, r.rating, r.comment, r.created_at, r.is_anonymous,
         r.reviewer_user_id, r.reviewee_user_id,
         ru.nickname AS reviewer_nickname, ru.avatar_url AS reviewer_avatar,
         reu.nickname AS reviewee_nickname, reu.avatar_url AS reviewee_avatar,
@@ -192,6 +200,21 @@ class Review {
       return this.findById(id);
     }
     return null;
+  }
+
+  /**
+   * 切换评价显示状态
+   */
+  static async toggleVisibility(id) {
+    const [result] = await pool.query(
+      'UPDATE reviews SET is_anonymous = NOT is_anonymous WHERE id = ?',
+      [id]
+    );
+    if (result.affectedRows > 0) {
+      const [rows] = await pool.query('SELECT is_anonymous FROM reviews WHERE id = ?', [id]);
+      return { success: true, is_anonymous: rows[0].is_anonymous };
+    }
+    return { success: false };
   }
 }
 

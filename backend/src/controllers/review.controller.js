@@ -35,21 +35,22 @@ class ReviewController {
   /**
    * 搜索评价
    */
-static async searchReviews(req, res) {
-  try {
-    const { keyword, min_rating, max_rating, page = 1, limit = 10 } = req.query;
+  static async searchReviews(req, res) {
+    try {
+      const { keyword, min_rating, max_rating, is_anonymous, page = 1, limit = 10 } = req.query;
 
-    console.log('收到搜索请求，原始参数:', req.query);
+      console.log('收到搜索请求，原始参数:', req.query);
 
-    // 将处理后的参数直接传递给模型层
-    // 模型层会负责处理 undefined, 空字符串等情况
-    const { data, total } = await Review.search({
-      keyword,
-      min_rating,
-      max_rating,
-      page,
-      limit,
-    });
+      // 将处理后的参数直接传递给模型层
+      // 模型层会负责处理 undefined, 空字符串等情况
+      const { data, total } = await Review.search({
+        keyword,
+        min_rating,
+        max_rating,
+        is_anonymous,
+        page,
+        limit,
+      });
 
     res.json({
       success: true,
@@ -192,6 +193,36 @@ static async searchReviews(req, res) {
         success: false,
         message: '导出评价失败'
       })
+    }
+  }
+
+  /**
+   * 切换评价显示状态
+   */
+  static async toggleVisibility(req, res) {
+    try {
+      const { id } = req.params;
+      const result = await Review.toggleVisibility(id);
+      
+      if (!result.success) {
+        return res.status(404).json({
+          success: false,
+          message: '评价不存在'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          is_anonymous: result.is_anonymous
+        }
+      });
+    } catch (err) {
+      console.error('切换显示状态失败:', err);
+      res.status(500).json({
+        success: false,
+        message: '切换显示状态失败'
+      });
     }
   }
 }

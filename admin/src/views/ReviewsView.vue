@@ -40,21 +40,33 @@
           />
         </el-select>
         
-        <el-select 
-          v-model="filters.max_rating" 
-          placeholder="最高评分" 
-          clearable 
-          @change="handleSearch"
-          style="width: 120px"
-        >
-          <el-option label="全部" value="" />
-          <el-option
-            v-for="i in 5"
-            :key="i"
-            :label="`${i}星`"
-            :value="i"
-          />
-        </el-select>
+      <el-select 
+        v-model="filters.max_rating" 
+        placeholder="最高评分" 
+        clearable 
+        @change="handleSearch"
+        style="width: 120px"
+      >
+        <el-option label="全部" value="" />
+        <el-option
+          v-for="i in 5"
+          :key="i"
+          :label="`${i}星`"
+          :value="i"
+        />
+      </el-select>
+
+      <el-select 
+        v-model="filters.is_anonymous" 
+        placeholder="评价状态" 
+        clearable 
+        @change="handleSearch"
+        style="width: 120px"
+      >
+        <el-option label="全部" value="" />
+        <el-option label="显示中" value="false" />
+        <el-option label="已隐藏" value="true" />
+      </el-select>
         
         <el-button type="primary" @click="handleSearch">筛选</el-button>
         <el-button @click="resetFilters">重置</el-button>
@@ -69,6 +81,7 @@
       border
       stripe
       style="width: 100%"
+      :row-class-name="({row}) => row.is_anonymous ? 'hidden-row' : ''"
     >
       <template #empty>
         <div v-if="reviewList.length === 0 && !loading" class="empty-table">
@@ -164,11 +177,11 @@
           
           <el-button
             link
-            type="warning"
+            :type="scope.row.is_anonymous ? 'success' : 'info'"
             size="small"
-            @click="handleReplyReview(scope.row)"
+            @click="handleToggleVisibility(scope.row)"
           >
-            修改
+            {{ scope.row.is_anonymous ? '显示' : '隐藏' }}
           </el-button>
         </template>
       </el-table-column>
@@ -358,7 +371,8 @@ const currentUserDetail = ref(null)
 const filters = reactive({
   keyword: '',
   min_rating: '',
-  max_rating: ''
+  max_rating: '',
+  is_anonymous: ''
 })
 
 // 分页配置
@@ -407,9 +421,12 @@ const fetchReviewList = async () => {
     if (filters.max_rating !== '') {
       params.max_rating = filters.max_rating
     }
+    if (filters.is_anonymous !== '') {
+      params.is_anonymous = filters.is_anonymous === 'true'
+    }
 
     // 如果有搜索关键词，使用搜索接口，否则使用列表接口
-    const useSearchAPI = filters.keyword || filters.min_rating || filters.max_rating;
+    const useSearchAPI = filters.keyword || filters.min_rating || filters.max_rating || filters.is_anonymous;
     const url = useSearchAPI ? '/api/review/admin/search' : '/api/review/admin/list';
     const response = await axios.get(url, { params })
 
@@ -521,11 +538,25 @@ const viewReviewDetail = async (review) => {
   }
 }
 
-// 回复评价
-const handleReplyReview = (review) => {
-  currentReview.value = review
-  replyForm.content = review.comment || ''
-  reviewDetailVisible.value = true
+// 切换评价显示/隐藏状态
+const handleToggleVisibility = async (review) => {
+  try {
+    loading.value = true
+    const response = await axios.post(`/api/review/admin/${review.id}/toggle-visibility`)
+    if (response.data.success) {
+      // 更新本地数据状态而不重新获取整个列表
+      const index = reviewList.value.findIndex(r => r.id === review.id)
+      if (index !== -1) {
+        reviewList.value[index].is_anonymous = !reviewList.value[index].is_anonymous
+        ElMessage.success(reviewList.value[index].is_anonymous ? '评价已隐藏' : '评价已显示')
+      }
+    }
+  } catch (err) {
+    console.error('切换显示状态失败:', err)
+    ElMessage.error('操作失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 // 提交回复
@@ -756,5 +787,13 @@ onMounted(() => {
 
 .el-descriptions {
   margin-top: 10px;
+}
+
+.hidden-row {
+  background-color: #f0f9eb;
+  color: #67c23a;
+}
+.hidden-row:hover > td {
+  background-color: #e1f3d8 !important;
 }
 </style>
