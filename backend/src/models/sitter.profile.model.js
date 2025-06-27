@@ -123,12 +123,13 @@ class SitterProfile {
    * @param {number} options.offset - 偏移量
    * @param {number} options.limit - 限制数量
    * @param {string} options.service_type - 服务类型
+   * @param {string} options.district - 区域名称
    * @param {string} options.sort - 排序方式
    * @returns {Promise<Object>} 帮溜员列表和总数
    */
   static async findAll(options = {}) {
     try {
-      const { offset = 0, limit = 10, service_type, sort } = options;
+      const { offset = 0, limit = 10, service_type, district, sort } = options;
       
       // 构建基础查询
       let query = `
@@ -173,6 +174,18 @@ class SitterProfile {
         `;
         queryParams.push(service_type);
         countParams.push(service_type);
+      }
+      
+      // 如果指定了区域，添加区域筛选（模糊匹配）
+      if (district) {
+        query += `
+          AND sp.service_area LIKE ?
+        `;
+        countQuery += `
+          AND sp.service_area LIKE ?
+        `;
+        queryParams.push(`%${district}%`);
+        countParams.push(`%${district}%`);
       }
       
       // 添加排序

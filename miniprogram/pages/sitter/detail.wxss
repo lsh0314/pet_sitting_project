@@ -145,6 +145,18 @@
   margin-bottom: 10rpx;
 }
 
+/* 服务区域 */
+.service-area {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 0;
+}
+
+.area-icon {
+  margin-right: 10rpx;
+  font-size: 32rpx;
+}
+
 /* 服务列表 */
 .service-list {
   display: flex;

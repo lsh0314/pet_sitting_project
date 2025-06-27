@@ -14,7 +14,8 @@ Page({
     error: false, // 错误状态
     currentPage: 1, // 当前页码
     hasMore: true, // 是否还有更多数据
-    activeFilter: 'all' // 当前筛选条件：'all', 'rating', 'orders'
+    activeFilter: 'all', // 当前筛选条件：'all', 'rating', 'orders'
+    region: ['北京市', '北京市', '海淀区'], // 默认区域
   },
 
   /**
@@ -34,9 +35,16 @@ Page({
       serviceTypeText = '宠物寄养';
     }
     
+    // 尝试从全局获取当前位置
+    let region = ['北京市', '北京市', '海淀区'];
+    if (app.globalData && app.globalData.currentRegion) {
+      region = app.globalData.currentRegion;
+    }
+    
     this.setData({
       serviceType,
-      serviceTypeText
+      serviceTypeText,
+      region
     });
     
     // 加载帮溜员列表
@@ -100,6 +108,11 @@ Page({
       params.sort = 'rating';
     } else if (this.data.activeFilter === 'orders') {
       params.sort = 'orders';
+    }
+    
+    // 添加区域筛选
+    if (this.data.region && this.data.region[2]) {
+      params.district = this.data.region[2];
     }
     
     // 调用接口获取帮溜员列表
@@ -198,6 +211,29 @@ Page({
       
       this.fetchSitters();
     }
+  },
+
+  /**
+   * 地区选择器变化处理
+   */
+  bindRegionChange: function(e) {
+    console.log('地区选择变化:', e.detail.value);
+    this.setData({
+      region: e.detail.value,
+      sitters: [],
+      currentPage: 1,
+      hasMore: true,
+      loading: true,
+      error: false
+    });
+    
+    // 保存到全局数据，方便其他页面使用
+    if (app.globalData) {
+      app.globalData.currentRegion = e.detail.value;
+    }
+    
+    // 重新获取帮溜员列表
+    this.fetchSitters();
   },
 
   /**

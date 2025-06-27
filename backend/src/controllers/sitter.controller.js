@@ -122,7 +122,7 @@ class SitterController {
   static async getSitters(req, res) {
     try {
       // 获取查询参数
-      const { service_type, page = 1, size = 10, sort } = req.query;
+      const { service_type, page = 1, size = 10, sort, district } = req.query;
       
       // 计算分页参数
       const offset = (page - 1) * size;
@@ -140,16 +140,29 @@ class SitterController {
         options.service_type = service_type;
       }
       
+      // 如果指定了区域，添加到查询条件
+      if (district) {
+        options.district = district;
+      }
+      
       // 获取帮溜员列表
       const { sitters, total } = await SitterProfile.findAll(options);
       
+      // 如果指定了区域，在应用层面进行进一步筛选
+      let filteredSitters = sitters;
+      if (district && district !== '全部') {
+        filteredSitters = sitters.filter(sitter => 
+          sitter.service_area && sitter.service_area.includes(district)
+        );
+      }
+      
       res.json({
         success: true,
-        data: sitters,
-        total,
+        data: filteredSitters,
+        total: district ? filteredSitters.length : total,
         page: parseInt(page),
         size: parseInt(size),
-        totalPages: Math.ceil(total / size)
+        totalPages: Math.ceil((district ? filteredSitters.length : total) / size)
       });
     } catch (error) {
       console.error('获取帮溜员列表失败:', error);

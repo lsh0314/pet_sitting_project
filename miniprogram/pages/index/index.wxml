@@ -4,9 +4,10 @@
     <view class="logo-area">
       <view class="logo-text">宠物帮</view>
     </view>
-    <view class="rating-area">
-      <text class="star-icon">☆</text>
-      <text class="rating-text">5.0</text>
+    <view class="location-area" bindtap="openLocationPicker">
+      <text class="location-icon">📍</text>
+      <text class="location-text">{{region[0]}} {{region[1]}} {{region[2]}}</text>
+      <text class="location-arrow">▼</text>
     </view>
   </view>
   

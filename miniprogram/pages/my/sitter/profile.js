@@ -28,6 +28,7 @@ Page({
       service_area: '',
       available_dates: []
     },
+    region: ['北京市', '北京市', '海淀区'], // 默认区域
     services: [
       { service_type: 'walk', name: '遛狗', price: '', checked: false },
       { service_type: 'feed', name: '喂食', price: '', checked: false },
@@ -103,9 +104,31 @@ Page({
               };
             });
             
+            // 如果有服务区域数据，尝试解析为省市区
+            let region = ['北京市', '北京市', '海淀区']; // 默认值
+            if (profile.service_area) {
+              try {
+                // 尝试从服务区域字符串中提取省市区
+                const areaMatch = profile.service_area.match(/^(.*?)[省市](.*?)[市区县](.*?)$/);
+                if (areaMatch && areaMatch.length >= 4) {
+                  region = [
+                    areaMatch[1] + (areaMatch[1].endsWith('省') ? '' : '市'),
+                    areaMatch[2] + (areaMatch[2].endsWith('市') ? '' : '市'),
+                    areaMatch[3]
+                  ];
+                } else {
+                  // 如果无法解析，则直接使用服务区域字符串
+                  region = [profile.service_area, '', ''];
+                }
+              } catch (e) {
+                console.error('解析服务区域失败:', e);
+              }
+            }
+            
             this.setData({
               'profileData.bio': profile.bio || '',
               'profileData.service_area': profile.service_area || '',
+              region: region,
               selectedDates: availableDates || [],
               'profileData.available_dates': availableDates || [],
               weekdayOptions: updatedWeekdayOptions
@@ -204,6 +227,25 @@ Page({
       weekdayOptions,
       selectedDates,
       'profileData.available_dates': selectedDates
+    });
+  },
+
+  /**
+   * 服务区域选择处理
+   */
+  onRegionChange: function (e) {
+    const region = e.detail.value;
+    console.log('区域选择变化:', region);
+    
+    // 更新region数据
+    this.setData({
+      region: region
+    });
+    
+    // 将选择的省市区组合成服务区域字符串
+    const serviceArea = region.join('');
+    this.setData({
+      'profileData.service_area': serviceArea
     });
   },
 

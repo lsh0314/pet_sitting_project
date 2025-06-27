@@ -95,7 +95,10 @@
         <view class="section">
           <view class="section-title">服务区域</view>
           <view class="section-content">
-            <text>{{sitterInfo.serviceArea || '暂无服务区域信息'}}</text>
+            <view class="service-area">
+              <text class="area-icon">📍</text>
+              <text>{{sitterInfo.serviceArea || '暂无服务区域信息'}}</text>
+            </view>
           </view>
         </view>
         

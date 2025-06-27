@@ -138,16 +138,36 @@
 .area-input {
   width: 100%;
   height: 80rpx;
-  background-color: #f9f9f9;
+  background-color: #f5f5f5;
   border-radius: 8rpx;
-  padding: 0 16rpx;
+  padding: 0 20rpx;
   font-size: 28rpx;
   box-sizing: border-box;
-  border: 1rpx solid #eee;
 }
 
-.area-input:focus {
-  border-color: #ffba00;
+/* 服务区域选择器样式 */
+.region-picker {
+  width: 100%;
+  height: 80rpx;
+  background-color: #f5f5f5;
+  border-radius: 8rpx;
+  padding: 0 20rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.region-text {
+  flex: 1;
+  color: #333;
+}
+
+.region-arrow {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 10rpx;
 }
 
 /* 服务项目列表 */

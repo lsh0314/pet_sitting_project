@@ -24,6 +24,34 @@
   color: #333;
 }
 
+.location-area {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 30rpx;
+  padding: 6rpx 20rpx;
+  max-width: 300rpx;
+}
+
+.location-icon {
+  font-size: 32rpx;
+  margin-right: 8rpx;
+}
+
+.location-text {
+  font-size: 24rpx;
+  color: #333;
+  margin-right: 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.location-arrow {
+  font-size: 20rpx;
+  color: #999;
+}
+
 .rating-area {
   display: flex;
   align-items: center;

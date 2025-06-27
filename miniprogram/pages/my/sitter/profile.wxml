@@ -34,13 +34,16 @@
     <!-- 服务区域 -->
     <view class="form-section">
       <view class="section-title">服务区域</view>
-      <input 
-        class="area-input" 
-        placeholder="例如：北京市海淀区" 
-        value="{{profileData.service_area}}"
-        bindinput="onInputChange"
-        data-field="service_area"
-      />
+      <picker 
+        mode="region" 
+        bindchange="onRegionChange" 
+        value="{{region}}"
+      >
+        <view class="region-picker">
+          <text class="region-text">{{region[0]}} {{region[1]}} {{region[2]}}</text>
+          <text class="region-arrow">▼</text>
+        </view>
+      </picker>
     </view>
 
     <!-- 服务项目与价格 -->
