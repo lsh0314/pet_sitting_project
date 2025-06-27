@@ -92,10 +92,6 @@
               />
             </div>
             <div class="comment">{{ row.comment }}</div>
-            <div v-if="row.reply_content" class="reply-content">
-              <span class="reply-label">管理员回复：</span>
-              {{ row.reply_content }}
-            </div>
           </div>
         </template>
       </el-table-column>
@@ -164,7 +160,7 @@
             size="small"
             @click="handleReplyReview(scope.row)"
           >
-            {{ scope.row.reply_content ? '修改回复' : '回复' }}
+            修改
           </el-button>
         </template>
       </el-table-column>
@@ -255,21 +251,20 @@
         </div>
         
         <div class="detail-section">
-          <h3>回复评价</h3>
+          <h3>编辑评价内容</h3>
           <el-input
             v-model="replyForm.content"
             type="textarea"
             :rows="4"
-            placeholder="请输入回复内容"
+            placeholder="请输入内容"
           />
           <div class="action-buttons">
-            <el-button type="primary" @click="submitReply">提交回复</el-button>
+            <el-button type="primary" @click="submitReply">保存修改</el-button>
           </div>
           
-          <div v-if="currentReview.reply_content" class="existing-reply">
-            <h4>已有回复</h4>
-            <div class="reply-content">{{ currentReview.reply_content }}</div>
-            <div class="reply-time">回复时间: {{ formatDate(currentReview.reply_time) }}</div>
+          <div v-if="currentReview.comment" class="existing-reply">
+            <h4>当前评价内容</h4>
+            <div class="reply-content">{{ currentReview.comment }}</div>
           </div>
         </div>
       </div>
@@ -327,14 +322,26 @@ const fetchReviewList = async () => {
   try {
     loading.value = true
 
+    // 构建参数对象，过滤掉空值参数
     const params = {
       page: pagination.page,
-      limit: pagination.limit,
-      ...filters
+      limit: pagination.limit
+    }
+    
+    // 只添加非空的筛选条件
+    if (filters.keyword && filters.keyword.trim() !== '') {
+      params.keyword = filters.keyword.trim()
+    }
+    if (filters.min_rating !== '') {
+      params.min_rating = filters.min_rating
+    }
+    if (filters.max_rating !== '') {
+      params.max_rating = filters.max_rating
     }
 
     // 如果有搜索关键词，使用搜索接口，否则使用列表接口
-    const url = filters.keyword ? '/api/review/admin/search' : '/api/review/admin/list'
+    const useSearchAPI = filters.keyword || filters.min_rating || filters.max_rating;
+    const url = useSearchAPI ? '/api/review/admin/search' : '/api/review/admin/list';
     const response = await axios.get(url, { params })
 
     if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
@@ -456,19 +463,19 @@ const handleReplyReview = (review) => {
 const submitReply = async () => {
   try {
     if (!replyForm.content) {
-      return ElMessage.warning('回复内容不能为空')
+      return ElMessage.warning('评价内容不能为空')
     }
 
     await axios.post(`/api/review/admin/${currentReview.value.id}/update`, {
       comment: replyForm.content
     })
 
-    ElMessage.success('回复成功')
+    ElMessage.success('修改已保存')
     fetchReviewList()
     reviewDetailVisible.value = false
   } catch (err) {
     console.error('回复失败:', err)
-    ElMessage.error('回复失败')
+    ElMessage.error('保存失败')
   }
 }
 

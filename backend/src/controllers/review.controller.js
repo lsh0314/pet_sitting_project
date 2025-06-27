@@ -35,47 +35,37 @@ class ReviewController {
   /**
    * 搜索评价
    */
-  static async searchReviews(req, res) {
-    try {
-      const { keyword, min_rating, max_rating, page = 1, limit = 10 } = req.query
-      const skip = (page - 1) * limit
+static async searchReviews(req, res) {
+  try {
+    const { keyword, min_rating, max_rating, page = 1, limit = 10 } = req.query;
 
-      const query = {}
-      if (keyword) {
-        query.$or = [
-          { comment: { $regex: keyword, $options: 'i' } },
-          { 'reviewer_user.nickname': { $regex: keyword, $options: 'i' } },
-          { 'reviewee_user.nickname': { $regex: keyword, $options: 'i' } }
-        ]
-      }
-      if (min_rating) query.rating = { $gte: Number(min_rating) }
-      if (max_rating) query.rating = { ...query.rating, $lte: Number(max_rating) }
+    console.log('收到搜索请求，原始参数:', req.query);
 
-      const { data, total } = await Review.search({ 
-        keyword,
-        min_rating,
-        max_rating,
-        page: Number(page),
-        limit: Number(limit)
-      })
-      const reviews = data
+    // 将处理后的参数直接传递给模型层
+    // 模型层会负责处理 undefined, 空字符串等情况
+    const { data, total } = await Review.search({
+      keyword,
+      min_rating,
+      max_rating,
+      page,
+      limit,
+    });
 
-      res.json({
-        success: true,
-        data: {
-          data: reviews,
-          total
-        }
-      })
-    } catch (err) {
-      console.error('搜索评价失败:', err)
-      res.status(500).json({
-        success: false,
-        message: '搜索评价失败'
-      })
-    }
+    res.json({
+      success: true,
+      data: {
+        data, // data 字段通常就是查询结果数组
+        total,
+      },
+    });
+  } catch (err) {
+    console.error('搜索评价失败:', err);
+    res.status(500).json({
+      success: false,
+      message: '搜索评价失败',
+    });
   }
-
+}
   /**
    * 获取评价详情
    */
