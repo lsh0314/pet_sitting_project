@@ -214,7 +214,9 @@ class SitterController {
           type: service.service_type,
           price: service.price
         })),
-        availableDates: []
+        availableDates: [],
+        has_certificate: profile.has_certificate || false,
+        certificate_type: profile.certificate_type || null
       };
       
       // 安全解析available_dates
@@ -267,6 +269,14 @@ class SitterController {
       
       // 获取帮溜员服务项目
       const services = await SitterService.findByUserId(sitterId);
+      
+      // 确保证书信息存在
+      if (profile.has_certificate === undefined) {
+        profile.has_certificate = false;
+      }
+      if (profile.certificate_type === undefined) {
+        profile.certificate_type = null;
+      }
       
       // 返回组合数据（旧版本格式）
       res.json({

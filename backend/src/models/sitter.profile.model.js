@@ -12,14 +12,48 @@ class SitterProfile {
   static async findByUserId(userId) {
     try {
       const [rows] = await pool.query(
-        `SELECT sp.*, u.nickname, u.avatar_url
+        `SELECT sp.*, u.nickname, u.avatar_url, 
+                v.type as verification_type, v.submitted_data as verification_data
          FROM sitter_profiles sp
          JOIN users u ON sp.user_id = u.id
+         LEFT JOIN verifications v ON u.id = v.user_id AND v.status = 'approved'
          WHERE sp.user_id = ?`,
         [userId]
       );
       
-      return rows.length > 0 ? rows[0] : null;
+      if (rows.length === 0) {
+        return null;
+      }
+      
+      const profile = rows[0];
+      
+      // 处理证书信息
+      if (profile.verification_type === 'certificate' && profile.verification_data) {
+        try {
+          // 检查verification_data是否已经是对象
+          const verificationData = typeof profile.verification_data === 'object' ? 
+            profile.verification_data : JSON.parse(profile.verification_data);
+          
+          profile.certificate_type = verificationData.certificate_type || null;
+          profile.has_certificate = true;
+          
+          // 如果有证书名称，也添加到返回数据中
+          if (verificationData.certificate_name) {
+            profile.certificate_name = verificationData.certificate_name;
+          }
+        } catch (e) {
+          console.error('解析证书数据失败:', e);
+          profile.has_certificate = false;
+        }
+      } else {
+        profile.has_certificate = false;
+      }
+      
+      // 删除原始验证数据，减少传输量
+      delete profile.verification_data;
+      delete profile.verification_type;
+      
+      return profile;
     } catch (error) {
       console.error('查询帮溜员资料失败:', error);
       throw error;
@@ -140,9 +174,12 @@ class SitterProfile {
           sp.rating, 
           sp.total_services_completed,
           u.nickname, 
-          u.avatar_url
+          u.avatar_url,
+          v.type as verification_type,
+          v.submitted_data as verification_data
         FROM sitter_profiles sp
         JOIN users u ON sp.user_id = u.id
+        LEFT JOIN verifications v ON u.id = v.user_id AND v.status = 'approved'
         WHERE u.role = 'sitter' AND u.status = 'active'
       `;
       
@@ -205,8 +242,41 @@ class SitterProfile {
       const [rows] = await pool.query(query, queryParams);
       const [countResult] = await pool.query(countQuery, countParams);
       
+      // 处理认证数据
+      const sitters = rows.map(row => {
+        const sitter = { ...row };
+        
+        // 解析证书信息
+        if (sitter.verification_type === 'certificate' && sitter.verification_data) {
+          try {
+            // 检查verification_data是否已经是对象
+            const verificationData = typeof sitter.verification_data === 'object' ? 
+              sitter.verification_data : JSON.parse(sitter.verification_data);
+            
+            sitter.certificate_type = verificationData.certificate_type || null;
+            sitter.has_certificate = true;
+            
+            // 如果有证书名称，也添加到返回数据中
+            if (verificationData.certificate_name) {
+              sitter.certificate_name = verificationData.certificate_name;
+            }
+          } catch (e) {
+            console.error('解析证书数据失败:', e);
+            sitter.has_certificate = false;
+          }
+        } else {
+          sitter.has_certificate = false;
+        }
+        
+        // 删除原始验证数据，减少传输量
+        delete sitter.verification_data;
+        delete sitter.verification_type;
+        
+        return sitter;
+      });
+      
       return {
-        sitters: rows,
+        sitters: sitters,
         total: countResult[0].total
       };
     } catch (error) {

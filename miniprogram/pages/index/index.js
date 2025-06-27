@@ -17,6 +17,7 @@ Page({
     locationCoords: null, // 位置坐标
     showLocationConfirmModal: false, // 是否显示位置确认模态框
     selectedLocation: null, // 选择的位置信息
+    petCount: 0, // 宠物总数
   },
 
   /**
@@ -27,6 +28,8 @@ Page({
     this.getCurrentLocation();
     // 获取帮溜员列表
     this.fetchSitters();
+    // 获取宠物总数
+    this.fetchPetCount();
   },
 
   /**
@@ -425,5 +428,23 @@ Page({
         });
       }
     });
+  },
+
+  /**
+   * 获取宠物总数
+   */
+  fetchPetCount: function() {
+    api.get('/api/dashboard/public/pet-count', {}, false)
+      .then(res => {
+        console.log('获取宠物总数成功:', res);
+        if (res.success && res.data && res.data.petCount) {
+          this.setData({
+            petCount: res.data.petCount
+          });
+        }
+      })
+      .catch(err => {
+        console.error('获取宠物总数失败:', err);
+      });
   }
 }) 

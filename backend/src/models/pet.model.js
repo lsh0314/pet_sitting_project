@@ -247,6 +247,20 @@ class Pet {
       throw error;
     }
   }
+
+  /**
+   * 获取宠物表中的最大ID
+   * @returns {Promise<number>} - 返回最大宠物ID
+   */
+  static async getMaxPetId() {
+    try {
+      const [rows] = await db.execute('SELECT MAX(id) as maxId FROM pets');
+      return rows[0].maxId || 0;
+    } catch (error) {
+      console.error('获取最大宠物ID失败:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = Pet;

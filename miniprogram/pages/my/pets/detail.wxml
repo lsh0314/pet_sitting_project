@@ -2,43 +2,68 @@
 <view class="container">
   <!-- 加载状态 -->
   <view class="loading-container" wx:if="{{loading}}">
+    <image class="loading-image" src="/static/images/loading.gif" mode="aspectFit"></image>
     <view class="loading">加载中...</view>
   </view>
   
   <!-- 错误提示 -->
   <view class="error-container" wx:elif="{{error}}">
+    <icon type="warn" size="60" color="#e64340"></icon>
     <view class="error-message">{{error}}</view>
     <button class="retry-btn" bindtap="fetchPetDetail" data-id="{{petId}}">重试</button>
   </view>
   
   <!-- 宠物详情 -->
   <block wx:else>
+    <!-- 顶部导航栏 -->
+    <view class="nav-bar">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">←</text>
+      </view>
+      <view class="nav-title">宠物详情</view>
+      <view class="placeholder"></view>
+    </view>
+    
     <view class="pet-header">
       <view class="pet-photo-container">
-        <image class="pet-photo" src="{{tempPhotoPath}}" mode="aspectFill" bindtap="{{isEditing ? 'choosePhoto' : ''}}"></image>
-        <view class="edit-photo-hint" wx:if="{{isEditing}}">点击更换照片</view>
+        <image class="pet-photo" src="{{tempPhotoPath || '/static/images/pet-icon.png'}}" mode="aspectFill" bindtap="{{isEditing ? 'choosePhoto' : ''}}"></image>
+        <view class="edit-photo-hint" wx:if="{{isEditing}}">
+          <text class="icon">📷</text>
+        </view>
       </view>
       <view class="pet-name">{{petData.name}}</view>
+      <view class="pet-breed" wx:if="{{petData.breed}}">{{petData.breed}}</view>
     </view>
     
     <view class="action-bar">
       <button class="action-btn {{isEditing ? 'cancel' : 'edit'}}" bindtap="toggleEditMode">
-        {{isEditing ? '取消' : '编辑'}}
+        <text class="btn-icon">{{isEditing ? '✕' : '✏️'}}</text>
+        <text>{{isEditing ? '取消' : '编辑'}}</text>
       </button>
-      <button class="action-btn delete" wx:if="{{!isEditing}}" bindtap="deletePet">删除</button>
+      <button class="action-btn delete" wx:if="{{!isEditing}}" bindtap="deletePet">
+        <text class="btn-icon">🗑️</text>
+        <text>删除</text>
+      </button>
       <button class="action-btn save" wx:if="{{isEditing}}" bindtap="submitForm" disabled="{{isSubmitting}}">
-        {{isSubmitting ? '保存中...' : '保存'}}
+        <text class="btn-icon">✓</text>
+        <text>{{isSubmitting ? '保存中...' : '保存'}}</text>
       </button>
     </view>
     
     <view class="form-container">
       <!-- 基本信息 -->
       <view class="form-section">
-        <view class="section-title">基本信息</view>
+        <view class="section-title">
+          <text class="section-icon">📋</text>
+          <text>基本信息</text>
+        </view>
         
         <!-- 宠物名称 -->
         <view class="form-item">
-          <view class="form-label required">宠物名称</view>
+          <view class="form-label required">
+            <text class="label-icon">🏷️</text>
+            <text>宠物名称</text>
+          </view>
           <block wx:if="{{isEditing}}">
             <input class="form-input" placeholder="请输入宠物名称" value="{{petData.name}}" bindinput="onInputChange" data-field="name" />
           </block>
@@ -49,7 +74,10 @@
         
         <!-- 品种 -->
         <view class="form-item">
-          <view class="form-label">品种</view>
+          <view class="form-label">
+            <text class="label-icon">🐾</text>
+            <text>品种</text>
+          </view>
           <block wx:if="{{isEditing}}">
             <input class="form-input" placeholder="请输入宠物品种" value="{{petData.breed}}" bindinput="onInputChange" data-field="breed" />
           </block>
@@ -60,22 +88,32 @@
         
         <!-- 性别 -->
         <view class="form-item">
-          <view class="form-label">性别</view>
+          <view class="form-label">
+            <text class="label-icon">👤</text>
+            <text>性别</text>
+          </view>
           <block wx:if="{{isEditing}}">
             <radio-group class="radio-group" bindchange="onGenderChange">
               <label class="radio" wx:for="{{genderOptions}}" wx:key="value">
-                <radio value="{{item.value}}" checked="{{petData.gender === item.value}}" />{{item.name}}
+                <radio value="{{item.value}}" checked="{{petData.gender === item.value}}" color="#FFD100" />
+                <text class="gender-text">{{item.name}}</text>
               </label>
             </radio-group>
           </block>
           <block wx:else>
-            <view class="form-value">{{petData.gender === 'male' ? '公' : petData.gender === 'female' ? '母' : '未填写'}}</view>
+            <view class="form-value gender-value">
+              <text class="gender-icon">{{petData.gender === 'male' ? '♂' : petData.gender === 'female' ? '♀' : ''}}</text>
+              <text>{{petData.gender === 'male' ? '公' : petData.gender === 'female' ? '母' : '未填写'}}</text>
+            </view>
           </block>
         </view>
         
         <!-- 年龄 -->
         <view class="form-item">
-          <view class="form-label">年龄</view>
+          <view class="form-label">
+            <text class="label-icon">🎂</text>
+            <text>年龄</text>
+          </view>
           <block wx:if="{{isEditing}}">
             <input class="form-input" placeholder="例如：2岁" value="{{petData.age}}" bindinput="onInputChange" data-field="age" />
           </block>
@@ -86,7 +124,10 @@
         
         <!-- 体重 -->
         <view class="form-item">
-          <view class="form-label">体重(kg)</view>
+          <view class="form-label">
+            <text class="label-icon">⚖️</text>
+            <text>体重(kg)</text>
+          </view>
           <block wx:if="{{isEditing}}">
             <input class="form-input" type="digit" placeholder="请输入宠物体重" value="{{petData.weight}}" bindinput="onInputChange" data-field="weight" />
           </block>
@@ -97,23 +138,34 @@
         
         <!-- 绝育状态 -->
         <view class="form-item">
-          <view class="form-label">是否绝育</view>
+          <view class="form-label">
+            <text class="label-icon">💉</text>
+            <text>是否绝育</text>
+          </view>
           <block wx:if="{{isEditing}}">
-            <switch checked="{{petData.isSterilized}}" bindchange="onSterilizedChange" color="#07c160" />
+            <switch checked="{{petData.isSterilized}}" bindchange="onSterilizedChange" color="#FFD100" />
           </block>
           <block wx:else>
-            <view class="form-value">{{petData.isSterilized ? '是' : '否'}}</view>
+            <view class="form-value status-tag {{petData.isSterilized ? 'status-yes' : 'status-no'}}">
+              {{petData.isSterilized ? '是' : '否'}}
+            </view>
           </block>
         </view>
       </view>
       
       <!-- 健康信息 -->
       <view class="form-section">
-        <view class="section-title">健康信息</view>
+        <view class="section-title">
+          <text class="section-icon">🏥</text>
+          <text>健康信息</text>
+        </view>
         
         <!-- 健康状况 -->
         <view class="form-item">
-          <view class="form-label">健康状况</view>
+          <view class="form-label">
+            <text class="label-icon">❤️</text>
+            <text>健康状况</text>
+          </view>
           <block wx:if="{{isEditing}}">
             <textarea class="form-textarea" placeholder="请描述宠物的健康状况" value="{{petData.healthDesc}}" bindinput="onInputChange" data-field="healthDesc" />
           </block>
@@ -124,7 +176,10 @@
         
         <!-- 过敏源 -->
         <view class="form-item">
-          <view class="form-label">过敏源</view>
+          <view class="form-label">
+            <text class="label-icon">⚠️</text>
+            <text>过敏源</text>
+          </view>
           <block wx:if="{{isEditing}}">
             <textarea class="form-textarea" placeholder="请描述宠物的过敏源（如有）" value="{{petData.allergyInfo}}" bindinput="onInputChange" data-field="allergyInfo" />
           </block>
@@ -135,7 +190,10 @@
         
         <!-- 疫苗证明 -->
         <view class="form-item">
-          <view class="form-label">疫苗证明</view>
+          <view class="form-label">
+            <text class="label-icon">📄</text>
+            <text>疫苗证明</text>
+          </view>
           <block wx:if="{{isEditing}}">
             <view class="vaccine-upload">
               <view class="vaccine-photos">
@@ -144,7 +202,7 @@
                   <view class="delete-icon" catchtap="deleteVaccinePhoto" data-index="{{index}}">×</view>
                 </view>
                 <view class="vaccine-upload-btn" bindtap="chooseVaccineProof" wx:if="{{tempVaccinePhotos.length < 9}}">
-                  <view class="upload-icon">+</view>
+                  <text class="upload-icon">+</text>
                 </view>
               </view>
             </view>
@@ -155,18 +213,24 @@
                 <image class="vaccine-photo" src="{{item}}" mode="aspectFill"></image>
               </view>
             </view>
-            <view class="form-value" wx:else>未上传</view>
+            <view class="form-value empty-vaccine" wx:else>未上传</view>
           </block>
         </view>
       </view>
       
       <!-- 性格特点 -->
       <view class="form-section">
-        <view class="section-title">性格特点</view>
+        <view class="section-title">
+          <text class="section-icon">🐾</text>
+          <text>性格特点</text>
+        </view>
         
         <!-- 性格标签 -->
         <view class="form-item">
-          <view class="form-label">性格标签</view>
+          <view class="form-label">
+            <text class="label-icon">🏷️</text>
+            <text>性格标签</text>
+          </view>
           <view class="tags-container">
             <view 
               wx:for="{{tagOptions}}" 
@@ -182,7 +246,10 @@
         
         <!-- 特别注意事项 -->
         <view class="form-item">
-          <view class="form-label">特别注意事项</view>
+          <view class="form-label">
+            <text class="label-icon">📝</text>
+            <text>特别注意事项</text>
+          </view>
           <block wx:if="{{isEditing}}">
             <textarea class="form-textarea" placeholder="请描述需要特别注意的事项" value="{{petData.specialNotes}}" bindinput="onInputChange" data-field="specialNotes" />
           </block>
@@ -192,5 +259,7 @@
         </view>
       </view>
     </view>
+    
+    <view class="footer-space"></view>
   </block>
 </view>
