@@ -39,8 +39,9 @@ router.get('/:id/review', authMiddleware, OrderController.getOrderReview);
 
 // 管理员订单管理接口
 router.get('/admin/list', authMiddleware, adminMiddleware, OrderController.getAllOrders);
+router.get('/admin/export', authMiddleware, adminMiddleware, OrderController.exportOrders);
 router.get('/admin/:id', authMiddleware, adminMiddleware, OrderController.getAdminOrderDetail);
 router.post('/admin/:id/status', authMiddleware, adminMiddleware, OrderController.updateOrderStatus);
-router.get('/admin/export', authMiddleware, adminMiddleware, OrderController.exportOrders);
+
 
 module.exports = router;

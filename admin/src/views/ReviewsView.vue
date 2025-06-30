@@ -70,140 +70,142 @@
         
         <el-button type="primary" @click="handleSearch">筛选</el-button>
         <el-button @click="resetFilters">重置</el-button>
-        <el-button type="success" @click="handleExport">导出数据</el-button>
+       <!-- <el-button type="success" @click="handleExport">导出数据</el-button> -->
       </div>
     </el-card>
-    <!-- 评价列表 -->
-    <el-table
-      v-loading="loading"
-      :data="reviewList"
-      :key="tableKey"
-      border
-      stripe
-      style="width: 100%"
-      :row-class-name="({row}) => row.is_anonymous ? 'hidden-row' : ''"
-    >
-      <template #empty>
-        <div v-if="reviewList.length === 0 && !loading" class="empty-table">
-          {{ loading ? '加载中...' : '暂无数据' }}
-        </div>
-      </template>
-      <el-table-column type="index" width="50" label="#" :key="'index'" />
-      
-      <el-table-column prop="id" label="评价ID" width="100" :key="'id'" />
-      
-      <el-table-column label="评价内容" min-width="200" :key="'content'">
-        <template #default="{ row }">
-          <div class="review-content">
-            <div class="rating">
-              <el-rate
-                v-model="row.rating"
-                disabled
-                show-score
-                text-color="#ff9900"
-                score-template="{value} 星"
-              />
-            </div>
-            <div class="comment">{{ row.comment }}</div>
+
+    <!-- 评价列表卡片 -->
+    <el-card v-loading="loading">
+      <!-- 评价列表 -->
+      <el-table
+        :data="reviewList"
+        :key="tableKey"
+        border
+        style="width: 100%"
+        :row-class-name="({row}) => row.is_anonymous ? 'hidden-row' : ''"
+      >
+        <template #empty>
+          <div class="empty-table">
+            暂无数据
           </div>
         </template>
-      </el-table-column>
-      
-      <el-table-column label="用户信息" width="180">
-        <template #default="{ row }">
-          <div class="user-info">
+        <el-table-column type="index" width="50" label="#" :key="'index'" />
+        
+        <el-table-column prop="id" label="评价ID" width="100" :key="'id'" />
+        
+        <el-table-column label="评价内容" min-width="200" :key="'content'">
+          <template #default="{ row }">
+            <div class="review-content">
+              <div class="rating">
+                <el-rate
+                  v-model="row.rating"
+                  disabled
+                  show-score
+                  text-color="#ff9900"
+                  score-template="{value} 星"
+                />
+              </div>
+              <div class="comment">{{ row.comment }}</div>
+            </div>
+          </template>
+        </el-table-column>
+        
+        <el-table-column label="用户信息" width="180">
+          <template #default="{ row }">
+            <div class="user-info">
+                <el-avatar 
+                  :size="40" 
+                  :src="row.user && row.user.avatar_url"
+                  shape="circle"
+                  style="flex-shrink: 0"
+                >
+                  {{ (row.user && row.user.nickname && row.user.nickname.charAt(0)) || 'U' }}
+                </el-avatar>
+                <div class="user-details">
+                  <div class="nickname" @click="handleUserClick(row.user)" style="cursor: pointer; color: #409EFF">
+                    {{ (row.user && row.user.nickname) || '未知用户' }}
+                  </div>
+                  <div class="time">评价时间: {{ formatDate(row.created_at) }}</div>
+                </div>
+            </div>
+          </template>
+        </el-table-column>
+        
+        <el-table-column label="帮溜员" width="180">
+          <template #default="{ row }">
+            <div class="user-info">
               <el-avatar 
                 :size="40" 
-                :src="row.user && row.user.avatar_url"
+                :src="row.sitter && row.sitter.avatar_url"
                 shape="circle"
                 style="flex-shrink: 0"
               >
-                {{ (row.user && row.user.nickname && row.user.nickname.charAt(0)) || 'U' }}
+                {{ (row.sitter && row.sitter.nickname && row.sitter.nickname.charAt(0)) || 'S' }}
               </el-avatar>
               <div class="user-details">
-                <div class="nickname" @click="handleUserClick(row.user)" style="cursor: pointer; color: #409EFF">
-                  {{ (row.user && row.user.nickname) || '未知用户' }}
+                  <div class="nickname" @click="handleSitterClick(row.sitter)" style="cursor: pointer; color: #409EFF">
+                  {{ (row.sitter && row.sitter.nickname) || '未知帮溜员' }}
                 </div>
-                <div class="time">评价时间: {{ formatDate(row.created_at) }}</div>
-              </div>
-          </div>
-        </template>
-      </el-table-column>
-      
-      <el-table-column label="帮溜员" width="180">
-        <template #default="{ row }">
-          <div class="user-info">
-            <el-avatar 
-              :size="40" 
-              :src="row.sitter && row.sitter.avatar_url"
-              shape="circle"
-              style="flex-shrink: 0"
-            >
-              {{ (row.sitter && row.sitter.nickname && row.sitter.nickname.charAt(0)) || 'S' }}
-            </el-avatar>
-            <div class="user-details">
-                <div class="nickname" @click="handleSitterClick(row.sitter)" style="cursor: pointer; color: #409EFF">
-                {{ (row.sitter && row.sitter.nickname) || '未知帮溜员' }}
-              </div>
-              <div class="order">订单号: 
-                <span @click="goToOrderDetail(row.order && row.order.order_no)" style="cursor: pointer; color: #409EFF">
-                  {{ (row.order && row.order.order_no) || '未知' }}
-                </span>
+                <div class="order">订单号: 
+                  <span @click="goToOrderDetail(row.order && row.order.order_no)" style="cursor: pointer; color: #409EFF">
+                    {{ (row.order && row.order.order_no) || '未知' }}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        </template>
-      </el-table-column>
+          </template>
+        </el-table-column>
+        
+        <el-table-column label="操作" width="180" fixed="right">
+          <template #default="scope">
+            <el-button
+              link
+              type="primary"
+              size="small"
+              @click="viewReviewDetail(scope.row)"
+            >
+              详情
+            </el-button>
+            
+            <el-button
+              link
+              type="danger"
+              size="small"
+              @click="handleDeleteReview(scope.row)"
+            >
+              删除
+            </el-button>
+            
+            <el-button
+              link
+              :type="scope.row.is_anonymous ? 'success' : 'info'"
+              size="small"
+              @click="handleToggleVisibility(scope.row)"
+            >
+              {{ scope.row.is_anonymous ? '显示' : '隐藏' }}
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
       
-      <el-table-column label="操作" width="180" fixed="right">
-        <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            size="small"
-            @click="viewReviewDetail(scope.row)"
-          >
-            详情
-          </el-button>
-          
-          <el-button
-            link
-            type="danger"
-            size="small"
-            @click="handleDeleteReview(scope.row)"
-          >
-            删除
-          </el-button>
-          
-          <el-button
-            link
-            :type="scope.row.is_anonymous ? 'success' : 'info'"
-            size="small"
-            @click="handleToggleVisibility(scope.row)"
-          >
-            {{ scope.row.is_anonymous ? '显示' : '隐藏' }}
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    
-    <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        v-if="pagination.total > 0"
-        :key="pagination.page + '-' + pagination.limit"
-        :current-page="pagination.page"
-        :page-size="pagination.limit"
-        :total="pagination.total"
-        :page-sizes="[10, 20, 50, 100]"
-        :background="true"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handlePageChange"
-      />
-      <div v-else class="no-data">暂无数据</div>
-    </div>
-    
+      <!-- 分页 -->
+      <div class="pagination-container">
+        <el-pagination
+          v-if="pagination.total > 0"
+          :key="pagination.page + '-' + pagination.limit"
+          :current-page="pagination.page"
+          :page-size="pagination.limit"
+          :total="pagination.total"
+          :page-sizes="[10, 20, 50, 100]"
+          :background="true"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
+        />
+        <div v-else class="no-data">暂无数据</div>
+      </div>
+    </el-card>
+
     <!-- 评价详情抽屉 -->
     <el-drawer
       v-model="reviewDetailVisible"
@@ -265,10 +267,10 @@
         
         <div class="detail-section">
           <h3>订单信息</h3>
-    <el-descriptions :column="1" border>
-      <el-descriptions-item label="订单号">{{ currentReview && currentReview.order ? currentReview.order.order_no : '未知' }}</el-descriptions-item>
-      <el-descriptions-item label="服务时间">{{ currentReview && currentReview.order && currentReview.order.service_date ? formatDate(currentReview.order.service_date) : '未知' }}</el-descriptions-item>
-    </el-descriptions>
+          <el-descriptions :column="1" border>
+            <el-descriptions-item label="订单号">{{ currentReview && currentReview.order ? currentReview.order.order_no : '未知' }}</el-descriptions-item>
+            <el-descriptions-item label="服务时间">{{ currentReview && currentReview.order && currentReview.order.service_date ? formatDate(currentReview.order.service_date) : '未知' }}</el-descriptions-item>
+          </el-descriptions>
         </div>
         
         <div class="detail-section">
@@ -347,6 +349,7 @@
 </template>
 
 <script setup>
+// <script> 部分未做修改，保持原样
 import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
@@ -405,13 +408,11 @@ const fetchReviewList = async () => {
   try {
     loading.value = true
 
-    // 构建参数对象，过滤掉空值参数
     const params = {
       page: pagination.page,
       limit: pagination.limit
     }
     
-    // 只添加非空的筛选条件
     if (filters.keyword && filters.keyword.trim() !== '') {
       params.keyword = filters.keyword.trim()
     }
@@ -425,7 +426,6 @@ const fetchReviewList = async () => {
       params.is_anonymous = filters.is_anonymous === 'true'
     }
 
-    // 如果有搜索关键词，使用搜索接口，否则使用列表接口
     const useSearchAPI = filters.keyword || filters.min_rating || filters.max_rating || filters.is_anonymous;
     const url = useSearchAPI ? '/api/review/admin/search' : '/api/review/admin/list';
     const response = await axios.get(url, { params })
@@ -544,7 +544,6 @@ const handleToggleVisibility = async (review) => {
     loading.value = true
     const response = await axios.post(`/api/review/admin/${review.id}/toggle-visibility`)
     if (response.data.success) {
-      // 更新本地数据状态而不重新获取整个列表
       const index = reviewList.value.findIndex(r => r.id === review.id)
       if (index !== -1) {
         reviewList.value[index].is_anonymous = !reviewList.value[index].is_anonymous
@@ -585,7 +584,6 @@ const userDetailTitle = computed(() => {
 })
 
 const openUserDetail = async (userId) => {
-  console.log('点击用户ID:', userId)
   if (!userId) {
     ElMessage.warning('无效的用户ID')
     return
@@ -595,9 +593,7 @@ const openUserDetail = async (userId) => {
     loading.value = true
     currentUserId.value = userId
     
-    // 获取用户详情 - 修改API路径为绝对路径
     const response = await axios.get(`/api/user/admin/${userId}/detail`)
-    console.log('用户详情响应:', response.data)
     
     if (response.data && response.data.data) {
       currentUserDetail.value = response.data.data
@@ -606,11 +602,7 @@ const openUserDetail = async (userId) => {
       throw new Error(response.data?.message || '无效的响应数据')
     }
   } catch (err) {
-    console.error('获取用户详情失败:', {
-      error: err,
-      response: err.response,
-      config: err.config
-    })
+    console.error('获取用户详情失败:', err)
     ElMessage.error(`获取用户详情失败: ${err.response?.data?.message || err.message}`)
   } finally {
     loading.value = false
@@ -619,40 +611,24 @@ const openUserDetail = async (userId) => {
 
 // 跳转到订单详情
 const handleUserClick = (user) => {
-  console.log('用户数据:', user)
-  if (!user) {
-    console.error('用户数据为空:', user)
-    ElMessage.warning('用户数据为空')
-    return
-  }
-  if (!user.id) {
-    console.error('用户ID为空:', user)
+  if (!user || !user.id) {
     ElMessage.warning('用户ID为空')
     return
   }
-  console.log('准备打开用户详情，ID:', user.id)
   openUserDetail(user.id)
 }
 
 const handleSitterClick = (sitter) => {
-  console.log('帮溜员数据:', sitter)
-  if (!sitter) {
-    console.error('帮溜员数据为空:', sitter)
-    ElMessage.warning('帮溜员数据为空')
-    return
-  }
-  if (!sitter.id) {
-    console.error('帮溜员ID为空:', sitter)
+  if (!sitter || !sitter.id) {
     ElMessage.warning('帮溜员ID为空')
     return
   }
-  console.log('准备打开帮溜员详情，ID:', sitter.id)
   openUserDetail(sitter.id)
 }
 
 const goToOrderDetail = (orderNo) => {
   if (orderNo) {
-    router.push(`/orders/${orderNo}`)  // 修改为后端实际路由
+    router.push(`/orders/${orderNo}`)
   }
 }
 
@@ -670,9 +646,14 @@ onMounted(() => {
 }
 
 .el-table {
-  margin-top: 20px;
-  height: calc(100vh - 300px);
-  overflow-y: auto;
+  /* 移除固定高度和上边距 */
+}
+
+/* 新增：统一样式，设置表头背景色和字体 */
+.el-table :deep(.el-table__header th) {
+  background-color: #f8f8f9;
+  font-weight: 600;
+  color: #303133;
 }
 
 .empty-table {
@@ -716,10 +697,7 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: center;
-  background: white;
-  padding: 15px;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  /* 简化样式，因为父级卡片提供了背景和边框 */
 }
 
 .no-data {
@@ -740,7 +718,7 @@ onMounted(() => {
   margin-bottom: 5px;
 }
 
-.review-content .content {
+.review-content .comment {
   margin: 10px 0;
   line-height: 1.5;
 }
@@ -790,10 +768,10 @@ onMounted(() => {
 }
 
 .hidden-row {
-  background-color: #f0f9eb;
-  color: #67c23a;
+  /* 定义隐藏行的样式，例如淡灰色背景 */
+  background-color: #fdf6ec !important; 
 }
 .hidden-row:hover > td {
-  background-color: #e1f3d8 !important;
+  background-color: #faecd8 !important;
 }
 </style>

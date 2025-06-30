@@ -1,7 +1,7 @@
 const userModel = require('../models/user.model');
 const { success, error } = require('../utils/response.util');
 const pool = require('../config/database');
-
+const exceljs = require('exceljs');
 /**
  * 用户控制器
  * 处理用户相关请求
@@ -288,23 +288,35 @@ class UserController {
     }
   }
 
-  /**
-   * 导出用户数据(管理员)
+   /**
+   * 导出用户数据(管理员) - 生成 .xlsx 文件
    * @param {Object} req - 请求对象
    * @param {Object} res - 响应对象
    */
   async exportUsers(req, res) {
     try {
+      // 1. 定义中文映射字典 (确保 identityStatusMap 存在)
+      const roleMap = { 'pet_owner': '宠物主人', 'sitter': '帮溜员' };
+      const statusMap = { 'active': '正常', 'banned': '已封禁' };
+      const genderMap = { 'male': '男', 'female': '女', 'unknown': '未知' };
+      const identityStatusMap = {
+        'unsubmitted': '未申请',
+        'pending': '审核中',
+        'approved': '已认证',
+        'rejected': '未通过'
+      };
+
+      // 2. 修改 SQL 查询语句
       const { role = '', status = '' } = req.query;
       
-      let query = 'SELECT id, nickname, avatar_url, role, status, gender, created_at FROM users WHERE 1=1';
+      // 从查询中移除 avatar_url，并确保 identity_status 存在
+      let query = 'SELECT id, nickname, role, status, gender, identity_status, created_at FROM users WHERE 1=1';
       const params = [];
       
       if (role) {
         query += ' AND role = ?';
         params.push(role);
       }
-      
       if (status) {
         query += ' AND status = ?';
         params.push(status);
@@ -314,21 +326,48 @@ class UserController {
       
       const [rows] = await pool.execute(query, params);
       
-      // 构建CSV内容
-      const csvHeader = '用户ID,昵称,头像URL,角色,状态,性别,注册时间\n';
-      const csvRows = rows.map(user => 
-        `"${user.id}","${user.nickname || ''}","${user.avatar_url || ''}","${user.role}","${user.status}","${user.gender || ''}","${user.created_at}"`
-      ).join('\n');
+      // 3. 创建 Excel 工作簿和工作表
+      const workbook = new exceljs.Workbook();
+      const worksheet = workbook.addWorksheet('用户列表');
+
+      // 4. 修改 ExcelJS 列定义
+      // 移除 '头像URL'，添加 '认证状态'
+      worksheet.columns = [
+        { header: '用户ID', key: 'id', width: 10 },
+        { header: '昵称', key: 'nickname', width: 25 },
+        // { header: '头像URL', key: 'avatar_url', width: 40 }, // <-- 已移除
+        { header: '角色', key: 'role', width: 15 },
+        { header: '状态', key: 'status', width: 10 },
+        { header: '性别', key: 'gender', width: 10 },
+        { header: '认证状态', key: 'identity_status', width: 15 }, // <-- 已添加
+        { header: '注册时间', key: 'created_at', width: 22, style: { numFmt: 'yyyy-mm-dd hh:mm:ss' } }
+      ];
       
-      const csvContent = csvHeader + csvRows;
+      // 5. 修改数据映射
+      // 移除 avatar_url，添加 identity_status
+      const dataToExport = rows.map(user => ({
+        id: user.id,
+        nickname: user.nickname || '',
+        // avatar_url: user.avatar_url || '', // <-- 已移除
+        role: roleMap[user.role] || user.role,
+        status: statusMap[user.status] || user.status,
+        gender: genderMap[user.gender] || user.gender,
+        identity_status: identityStatusMap[user.identity_status] || user.identity_status, // <-- 已添加
+        created_at: new Date(user.created_at)
+      }));
       
-      // 设置响应头
-      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-      res.setHeader('Content-Disposition', 'attachment; filename=users_export.csv');
-      
-      // 添加UTF-8 BOM头并发送CSV内容
-      const csvWithBOM = '\uFEFF' + csvContent;
-      res.send(Buffer.from(csvWithBOM, 'utf8'));
+      // 6. 将数据行添加到工作表，并加粗表头
+      worksheet.addRows(dataToExport);
+      worksheet.getRow(1).font = { bold: true };
+
+      // 7. 设置响应头
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=' + `users_export_${Date.now()}.xlsx`);
+
+      // 8. 将工作簿写入响应流并结束
+      await workbook.xlsx.write(res);
+      res.end();
+
     } catch (err) {
       console.error('导出用户数据失败:', err);
       return error(res, '导出用户数据失败', 500);

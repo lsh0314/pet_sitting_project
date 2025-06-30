@@ -146,14 +146,6 @@
               <el-button size="small" @click="viewOrderDetail(scope.row.id)">
                 查看
               </el-button>
-              <el-button 
-                size="small" 
-                type="warning" 
-                v-if="scope.row.status === 'paid'"
-                @click="updateOrderStatus(scope.row.id, 'in_progress')"
-              >
-                开始服务
-              </el-button>
             </template>
           </el-table-column>
         </el-table>
