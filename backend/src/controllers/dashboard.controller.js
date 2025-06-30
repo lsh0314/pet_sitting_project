@@ -18,12 +18,14 @@ class DashboardController {
       const totalOrders = await DashboardModel.getTotalOrders()
       const totalSitters = await DashboardModel.getTotalSitters()
       const totalRevenue = await DashboardModel.getTotalRevenue()
+      const totalReviews = await DashboardModel.getTotalReviews()
 
       console.log('统计数据获取成功:', {
         totalUsers,
         totalOrders,
         totalSitters,
-        totalRevenue
+        totalRevenue,
+        totalReviews
       })
 
       res.json({
@@ -32,7 +34,8 @@ class DashboardController {
             totalUsers,
             totalOrders,
             totalSitters,
-            totalRevenue
+            totalRevenue,
+            totalReviews
         }
       })
     } catch (error) {

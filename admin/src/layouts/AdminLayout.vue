@@ -4,7 +4,7 @@
       <!-- 侧边栏 -->
       <el-aside width="240px">
         <div class="logo-container">
-          <img src="@/assets/images/logo.png" alt="宠物派" class="logo-image">
+          <!--<img src="@/assets/images/logo.png" alt="宠物派" class="logo-image">-->
           <h1 class="logo-text">宠物派管理后台</h1>
         </div>
         
@@ -41,20 +41,20 @@
             <span>提现审核</span>
           </el-menu-item>
           
-          <el-menu-item index="/complaints">
+          <!--<el-menu-item index="/complaints">
             <el-icon><el-icon-warning /></el-icon>
             <span>投诉管理</span>
-          </el-menu-item>
+          </el-menu-item>-->
           
           <el-menu-item index="/reviews">
             <el-icon><el-icon-star /></el-icon>
             <span>评价管理</span>
           </el-menu-item>
           
-          <el-menu-item index="/config">
+          <!--<el-menu-item index="/config">
             <el-icon><el-icon-setting /></el-icon>
             <span>平台配置</span>
-          </el-menu-item>
+          </el-menu-item>-->
         </el-menu>
       </el-aside>
       

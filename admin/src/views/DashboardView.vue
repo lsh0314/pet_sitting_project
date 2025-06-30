@@ -15,7 +15,7 @@
     <el-card class="data-card-container">
       <el-row :gutter="20">
       <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
-        <el-card class="data-card">
+        <el-card class="data-card" @click="navigateToUsers">
           <div class="data-card-content">
             <div class="data-card-value">{{ statistics.totalUsers || 0 }}</div>
             <div class="data-card-title">注册用户</div>
@@ -27,7 +27,7 @@
       </el-col>
       
       <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
-        <el-card class="data-card">
+        <el-card class="data-card" @click="navigateToOrders">
           <div class="data-card-content">
             <div class="data-card-value">{{ statistics.totalOrders || 0 }}</div>
             <div class="data-card-title">总订单数</div>
@@ -39,7 +39,7 @@
       </el-col>
       
       <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
-        <el-card class="data-card">
+        <el-card class="data-card" @click="navigateToUsers">
           <div class="data-card-content">
             <div class="data-card-value">{{ statistics.totalSitters || 0 }}</div>
             <div class="data-card-title">帮溜员数量</div>
@@ -51,13 +51,13 @@
       </el-col>
       
       <el-col :xs="24" :sm="12" :md="12" :lg="6" :xl="6">
-        <el-card class="data-card">
+        <el-card class="data-card" @click="navigateToReviews">
           <div class="data-card-content">
-            <div class="data-card-value">{{ formatRevenue(statistics.totalRevenue) }}</div>
-            <div class="data-card-title">总收入</div>
+            <div class="data-card-value">{{ statistics.totalReviews || 0 }}</div>
+            <div class="data-card-title">评价数量</div>
           </div>
-          <div class="data-card-icon revenue-icon">
-            <el-icon><el-icon-money /></el-icon>
+          <div class="data-card-icon review-icon">
+            <el-icon><el-icon-star /></el-icon>
           </div>
         </el-card>
       </el-col>
@@ -113,15 +113,15 @@
       <div v-loading="loading.recentOrders">
         <el-table :data="recentOrders" style="width: 100%" v-if="recentOrders.length > 0">
           <el-table-column prop="id" label="订单ID" width="80" />
-          <el-table-column prop="user.username" label="用户" />
-          <el-table-column prop="service_type" label="服务类型">
+          <el-table-column prop="userNickname" label="用户" width="120" />
+          <el-table-column prop="serviceType" label="服务类型">
             <template #default="scope">
-              {{ formatServiceType(scope.row.service_type) }}
+              {{ formatServiceType(scope.row.serviceType) }}
             </template>
           </el-table-column>
-          <el-table-column prop="amount" label="金额">
+          <el-table-column prop="price" label="金额">
 <template #default="scope">
-  ¥{{ (scope.row.amount || 0).toFixed(2) }}
+  ¥{{ (Number(scope.row.price) || 0).toFixed(2) }}
 </template>
           </el-table-column>
           <el-table-column prop="status" label="状态">
@@ -131,9 +131,9 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="created_at" label="创建时间">
+          <el-table-column prop="createdAt" label="创建时间">
             <template #default="scope">
-              {{ formatDate(scope.row.created_at) }}
+              {{ formatDate(scope.row.createdAt) }}
             </template>
           </el-table-column>
           <el-table-column label="操作" width="120">
@@ -160,7 +160,8 @@ import {
   User as ElIconUser,
   UserFilled as ElIconUserFilled,
   Tickets as ElIconTickets,
-  Money as ElIconMoney
+  Money as ElIconMoney,
+  Star as ElIconStar
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -171,7 +172,8 @@ const statistics = reactive({
   totalUsers: 0,
   totalOrders: 0,
   totalSitters: 0,
-  totalRevenue: 0
+  totalRevenue: 0,
+  totalReviews: 0
 })
 
 const recentOrders = ref([])
@@ -299,6 +301,7 @@ const loadRecentOrders = async () => {
     loading.recentOrders = true
     const response = await axios.get('/api/dashboard/admin/recent-orders')
     recentOrders.value = response.data.data
+    console.log('最近订单数据:', recentOrders.value)
   } catch (error) {
     ElMessage.error('加载最近订单失败')
     console.error(error)
@@ -389,8 +392,16 @@ const formatDate = (dateString) => {
 }
 
 // 导航
+const navigateToUsers = () => {
+  router.push({ name: 'users' })
+}
+
 const navigateToOrders = () => {
   router.push({ name: 'orders' })
+}
+
+const navigateToReviews = () => {
+  router.push({ name: 'reviews' })
 }
 
 const viewOrderDetail = (orderId) => {
@@ -491,6 +502,9 @@ watch(
         
         &.revenue-icon {
           color: #F56C6C;
+        }
+        &.review-icon {
+          color: #E6A23C;
         }
       }
     }

@@ -65,6 +65,20 @@ class DashboardModel {
   }
 
   /**
+   * 获取评价总数
+   * @returns {Promise<number>} 评价总数
+   */
+  static async getTotalReviews() {
+    try {
+      const [rows] = await db.execute('SELECT COUNT(*) as count FROM reviews');
+      return rows[0].count;
+    } catch (error) {
+      console.error('获取评价总数失败:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 获取最近订单
    * @param {number} limit - 限制数量
    * @returns {Promise<Array>} 订单列表
