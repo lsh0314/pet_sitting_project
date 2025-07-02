@@ -423,10 +423,11 @@
 }
 
 .tag.selected {
-  background-color: #ffd100;
-  color: #333;
+  background-color: #ffd100 !important;
+  color: #333 !important;
   transform: scale(1.05);
   box-shadow: 0 2rpx 8rpx rgba(255, 209, 0, 0.3);
+  border: 1rpx solid #ffd100 !important;
 }
 
 .vaccine-photos {

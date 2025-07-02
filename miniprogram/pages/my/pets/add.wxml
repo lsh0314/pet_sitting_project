@@ -102,7 +102,7 @@
           <view 
             wx:for="{{tagOptions}}" 
             wx:key="*this" 
-            class="tag {{selectedTags.indexOf(item) > -1 ? 'selected' : ''}}" 
+            class="tag {{tagActiveStates[item] ? 'selected' : ''}}" 
             bindtap="onTagTap" 
             data-tag="{{item}}"
           >

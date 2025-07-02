@@ -26,6 +26,7 @@ Page({
     ],
     tagOptions: ['活泼', '安静', '亲人', '胆小', '爱叫', '护食', '怕生'],
     selectedTags: [],
+    tagActiveStates: {}, // 新增：简单的状态管理对象
     tempPhotoPath: '',
     tempVaccinePhotos: [],
     isEditing: false,
@@ -80,12 +81,19 @@ Page({
           // 设置标签选中状态
           const selectedTags = petData.characterTags || [];
           
+          // 生成标签激活状态对象
+          const tagActiveStates = {};
+          selectedTags.forEach(tag => {
+            tagActiveStates[tag] = true;
+          });
+          
           // 设置临时图片路径（用于显示）
           const tempVaccinePhotos = petData.vaccineProof || [];
           
           this.setData({
             petData,
             selectedTags,
+            tagActiveStates,
             tempPhotoPath: petData.photo,
             tempVaccinePhotos,
             loading: false
@@ -111,9 +119,27 @@ Page({
    * 切换编辑模式
    */
   toggleEditMode: function () {
-    this.setData({
-      isEditing: !this.data.isEditing
-    });
+    const isEditing = !this.data.isEditing;
+    
+    // 如果切换到编辑模式，确保 selectedTags 与 petData.characterTags 同步
+    if (isEditing) {
+      const selectedTags = this.data.petData.characterTags || [];
+      
+      // 生成标签激活状态对象
+      const tagActiveStates = {};
+      selectedTags.forEach(tag => {
+        tagActiveStates[tag] = true;
+      });
+      
+      this.setData({
+        isEditing: isEditing,
+        selectedTags: selectedTags,
+        tagActiveStates: tagActiveStates
+      });
+    } else {
+      // 如果取消编辑，重新加载宠物详情以还原数据
+      this.fetchPetDetail(this.data.petId);
+    }
   },
 
   /**
@@ -153,19 +179,38 @@ Page({
     if (!this.data.isEditing) return;
     
     const tag = e.currentTarget.dataset.tag;
-    const selectedTags = [...this.data.selectedTags];
+    const { selectedTags, tagActiveStates } = this.data;
     
-    const index = selectedTags.indexOf(tag);
-    if (index > -1) {
-      selectedTags.splice(index, 1);
+    console.log('点击标签:', tag);
+    console.log('当前选择:', selectedTags);
+    
+    if (selectedTags.indexOf(tag) > -1) {
+      // 取消选择
+      const newTags = selectedTags.filter(t => t !== tag);
+      const newActiveStates = { ...tagActiveStates };
+      newActiveStates[tag] = false;
+      
+      console.log('取消后:', newTags);
+      
+      this.setData({
+        selectedTags: newTags,
+        tagActiveStates: newActiveStates,
+        'petData.characterTags': newTags
+      });
     } else {
-      selectedTags.push(tag);
+      // 选择
+      const newTags = [...selectedTags, tag];
+      const newActiveStates = { ...tagActiveStates };
+      newActiveStates[tag] = true;
+      
+      console.log('选择后:', newTags);
+      
+      this.setData({
+        selectedTags: newTags,
+        tagActiveStates: newActiveStates,
+        'petData.characterTags': newTags
+      });
     }
-    
-    this.setData({
-      selectedTags,
-      'petData.characterTags': selectedTags
-    });
   },
 
   /**
@@ -212,7 +257,6 @@ Page({
 
   /**
    * 上传图片到服务器
-   * 注意：MVP阶段可以简化，直接使用本地路径或模拟URL
    */
   uploadImage: function (filePath, type) {
     // 显示上传中
@@ -221,25 +265,62 @@ Page({
       mask: true
     });
     
-    // MVP阶段模拟上传，直接使用临时路径
-    setTimeout(() => {
-      wx.hideLoading();
-      
-      if (type === 'photo') {
-        this.setData({
-          tempPhotoPath: filePath,
-          'petData.photo': filePath // 实际项目中应该是服务器返回的URL
-        });
-      } else if (type === 'vaccine') {
-        const tempVaccinePhotos = [...this.data.tempVaccinePhotos, filePath];
-        const vaccineProof = [...this.data.petData.vaccineProof, filePath]; // 实际项目中应该是服务器返回的URL
+    // 真实上传到后端
+    wx.uploadFile({
+      url: `${app.globalData.apiBaseUrl}/api/upload/image`,
+      filePath: filePath,
+      name: 'photo',
+      header: {
+        'Authorization': `Bearer ${wx.getStorageSync('token')}`
+      },
+      success: (res) => {
+        wx.hideLoading();
+        console.log('上传响应:', res);
         
-        this.setData({
-          tempVaccinePhotos,
-          'petData.vaccineProof': vaccineProof
+        try {
+          const data = JSON.parse(res.data);
+          console.log('解析后的数据:', data);
+          
+          if (data.success) {
+            if (type === 'photo') {
+              this.setData({
+                tempPhotoPath: filePath,
+                'petData.photo': data.url
+              });
+              console.log('宠物照片上传成功，URL:', data.url);
+            } else if (type === 'vaccine') {
+              const tempVaccinePhotos = [...this.data.tempVaccinePhotos, filePath];
+              const vaccineProof = [...this.data.petData.vaccineProof, data.url];
+              
+              this.setData({
+                tempVaccinePhotos,
+                'petData.vaccineProof': vaccineProof
+              });
+              console.log('疫苗证明上传成功，URL:', data.url);
+            }
+          } else {
+            wx.showToast({
+              title: data.message || '上传失败',
+              icon: 'none'
+            });
+          }
+        } catch (e) {
+          console.error('解析上传响应失败:', e);
+          wx.showToast({
+            title: '上传失败',
+            icon: 'none'
+          });
+        }
+      },
+      fail: (err) => {
+        wx.hideLoading();
+        console.error('上传失败:', err);
+        wx.showToast({
+          title: '上传失败，请重试',
+          icon: 'none'
         });
       }
-    }, 500);
+    });
   },
 
   /**

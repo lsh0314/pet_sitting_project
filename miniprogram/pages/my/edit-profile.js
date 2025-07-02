@@ -70,46 +70,60 @@ Page({
       success: (res) => {
         const tempFilePath = res.tempFilePaths[0];
         
-        // 上传头像到服务器（实际项目中应该有上传接口）
-        // 这里简化处理，假设直接使用本地路径
+        // 上传头像到服务器
         wx.showLoading({
           title: '上传中...',
         });
         
-        // 模拟上传
-        setTimeout(() => {
-          this.setData({
-            'userInfo.avatar_url': tempFilePath
-          });
-          wx.hideLoading();
-          wx.showToast({
-            title: '头像已更新',
-            icon: 'success'
-          });
-        }, 1000);
-        
-        // 实际项目中应该调用上传API
-        /*
+        // 真实上传到后端
         wx.uploadFile({
-          url: api.getBaseUrl() + '/api/upload',
+          url: api.getBaseUrl() + '/api/upload/image',
           filePath: tempFilePath,
-          name: 'file',
+          name: 'photo',
           header: {
             'Authorization': 'Bearer ' + wx.getStorageSync('token')
           },
           success: (uploadRes) => {
-            const data = JSON.parse(uploadRes.data);
-            if (data.url) {
-              this.setData({
-                'userInfo.avatar_url': data.url
+            console.log('头像上传响应:', uploadRes);
+            
+            try {
+              const data = JSON.parse(uploadRes.data);
+              console.log('解析后的数据:', data);
+              
+              if (data.success && data.url) {
+                this.setData({
+                  'userInfo.avatar_url': data.url
+                });
+                wx.showToast({
+                  title: '头像已更新',
+                  icon: 'success'
+                });
+                console.log('头像上传成功，URL:', data.url);
+              } else {
+                wx.showToast({
+                  title: data.message || '上传失败',
+                  icon: 'none'
+                });
+              }
+            } catch (e) {
+              console.error('解析上传响应失败:', e);
+              wx.showToast({
+                title: '上传失败',
+                icon: 'none'
               });
             }
+          },
+          fail: (err) => {
+            console.error('头像上传失败:', err);
+            wx.showToast({
+              title: '上传失败，请重试',
+              icon: 'none'
+            });
           },
           complete: () => {
             wx.hideLoading();
           }
         });
-        */
       }
     });
   },

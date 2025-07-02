@@ -231,17 +231,31 @@
             <text class="label-icon">🏷️</text>
             <text>性格标签</text>
           </view>
-          <view class="tags-container">
-            <view 
-              wx:for="{{tagOptions}}" 
-              wx:key="*this" 
-              class="tag {{selectedTags.indexOf(item) > -1 ? 'selected' : ''}}" 
-              bindtap="onTagTap" 
-              data-tag="{{item}}"
-            >
-              {{item}}
+          <block wx:if="{{isEditing}}">
+            <view class="tags-container">
+              <view 
+                wx:for="{{tagOptions}}" 
+                wx:key="*this" 
+                class="tag {{tagActiveStates[item] ? 'selected' : ''}}" 
+                bindtap="onTagTap" 
+                data-tag="{{item}}"
+              >
+                {{item}}
+              </view>
             </view>
-          </view>
+          </block>
+          <block wx:else>
+            <view class="tags-container">
+              <view 
+                wx:for="{{selectedTags}}" 
+                wx:key="*this" 
+                class="tag selected"
+              >
+                {{item}}
+              </view>
+              <view wx:if="{{selectedTags.length === 0}}" class="form-value">未选择</view>
+            </view>
+          </block>
         </view>
         
         <!-- 特别注意事项 -->
