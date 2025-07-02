@@ -302,7 +302,7 @@ const genderMap = {
 const identityStatusMap = {
   unsubmitted: '未申请',
   pending: '审核中',
-  verified: '已认证',
+  approved: '已认证',
   rejected: '未通过'
 }
 
