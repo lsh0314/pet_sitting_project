@@ -68,36 +68,51 @@ Page({
   fetchPetDetail: function (petId) {
     this.setData({ loading: true, error: null });
 
-    api.get(`/api/pet/${petId}`)
-      .then((petData) => {
-        // 设置标签选中状态
-        const selectedTags = petData.characterTags || [];
-        
-        // 生成标签激活状态对象
-        const tagActiveStates = {};
-        selectedTags.forEach(tag => {
-          tagActiveStates[tag] = true;
-        });
-        
-        // 设置临时图片路径（用于显示）
-        const tempVaccinePhotos = petData.vaccineProof || [];
-        
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/api/pet/${petId}`,
+      method: 'GET',
+      header: {
+        'Authorization': `Bearer ${wx.getStorageSync('token')}`
+      },
+      success: (res) => {
+        if (res.statusCode === 200) {
+          const petData = res.data;
+          
+          // 设置标签选中状态
+          const selectedTags = petData.characterTags || [];
+          
+          // 生成标签激活状态对象
+          const tagActiveStates = {};
+          selectedTags.forEach(tag => {
+            tagActiveStates[tag] = true;
+          });
+          
+          // 设置临时图片路径（用于显示）
+          const tempVaccinePhotos = petData.vaccineProof || [];
+          
+          this.setData({
+            petData,
+            selectedTags,
+            tagActiveStates,
+            tempPhotoPath: petData.photo,
+            tempVaccinePhotos,
+            loading: false
+          });
+        } else {
+          this.setData({
+            error: res.data.message || '获取宠物详情失败',
+            loading: false
+          });
+        }
+      },
+      fail: (err) => {
         this.setData({
-          petData,
-          selectedTags,
-          tagActiveStates,
-          tempPhotoPath: petData.photo,
-          tempVaccinePhotos,
-          loading: false
-        });
-      })
-      .catch((err) => {
-        this.setData({
-          error: err.message || '获取宠物详情失败',
+          error: '网络请求失败，请检查网络连接',
           loading: false
         });
         console.error('获取宠物详情失败:', err);
-      });
+      }
+    });
   },
 
   /**
@@ -252,7 +267,7 @@ Page({
     
     // 真实上传到后端
     wx.uploadFile({
-      url: `${api.getBaseUrl()}/api/upload/image`,
+      url: `${app.globalData.apiBaseUrl}/api/upload/image`,
       filePath: filePath,
       name: 'photo',
       header: {
@@ -356,29 +371,45 @@ Page({
     });
     
     // 调用API更新宠物信息
-    api.put(`/api/pet/${this.data.petId}`, this.data.petData)
-      .then(() => {
-        // 更新成功
-        wx.showToast({
-          title: '更新成功',
-          icon: 'success',
-          duration: 2000,
-          success: () => {
-            // 退出编辑模式
-            this.setData({
-              isEditing: false,
-              isSubmitting: false
-            });
-          }
-        });
-      })
-      .catch((err) => {
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/api/pet/${this.data.petId}`,
+      method: 'PUT',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${wx.getStorageSync('token')}`
+      },
+      data: this.data.petData,
+      success: (res) => {
+        if (res.statusCode === 200) {
+          // 更新成功
+          wx.showToast({
+            title: '更新成功',
+            icon: 'success',
+            duration: 2000,
+            success: () => {
+              // 退出编辑模式
+              this.setData({
+                isEditing: false,
+                isSubmitting: false
+              });
+            }
+          });
+        } else {
+          // 更新失败
+          this.setData({
+            error: res.data.message || '更新失败，请重试',
+            isSubmitting: false
+          });
+        }
+      },
+      fail: (err) => {
         this.setData({
-          error: err.message || '更新失败，请重试',
+          error: '网络请求失败，请检查网络连接',
           isSubmitting: false
         });
         console.error('更新宠物信息失败:', err);
-      });
+      }
+    });
   },
 
   /**
@@ -406,28 +437,42 @@ Page({
       mask: true
     });
 
-    api.delete(`/api/pet/${this.data.petId}`)
-      .then(() => {
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/api/pet/${this.data.petId}`,
+      method: 'DELETE',
+      header: {
+        'Authorization': `Bearer ${wx.getStorageSync('token')}`
+      },
+      success: (res) => {
+        wx.hideLoading();
+        
+        if (res.statusCode === 200) {
+          wx.showToast({
+            title: '删除成功',
+            icon: 'success',
+            duration: 2000,
+            success: () => {
+              // 返回上一页
+              setTimeout(() => {
+                wx.navigateBack();
+              }, 2000);
+            }
+          });
+        } else {
+          wx.showToast({
+            title: res.data.message || '删除失败',
+            icon: 'none'
+          });
+        }
+      },
+      fail: () => {
         wx.hideLoading();
         wx.showToast({
-          title: '删除成功',
-          icon: 'success',
-          duration: 2000,
-          success: () => {
-            // 返回上一页
-            setTimeout(() => {
-              wx.navigateBack();
-            }, 2000);
-          }
-        });
-      })
-      .catch((err) => {
-        wx.hideLoading();
-        wx.showToast({
-          title: err.message || '删除失败',
+          title: '网络请求失败',
           icon: 'none'
         });
-      });
+      }
+    });
   },
 
   /**

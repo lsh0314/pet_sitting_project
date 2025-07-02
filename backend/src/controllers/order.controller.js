@@ -1502,6 +1502,45 @@ static async exportOrders(req, res) {
   }
 }
 
+/**
+ * 管理员获取订单服务报告列表
+ * @param {Object} req - Express请求对象
+ * @param {Object} res - Express响应对象
+ */
+static async getAdminOrderReports(req, res) {
+  try {
+    // 获取订单ID
+    const orderId = req.params.id;
+    
+    // 获取订单详情
+    const order = await Order.findById(orderId);
+    
+    // 验证订单是否存在
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: '订单不存在'
+      });
+    }
+    
+    // 获取服务报告列表
+    const reports = await Order.getReports(orderId);
+    
+    // 返回成功响应
+    res.status(200).json({
+      success: true,
+      data: reports
+    });
+  } catch (error) {
+    console.error('管理员获取服务报告列表失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取服务报告列表失败',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+}
+
 }
 
 module.exports = OrderController;
