@@ -132,6 +132,19 @@ Page({
           newSitters = res;
         }
         
+        // 调试：打印帮溜员数据
+        console.log('处理后的帮溜员数据:', JSON.stringify(newSitters));
+        
+        // 检查是否有证书信息
+        const hasCertificateInfo = newSitters.some(sitter => 
+          sitter.has_certificate !== undefined || sitter.certificate_type !== undefined
+        );
+        console.log('是否包含证书信息:', hasCertificateInfo);
+        
+        if (newSitters.length > 0) {
+          console.log('第一个帮溜员数据:', JSON.stringify(newSitters[0]));
+        }
+        
         const hasMore = newSitters.length === 10; // 假设每页10条
         
         this.setData({

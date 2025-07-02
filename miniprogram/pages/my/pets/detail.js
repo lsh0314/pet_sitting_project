@@ -392,5 +392,14 @@ Page({
         });
       }
     });
+  },
+
+  /**
+   * 返回上一页
+   */
+  goBack: function() {
+    wx.navigateBack({
+      delta: 1
+    });
   }
 }); 

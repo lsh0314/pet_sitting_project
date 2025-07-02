@@ -213,15 +213,18 @@
 .price-input {
   width: 120rpx;
   height: 60rpx;
-  background-color: #f9f9f9;
+  background-color: #ffffff;
   border: 1rpx solid #eee;
   border-radius: 6rpx;
   text-align: center;
   font-size: 28rpx;
+  padding: 0 10rpx;
+  box-sizing: border-box;
 }
 
 .price-input:focus {
   border-color: #ffba00;
+  outline: none;
 }
 
 .price-unit {

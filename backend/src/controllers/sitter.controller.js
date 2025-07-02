@@ -13,6 +13,22 @@ class SitterController {
       // 从认证中间件获取用户ID
       const userId = req.user.id;
       
+      // 检查用户状态
+      const db = require('../config/database');
+      const [userRows] = await db.query(
+        'SELECT status FROM users WHERE id = ?',
+        [userId]
+      );
+      
+      // 如果用户被封禁，返回特定错误码
+      if (userRows.length > 0 && userRows[0].status === 'banned') {
+        return res.status(403).json({
+          success: false,
+          message: '您的账号已被封禁，无法接单',
+          code: 'ACCOUNT_BANNED'
+        });
+      }
+      
       // 获取帮溜员基本资料
       const profile = await SitterProfile.findByUserId(userId);
       
@@ -214,7 +230,9 @@ class SitterController {
           type: service.service_type,
           price: service.price
         })),
-        availableDates: []
+        availableDates: [],
+        has_certificate: profile.has_certificate || false,
+        certificate_type: profile.certificate_type || null
       };
       
       // 安全解析available_dates
@@ -267,6 +285,14 @@ class SitterController {
       
       // 获取帮溜员服务项目
       const services = await SitterService.findByUserId(sitterId);
+      
+      // 确保证书信息存在
+      if (profile.has_certificate === undefined) {
+        profile.has_certificate = false;
+      }
+      if (profile.certificate_type === undefined) {
+        profile.certificate_type = null;
+      }
       
       // 返回组合数据（旧版本格式）
       res.json({

@@ -1,4 +1,5 @@
 const DashboardModel = require('../models/dashboard.model.js')
+const Pet = require('../models/pet.model.js')
 
 /**
  * 仪表盘控制器
@@ -129,6 +130,35 @@ class DashboardController {
       res.status(500).json({
         success: false,
         message: '获取服务分布失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      })
+    }
+  }
+
+  /**
+   * 获取宠物总数
+   * @param {Object} req - 请求对象
+   * @param {Object} res - 响应对象
+   */
+  static async getPetCount(req, res) {
+    try {
+      console.log('开始获取宠物总数')
+      
+      const maxPetId = await Pet.getMaxPetId()
+
+      console.log('宠物总数获取成功:', maxPetId)
+
+      res.json({
+        success: true,
+        data: {
+          petCount: maxPetId
+        }
+      })
+    } catch (error) {
+      console.error('获取宠物总数失败:', error)
+      res.status(500).json({
+        success: false,
+        message: '获取宠物总数失败',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
       })
     }

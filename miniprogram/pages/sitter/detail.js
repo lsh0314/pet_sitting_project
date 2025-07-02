@@ -45,6 +45,8 @@ Page({
     // 调用接口获取帮溜员详情
     api.get(`/api/sitter/${this.data.sitterId}`, {}, false)
       .then(res => {
+        console.log('获取帮溜员详情原始数据:', JSON.stringify(res));
+        
         // 处理返回的数据
         let sitterInfo = null;
         
@@ -65,9 +67,17 @@ Page({
               type: service.service_type,
               price: service.price
             })),
-            availableDates: res.availableDates || []
+            availableDates: res.availableDates || [],
+            has_certificate: res.profile.has_certificate || false,
+            certificate_type: res.profile.certificate_type || null,
+            certificate_name: res.profile.certificate_name || '宠物训练师证书'
           };
         }
+        
+        // 调试：打印处理后的数据
+        console.log('处理后的帮溜员详情:', JSON.stringify(sitterInfo));
+        console.log('是否有证书信息:', 
+          sitterInfo && (sitterInfo.has_certificate !== undefined || sitterInfo.certificate_type !== undefined));
         
         // 处理可预约日期
         if (sitterInfo && Array.isArray(sitterInfo.availableDates)) {

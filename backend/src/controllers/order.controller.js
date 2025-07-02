@@ -373,6 +373,24 @@ class OrderController {
         });
       }
       
+      // 如果是帮溜员取消订单，检查帮溜员账号状态
+      if (order.sitterUserId === userId) {
+        const db = require('../config/database');
+        const [userRows] = await db.query(
+          'SELECT status FROM users WHERE id = ?',
+          [userId]
+        );
+        
+        // 如果帮溜员账号已被封禁，返回特定错误
+        if (userRows.length > 0 && userRows[0].status === 'banned') {
+          return res.status(403).json({
+            success: false,
+            message: '您的账号已被封禁，无法取消订单',
+            code: 'ACCOUNT_BANNED'
+          });
+        }
+      }
+      
       // 验证订单状态是否允许取消（只能取消待接单、待支付、待服务状态的订单）
       const cancelableStatuses = ['pending', 'accepted', 'paid'];
       if (!cancelableStatuses.includes(order.status)) {
@@ -390,6 +408,46 @@ class OrderController {
           success: false,
           message: '取消订单失败'
         });
+      }
+      
+      // 如果是帮溜员取消订单，更新取消次数
+      if (order.sitterUserId === userId) {
+        const db = require('../config/database');
+        const connection = await db.getConnection();
+        
+        try {
+          await connection.beginTransaction();
+          
+          // 更新取消次数
+          const [updateResult] = await connection.execute(
+            'UPDATE sitter_profiles SET cancel_count = cancel_count + 1 WHERE user_id = ?',
+            [userId]
+          );
+          
+          // 获取更新后的取消次数
+          const [profileResult] = await connection.execute(
+            'SELECT cancel_count FROM sitter_profiles WHERE user_id = ?',
+            [userId]
+          );
+          
+          const cancelCount = profileResult[0]?.cancel_count || 0;
+          
+          // 如果达到3次，将用户状态设为banned
+          if (cancelCount >= 3) {
+            await connection.execute(
+              'UPDATE users SET status = ? WHERE id = ?',
+              ['banned', userId]
+            );
+          }
+          
+          await connection.commit();
+        } catch (error) {
+          await connection.rollback();
+          console.error('更新帮溜员取消次数失败:', error);
+          // 即使更新取消次数失败，也不影响订单取消操作
+        } finally {
+          connection.release();
+        }
       }
       
       // 返回成功响应

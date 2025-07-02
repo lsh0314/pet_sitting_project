@@ -112,8 +112,8 @@ Page({
       api.get('/api/verification/status')
         .then(res => {
           console.log('获取认证状态成功:', res);
-          // 如果有认证记录且类型为certificate且状态为approved，则允许访问
-          if (res.data && res.data.type === 'certificate' && res.data.status === 'approved') {
+          // 只检查状态是否为approved，不再检查type
+          if (res.data && res.data.status === 'approved') {
             resolve(true);
           } else {
             resolve(false);

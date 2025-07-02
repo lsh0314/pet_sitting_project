@@ -208,6 +208,9 @@ Page({
     this.setData({
       [`services[${index}].price`]: value
     });
+    
+    // 打印调试信息
+    console.log('价格输入变化:', index, value, this.data.services[index]);
   },
 
   /**
@@ -289,6 +292,16 @@ Page({
         });
         return;
       }
+      
+      // 确保价格是有效数字
+      const price = parseFloat(service.price);
+      if (isNaN(price) || price <= 0) {
+        wx.showToast({
+          title: `${service.name}的价格必须大于0`,
+          icon: 'none'
+        });
+        return;
+      }
     }
     
     // 设置提交状态
@@ -305,6 +318,8 @@ Page({
         price: parseFloat(s.price)
       }))
     };
+    
+    console.log('提交数据:', submitData);
     
     // 调用API更新帮溜员资料
     const token = wx.getStorageSync('token');

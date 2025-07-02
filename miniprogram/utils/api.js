@@ -30,6 +30,7 @@ const getBaseUrl = () => {
  * @param {string} options.method - 请求方法
  * @param {Object} options.data - 请求数据
  * @param {boolean} options.auth - 是否需要认证
+ * @param {boolean} options.suppressBannedAlert - 是否抑制账号封禁提示
  * @returns {Promise} Promise对象
  */
 const request = (options) => {
@@ -71,6 +72,31 @@ const request = (options) => {
           // 未授权，跳转到登录页
           navigateToLogin();
           reject(new Error('登录已过期，请重新登录'));
+        } else if (res.statusCode === 403) {
+          // 处理403错误，检查是否是账号被封禁
+          if (res.data && res.data.code === 'ACCOUNT_BANNED') {
+            // 返回带有特殊错误码的错误对象
+            const error = new Error(res.data.message || '账号已被封禁');
+            error.code = 'ACCOUNT_BANNED';
+            
+            // 只有在不抑制提示的情况下才显示账号封禁提示
+            if (!options.suppressBannedAlert) {
+              // 显示账号封禁提示
+              wx.showModal({
+                title: '账号已封禁',
+                content: '您的伴宠专员账号已被封禁，无法接单。请联系客服申诉。',
+                showCancel: false,
+                confirmText: '我知道了'
+              });
+            }
+            
+            reject(error);
+          } else {
+            // 其他403错误
+            const errMsg = (res.data && res.data.message) || '没有权限执行此操作';
+            showToast(errMsg);
+            reject(new Error(errMsg));
+          }
         } else {
           // 其他错误
           const errMsg = (res.data && res.data.message) || '服务器错误';
@@ -116,13 +142,15 @@ module.exports = {
    * @param {string} url - 请求地址
    * @param {Object} data - 请求参数
    * @param {boolean} auth - 是否需要认证
+   * @param {boolean} suppressBannedAlert - 是否抑制账号封禁提示
    */
-  get: (url, data = {}, auth = true) => {
+  get: (url, data = {}, auth = true, suppressBannedAlert = false) => {
     return request({
       url,
       method: 'GET',
       data,
-      auth
+      auth,
+      suppressBannedAlert
     });
   },
   

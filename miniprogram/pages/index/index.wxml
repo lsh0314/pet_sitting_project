@@ -70,7 +70,9 @@
         <view class="sitter-item" wx:for="{{sitters}}" wx:key="user_id" bindtap="onTapSitter" data-id="{{item.user_id}}">
           <image class="sitter-avatar" src="{{item.avatar_url || '/static/images/default-avatar.png'}}" mode="aspectFill"></image>
           <view class="sitter-info">
-            <view class="sitter-name">{{item.nickname || '帮溜员'}}</view>
+            <view class="sitter-name">{{item.nickname || '帮溜员'}}
+              <text class="certificate-tag" wx:if="{{item.has_certificate}}">{{item.certificate_name || '宠物训练师证书'}}</text>
+            </view>
             <view class="sitter-rating">
               <text>★ {{item.rating || '5.0'}}</text>
               <text class="sitter-orders">已完成 {{item.total_services_completed || 0}} 单</text>
@@ -100,7 +102,7 @@
     <image class="stats-icon" src="/static/images/pet-icon.png" mode="aspectFit"></image>
     <view class="stats-info">
       <view class="stats-text">已累计服务宠物</view>
-      <view class="stats-number">截止2025.05</view>
+      <view class="stats-number">{{petCount || 0}}只</view>
     </view>
   </view>
   

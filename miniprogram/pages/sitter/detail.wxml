@@ -13,7 +13,10 @@
       <view class="sitter-header">
         <image class="sitter-avatar" src="{{sitterInfo.avatar || '/static/images/default-avatar.png'}}"></image>
         <view class="sitter-basic">
-          <view class="sitter-name">{{sitterInfo.nickname || '帮溜员'}}</view>
+          <view class="sitter-name">
+            {{sitterInfo.nickname || '帮溜员'}}
+            <text class="certificate-tag" wx:if="{{sitterInfo.has_certificate}}">{{sitterInfo.certificate_name || '专业证书'}}</text>
+          </view>
           <view class="sitter-rating">
             <text class="icon-star">★</text>
             <text>{{sitterInfo.rating || '5.0'}}</text>
@@ -28,6 +31,17 @@
           <view class="section-title">个人简介</view>
           <view class="section-content">
             <text class="bio">{{sitterInfo.bio || '这位帮溜员很懒，还没有填写简介~'}}</text>
+          </view>
+        </view>
+        
+        <!-- 证书信息 -->
+        <view class="section" wx:if="{{sitterInfo.has_certificate}}">
+          <view class="section-title">专业证书</view>
+          <view class="section-content">
+            <view class="certificate-info">
+              <text class="certificate-icon">🏆</text>
+              <text class="certificate-name">{{sitterInfo.certificate_name || '专业宠物照护证书'}}</text>
+            </view>
           </view>
         </view>
         
