@@ -17,7 +17,9 @@ const ComplaintsView = () => import('../views/ComplaintsView.vue').catch(() => i
 const ComplaintDetailView = () => import('../views/ComplaintDetailView.vue').catch(() => import('../views/NotFoundView.vue'))
 const ReviewsView = () => import('../views/ReviewsView.vue').catch(() => import('../views/NotFoundView.vue'))
 const ConfigView = () => import('../views/ConfigView.vue').catch(() => import('../views/NotFoundView.vue'))
+const PetsView = () => import('../views/PetsView.vue').catch(() => import('../views/NotFoundView.vue'))
 const NotFoundView = () => import('../views/NotFoundView.vue')
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -85,6 +87,12 @@ const router = createRouter({
           name: 'reviews',
           component: ReviewsView,
           meta: { title: '评价管理' }
+        },
+        {
+          path: 'pets',
+          name: 'pets',
+          component: PetsView,
+          meta: { title: '宠物管理' }
         },
         {
           path: 'config',

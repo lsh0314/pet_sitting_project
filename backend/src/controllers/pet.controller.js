@@ -212,6 +212,168 @@ class PetController {
       });
     }
   }
+
+  /**
+   * 管理员获取所有宠物列表
+   */
+  static async adminGetPets(req, res) {
+    try {
+      const { page = 1, limit = 10, keyword, type, gender, owner } = req.query;
+      
+      const result = await Pet.adminList({
+        page: parseInt(page),
+        limit: parseInt(limit),
+        keyword,
+        type,
+        gender,
+        owner
+      });
+      
+      res.json({
+        success: true,
+        data: result.data,
+        total: result.total,
+        page: parseInt(page),
+        limit: parseInt(limit)
+      });
+    } catch (error) {
+      console.error('管理员获取宠物列表失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取宠物列表失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 管理员获取宠物详情
+   */
+  static async adminGetPetById(req, res) {
+    try {
+      const petId = parseInt(req.params.id);
+      
+      if (isNaN(petId)) {
+        return res.status(400).json({
+          success: false,
+          message: '无效的宠物ID'
+        });
+      }
+      
+      const pet = await Pet.adminGetById(petId);
+      
+      if (!pet) {
+        return res.status(404).json({
+          success: false,
+          message: '未找到对应宠物'
+        });
+      }
+      
+      res.json({
+        success: true,
+        data: pet
+      });
+    } catch (error) {
+      console.error('管理员获取宠物详情失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取宠物详情失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 管理员更新宠物信息
+   */
+  static async adminUpdatePet(req, res) {
+    try {
+      const petId = parseInt(req.params.id);
+      
+      if (isNaN(petId)) {
+        return res.status(400).json({
+          success: false,
+          message: '无效的宠物ID'
+        });
+      }
+      
+      const pet = await Pet.adminGetById(petId);
+      
+      if (!pet) {
+        return res.status(404).json({
+          success: false,
+          message: '未找到对应宠物'
+        });
+      }
+      
+      const success = await Pet.update(petId, req.body);
+      
+      if (success) {
+        res.json({
+          success: true,
+          message: '宠物档案更新成功'
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: '宠物档案更新失败'
+        });
+      }
+    } catch (error) {
+      console.error('管理员更新宠物信息失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '更新宠物信息失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  /**
+   * 管理员删除宠物
+   */
+  static async adminDeletePet(req, res) {
+    try {
+      const petId = parseInt(req.params.id);
+      
+      if (isNaN(petId)) {
+        return res.status(400).json({
+          success: false,
+          message: '无效的宠物ID'
+        });
+      }
+      
+      const pet = await Pet.adminGetById(petId);
+      
+      if (!pet) {
+        return res.status(404).json({
+          success: false,
+          message: '未找到对应宠物'
+        });
+      }
+      
+      const success = await Pet.delete(petId);
+      
+      if (success) {
+        res.json({
+          success: true,
+          message: '宠物档案已删除'
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: '宠物档案删除失败'
+        });
+      }
+    } catch (error) {
+      console.error('管理员删除宠物失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '删除宠物失败',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
 }
 
-module.exports = PetController; 
+module.exports = PetController;

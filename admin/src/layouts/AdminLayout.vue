@@ -30,6 +30,11 @@
             <el-icon><el-icon-user-filled /></el-icon>
             <span>用户管理</span>
           </el-menu-item>
+
+          <el-menu-item index="/pets">
+            <el-icon><el-icon-star-filled /></el-icon>
+            <span>宠物管理</span>
+          </el-menu-item>
           
           <el-menu-item index="/verifications">
             <el-icon><el-icon-user /></el-icon>
@@ -120,6 +125,7 @@ import {
   Money as ElIconMoney,
   Warning as ElIconWarning,
   Star as ElIconStar,
+  StarFilled as ElIconStarFilled,
   Setting as ElIconSetting,
   Fold as ElIconFold,
   Expand as ElIconExpand,

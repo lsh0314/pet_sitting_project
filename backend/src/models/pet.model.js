@@ -261,6 +261,158 @@ class Pet {
       throw error;
     }
   }
+
+  /**
+   * 管理员获取宠物列表(分页+筛选)
+   * @param {Object} options - 查询选项
+   * @param {number} options.page - 页码
+   * @param {number} options.limit - 每页数量
+   * @param {string} [options.keyword] - 搜索关键词
+   * @param {string} [options.type] - 宠物类型
+   * @param {string} [options.gender] - 性别
+   * @returns {Promise<Object>} - 返回宠物列表和总数
+   */
+  static async adminList({ page = 1, limit = 10, keyword, type, gender, owner }) {
+    try {
+      // 构建查询条件和参数
+      const conditions = [];
+      const params = [];
+      
+      if (keyword) {
+        conditions.push('(p.name LIKE ? OR p.id = ?)');
+        params.push(`%${keyword}%`, keyword);
+      }
+      
+      if (type) {
+        conditions.push('p.breed = ?');
+        params.push(type);
+      }
+      
+      if (gender) {
+        conditions.push('p.gender = ?');
+        params.push(gender);
+      }
+      
+      if (owner) {
+        // 定义一个辅助函数来判断字符串是否完全由数字组成
+        const isPurelyNumeric = (str) => /^\d+$/.test(str);
+
+        // 如果 owner 是一个纯数字字符串
+        if (isPurelyNumeric(owner)) {
+          // 那么它可以是用户ID，也可以是某个用户的纯数字昵称
+          conditions.push('(u.nickname LIKE ? OR p.owner_user_id = ?)');
+          params.push(`%${owner}%`, owner); // 第一个用于模糊搜索，第二个用于ID精确匹配
+        } else {
+          // 如果 owner 包含非数字字符 (如 "张三")，那它只能是昵称
+          conditions.push('u.nickname LIKE ?');
+          params.push(`%${owner}%`);
+        }
+      }
+      
+      const whereClause = conditions.length > 0 
+        ? `WHERE ${conditions.join(' AND ')}` 
+        : '';
+      
+      // 查询总数
+      const [totalResult] = await db.execute(
+        `SELECT COUNT(*) as total FROM pets p
+         LEFT JOIN users u ON p.owner_user_id = u.id
+         ${whereClause}`,
+        params
+      );
+      
+      // 查询分页数据
+      const offset = (page - 1) * limit;
+      const limitNum = Number(limit);
+      const offsetNum = Number(offset);
+      
+      const [rows] = await db.execute(
+        `SELECT 
+          p.id, p.name, p.photo_url as photo, p.breed, p.age, p.gender, 
+          p.weight, p.health_desc as healthStatus, 
+          p.character_tags as tags, p.special_notes as likes, 
+          p.allergy_info as dislikes, p.created_at, p.updated_at,
+          p.owner_user_id as owner_id,
+          u.nickname as owner_nickname,
+          u.avatar_url as owner_avatar_url
+         FROM pets p
+         LEFT JOIN users u ON p.owner_user_id = u.id
+         ${whereClause}
+         ORDER BY p.created_at DESC
+         LIMIT ${limitNum} OFFSET ${offsetNum}`,
+        params
+      );
+      
+      // 处理JSON字段
+      const processedRows = rows.map(row => {
+        if (row.tags) {
+          try {
+            row.tags = JSON.parse(row.tags);
+          } catch (e) {
+            row.tags = [];
+          }
+        }
+        return row;
+      });
+      
+      return {
+        data: processedRows,
+        total: totalResult[0].total
+      };
+    } catch (error) {
+      console.error('管理员获取宠物列表失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 管理员获取宠物详情
+   * @param {number} petId - 宠物ID
+   * @returns {Promise<Object|null>} - 返回宠物详情或null
+   */
+  static async adminGetById(petId) {
+    try {
+      const [rows] = await db.execute(
+        `SELECT 
+          id, owner_user_id, name, photo_url as photo, breed, age, gender, 
+          weight, is_sterilized as isSterilized, health_desc as healthStatus, 
+          character_tags as tags, special_notes as likes, 
+          allergy_info as dislikes, vaccine_proof_urls as vaccineProof,
+          created_at, updated_at
+         FROM pets 
+         WHERE id = ?`,
+        [petId]
+      );
+      
+      if (rows.length === 0) {
+        return null;
+      }
+      
+      const pet = rows[0];
+      
+      // 处理JSON字段
+      if (pet.tags) {
+        try {
+          pet.tags = JSON.parse(pet.tags);
+        } catch (e) {
+          pet.tags = [];
+        }
+      }
+      
+      if (pet.vaccineProof) {
+        try {
+          pet.vaccineProof = JSON.parse(pet.vaccineProof);
+        } catch (e) {
+          pet.vaccineProof = [];
+        }
+      }
+      
+      return pet;
+    } catch (error) {
+      console.error('管理员获取宠物详情失败:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = Pet;
