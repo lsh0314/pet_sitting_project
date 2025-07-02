@@ -12,238 +12,245 @@
 
 <template>
   <div class="users-view">
-    <h2>用户管理</h2>
-    <!-- 搜索和筛选 -->
-    <el-card class="filter-card">
-      <div class="filter-container">
-        <el-input
-          v-model="filters.keyword"
-          placeholder="输入用户昵称或ID搜索"
-          clearable
-          @clear="handleSearch"
-          @keyup.enter="handleSearch"
-          style="width: 220px"
-        >
-          <template #prefix>
-            <el-icon><Search /></el-icon>
-          </template>
-        </el-input>
-        
-        <el-select 
-          v-model="filters.role" 
-          placeholder="用户角色" 
-          clearable 
-          @change="handleSearch"
-          style="width: 160px"
-        >
-          <el-option label="全部角色" value="" />
-          <el-option
-            v-for="(label, value) in roleMap"
-            :key="value"
-            :label="label"
-            :value="value"
+    <el-container>
+      <el-main>
+        <h2>用户管理</h2>
+        <!-- 搜索和筛选 -->
+        <el-card class="filter-card">
+          <div class="filter-container">
+            <el-input
+              v-model="filters.keyword"
+              placeholder="输入用户昵称或ID搜索"
+              clearable
+              @clear="handleSearch"
+              @keyup.enter="handleSearch"
+              style="width: 220px"
+            >
+              <template #prefix>
+                <el-icon><Search /></el-icon>
+              </template>
+            </el-input>
             
-          />
-        </el-select>
-        
-        <el-select 
-          v-model="filters.status" 
-          placeholder="用户状态" 
-          clearable 
-          @change="handleSearch"
-          style="width: 160px"
-        >
-          <el-option label="全部状态" value="" />
-          <el-option
-            v-for="(label, value) in statusMap"
-            :key="value"
-            :label="label"
-            :value="value"
-          />
-        </el-select>
-        
-        <el-button type="primary" @click="handleSearch">筛选</el-button>
-        <el-button @click="resetFilters">重置</el-button>
-        <el-button type="success" @click="handleExport">导出数据</el-button>
-      </div>
-    </el-card>
-    <!-- 用户列表 -->
-    <el-table
-      v-loading="loading"
-      :data="userList"
-      :key="tableKey"
-      border
-      stripe
-      style="width: 100%"
-      @selection-change="handleSelectionChange"
-    >
-      <template #empty>
-        <div v-if="userList.length === 0 && !loading" class="empty-table">
-          {{ loading ? '加载中...' : '暂无数据' }}
-        </div>
-      </template>
-      <el-table-column type="index" width="50" label="#" :key="'index'" />
-      
-      <el-table-column prop="id" label="用户ID" width="80" :key="'id'" />
-      
-      <el-table-column label="用户信息" min-width="200" :key="'user-info'">
-        <template #default="{ row }">
-          <div v-if="!row.nickname">加载中...</div>
-          <div class="user-info">
-            <el-avatar :size="40" :src="row.avatar_url">
-              {{ row.nickname ? row.nickname.charAt(0) : 'U' }}
-            </el-avatar>
-            <div class="user-details">
-              <div class="nickname">{{ row.nickname }}</div>
-              <div class="join-time">注册时间: {{ formatDate(row.created_at) }}</div>
-            </div>
-          </div>
-        </template>
-      </el-table-column>
-      
-      <el-table-column prop="role" label="角色" width="120">
-        <template #default="{ row }">
-          <el-tag
-            :type="row.role === 'sitter' ? 'success' : 'info'"
-            effect="plain"
-          >
-            {{ roleMap[row.role] }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      
-      <el-table-column prop="status" label="状态" width="100">
-        <template #default="{ row }">
-          <el-tag
-            :type="row.status === 'active' ? 'success' : 'danger'"
-          >
-            {{ statusMap[row.status] }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      
-      <el-table-column label="操作" width="220" fixed="right">
-        <template #default="{ row }">
-          <el-button
-            link
-            type="primary"
-            size="small"
-            @click="viewUserDetail(row)"
-          >
-            详情
-          </el-button>
-          
-          <el-button
-            link
-            :type="row.status === 'active' ? 'danger' : 'success'"
-            size="small"
-            @click="handleToggleStatus(row)"
-          >
-            {{ row.status === 'active' ? '封禁' : '解封' }}
-          </el-button>
-          
-          <el-button
-            link
-            type="warning"
-            size="small"
-            @click="handleChangeRole(row)"
-          >
-            变更角色
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    
-      <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        v-if="pagination.total > 0"
-        :key="pagination.page + '-' + pagination.limit"
-        :current-page="pagination.page"
-        :page-size="pagination.limit"
-        :total="pagination.total"
-        :page-sizes="[10, 20, 50, 100]"
-        :background="true"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handlePageChange"
-        @update:current-page="(val) => pagination.page = val"
-        @update:page-size="(val) => pagination.limit = val"
-      />
-      <div v-else class="no-data">暂无数据</div>
-    </div>
-    
-    <!-- 用户详情抽屉 -->
-    <el-drawer
-      v-model="userDetailVisible"
-      :title="'用户详情 - ' + (currentUser && currentUser.nickname || '')"
-      size="500px"
-      destroy-on-close
-    >
-      <div v-if="currentUser" class="user-detail">
-        <div class="detail-header">
-          <el-avatar :size="80" :src="currentUser.avatar_url">
-            {{ currentUser.nickname ? currentUser.nickname.charAt(0) : 'U' }}
-          </el-avatar>
-          <h3>{{ currentUser.nickname }}</h3>
-        </div>
-        
-        <el-form :model="editForm" label-width="100px">
-          <el-form-item label="用户ID">
-            <el-input v-model="currentUser.id" disabled />
-          </el-form-item>
-          <el-form-item label="昵称">
-            <el-input v-model="editForm.nickname" />
-          </el-form-item>
-          <el-form-item label="头像URL">
-            <el-input v-model="editForm.avatar_url" />
-          </el-form-item>
-          <el-form-item label="性别">
-            <el-select v-model="editForm.gender">
-              <el-option label="男" value="male" />
-              <el-option label="女" value="female" />
-              <el-option label="未知" value="unknown" />
+            <el-select 
+              v-model="filters.role" 
+              placeholder="用户角色" 
+              clearable 
+              @change="handleSearch"
+              style="width: 160px"
+            >
+              <el-option label="全部角色" value="" />
+              <el-option
+                v-for="(label, value) in roleMap"
+                :key="value"
+                :label="label"
+                :value="value"
+              />
             </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="handleSaveUserInfo">保存</el-button>
-          </el-form-item>
-        </el-form>        <el-descriptions :column="1" border>
-          <el-descriptions-item label="用户角色">{{ roleMap[currentUser.role] }}</el-descriptions-item>
-          <el-descriptions-item label="账号状态">
-            <el-tag :type="currentUser.status === 'active' ? 'success' : 'danger'">
-              {{ statusMap[currentUser.status] }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="性别">
-            {{ genderMap[currentUser.gender || 'unknown'] }}
-          </el-descriptions-item>
-          <el-descriptions-item label="注册时间">{{ formatDate(currentUser.created_at) }}</el-descriptions-item>
-          <el-descriptions-item label="最后更新">{{ formatDate(currentUser.updated_at) }}</el-descriptions-item>
-        </el-descriptions>
+            
+            <el-select 
+              v-model="filters.status" 
+              placeholder="用户状态" 
+              clearable 
+              @change="handleSearch"
+              style="width: 160px"
+            >
+              <el-option label="全部状态" value="" />
+              <el-option
+                v-for="(label, value) in statusMap"
+                :key="value"
+                :label="label"
+                :value="value"
+              />
+            </el-select>
+            
+            <el-button type="primary" @click="handleSearch">筛选</el-button>
+            <el-button @click="resetFilters">重置</el-button>
+            <el-button type="success" @click="handleExport">导出数据</el-button>
+          </div>
+        </el-card>
+
+        <!-- 用户列表卡片 -->
+        <el-card v-loading="loading">
+          <!-- 用户列表 -->
+          <el-table
+            :data="userList"
+            :key="tableKey"
+            border
+            style="width: 100%"
+            @selection-change="handleSelectionChange"
+          >
+            <template #empty>
+              <div class="empty-table">
+                暂无数据
+              </div>
+            </template>
+
+            <el-table-column type="index" width="50" label="#" :key="'index'" />
+            
+            <el-table-column prop="id" label="用户ID" width="80" :key="'id'" />
+            
+            <el-table-column label="用户信息" min-width="200" :key="'user-info'">
+              <template #default="{ row }">
+                <div class="user-info">
+                  <el-avatar :size="40" :src="row.avatar_url">
+                    {{ row.nickname ? row.nickname.charAt(0) : 'U' }}
+                  </el-avatar>
+                  <div class="user-details">
+                    <div class="nickname">{{ row.nickname }}</div>
+                    <div class="join-time">注册时间: {{ formatDate(row.created_at) }}</div>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
         
-        <template v-if="currentUser.role === 'sitter'">
-          <div class="detail-section">
-            <h4>帮溜员资质</h4>
+            <el-table-column prop="role" label="角色" width="120">
+              <template #default="{ row }">
+                <el-tag
+                  :type="row.role === 'sitter' ? 'success' : 'info'"
+                  effect="plain"
+                >
+                  {{ roleMap[row.role] }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            
+            <el-table-column prop="status" label="状态" width="100">
+              <template #default="{ row }">
+                <el-tag
+                  :type="row.status === 'active' ? 'success' : 'danger'"
+                >
+                  {{ statusMap[row.status] }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            
+            <el-table-column label="操作" width="220" fixed="right">
+              <template #default="{ row }">
+                <el-button
+                  link
+                  type="primary"
+                  size="small"
+                  @click="viewUserDetail(row)"
+                >
+                  详情
+                </el-button>
+                
+                <el-button
+                  link
+                  :type="row.status === 'active' ? 'danger' : 'success'"
+                  size="small"
+                  @click="handleToggleStatus(row)"
+                >
+                  {{ row.status === 'active' ? '封禁' : '解封' }}
+                </el-button>
+                
+                <el-button
+                  link
+                  type="warning"
+                  size="small"
+                  @click="handleChangeRole(row)"
+                >
+                  变更角色
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          
+          <!-- 分页 -->
+          <div class="pagination-container">
+            <el-pagination
+              v-if="pagination.total > 0"
+              :key="pagination.page + '-' + pagination.limit"
+              :current-page="pagination.page"
+              :page-size="pagination.limit"
+              :total="pagination.total"
+              :page-sizes="[10, 20, 50, 100]"
+              :background="true"
+              layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange"
+              @current-change="handlePageChange"
+              @update:current-page="(val) => pagination.page = val"
+              @update:page-size="(val) => pagination.limit = val"
+            />
+            <div v-else class="no-data">暂无数据</div>
+          </div>
+        </el-card>
+
+        <!-- 用户详情抽屉 -->
+        <el-drawer
+          v-model="userDetailVisible"
+          :title="'用户详情 - ' + (currentUser && currentUser.nickname || '')"
+          size="500px"
+          destroy-on-close
+        >
+          <div v-if="currentUser" class="user-detail">
+            <div class="detail-header">
+              <el-avatar :size="80" :src="currentUser.avatar_url">
+                {{ currentUser.nickname ? currentUser.nickname.charAt(0) : 'U' }}
+              </el-avatar>
+              <h3>{{ currentUser.nickname }}</h3>
+            </div>
+            
+            <el-form :model="editForm" label-width="100px">
+              <el-form-item label="用户ID">
+                <el-input v-model="currentUser.id" disabled />
+              </el-form-item>
+              <el-form-item label="昵称">
+                <el-input v-model="editForm.nickname" />
+              </el-form-item>
+              <el-form-item label="头像URL">
+                <el-input v-model="editForm.avatar_url" />
+              </el-form-item>
+              <el-form-item label="性别">
+                <el-select v-model="editForm.gender">
+                  <el-option label="男" value="male" />
+                  <el-option label="女" value="female" />
+                  <el-option label="未知" value="unknown" />
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSaveUserInfo">保存</el-button>
+              </el-form-item>
+            </el-form>
+            
             <el-descriptions :column="1" border>
-              <el-descriptions-item label="认证状态">
-                <el-tag :type="currentUser.identity_status === 'verified' ? 'success' : 'warning'">
-                  {{ identityStatusMap[currentUser.identity_status] }}
+              <el-descriptions-item label="用户角色">{{ roleMap[currentUser.role] }}</el-descriptions-item>
+              <el-descriptions-item label="账号状态">
+                <el-tag :type="currentUser.status === 'active' ? 'success' : 'danger'">
+                  {{ statusMap[currentUser.status] }}
                 </el-tag>
               </el-descriptions-item>
-              <el-descriptions-item label="服务次数">{{ currentUser.service_count || 0 }}</el-descriptions-item>
+              <el-descriptions-item label="性别">
+                {{ genderMap[currentUser.gender || 'unknown'] }}
+              </el-descriptions-item>
+              <el-descriptions-item label="注册时间">{{ formatDate(currentUser.created_at) }}</el-descriptions-item>
+              <el-descriptions-item label="最后更新">{{ formatDate(currentUser.updated_at) }}</el-descriptions-item>
             </el-descriptions>
+            
+            <template v-if="currentUser.role === 'sitter'">
+              <div class="detail-section">
+                <h4>帮溜员资质</h4>
+                <el-descriptions :column="1" border>
+                  <el-descriptions-item label="认证状态">
+                    <el-tag :type="currentUser.identity_status === 'verified' ? 'success' : 'warning'">
+                      {{ identityStatusMap[currentUser.identity_status] }}
+                    </el-tag>
+                  </el-descriptions-item>
+                  <el-descriptions-item label="服务次数">{{ currentUser.service_count || 0 }}</el-descriptions-item>
+                </el-descriptions>
+              </div>
+            </template>
           </div>
-        </template>
-      </div>
-    </el-drawer>
+        </el-drawer>
+      </el-main>
+    </el-container>
   </div>
 </template>
 
 <script setup>
+// <script> 部分未做修改，保持原样
 import { ref, reactive, onMounted } from 'vue'
 import axios from 'axios'
-//import api from '../api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
@@ -295,7 +302,7 @@ const genderMap = {
 const identityStatusMap = {
   unsubmitted: '未申请',
   pending: '审核中',
-  approved: '已认证',
+  verified: '已认证',
   rejected: '未通过'
 }
 
@@ -314,43 +321,30 @@ const formatDate = (dateStr) => {
 
 // 获取用户列表
 const fetchUserList = async () => {
-  console.log('开始获取用户列表，参数:', { page: pagination.page, limit: pagination.limit, filters }) // 详细的调试日志
   try {
     loading.value = true
-
     const params = {
       page: pagination.page,
       limit: pagination.limit,
       ...filters
     }
 
-    // 如果有搜索关键词，使用搜索接口，否则使用列表接口
     const url = filters.keyword ? '/api/user/admin/search' : '/api/user/admin/list'
     const response = await axios.get(url, { params })
 
-    console.log('API响应:', response.data) // 调试日志
-
     if (response.data?.data?.data && Array.isArray(response.data.data.data)) {
-      // 先更新total，再更新列表，避免UI不同步
       pagination.total = response.data.data.total
       userList.value = response.data.data.data
-      console.log('更新后的分页信息:', { 
-        page: pagination.page, 
-        limit: pagination.limit, 
-        total: pagination.total,
-        listLength: userList.value.length 
-      })
     } else {
       pagination.total = 0
       userList.value = []
-      ElMessage.warning('获取的用户列表为空')
+      if (!response.data?.data) { 
+        ElMessage.warning('获取的用户列表为空或格式不正确')
+      }
     }
   } catch (err) {
     console.error('获取用户列表失败:', err)
-    console.error('错误详情:', err.response?.data)
-    console.error('Token:', localStorage.getItem('token'))
     ElMessage.error(err.response?.data?.message || '获取用户列表失败')
-    // 出错时重置数据
     pagination.total = 0
     userList.value = []
   } finally {
@@ -372,18 +366,14 @@ const resetFilters = () => {
 
 // 分页处理
 const handleSizeChange = async (val) => {
-  console.log('切换每页显示条数:', { oldLimit: pagination.limit, newLimit: val })
   pagination.limit = val
-  pagination.page = 1 // 切换每页条数时重置到第一页
+  pagination.page = 1
   await fetchUserList()
-  console.log('切换每页条数后的分页状态:', pagination)
 }
 
 const handlePageChange = async (val) => {
-  console.log('切换页码:', { oldPage: pagination.page, newPage: val })
   pagination.page = val
   await fetchUserList()
-  console.log('切换页码后的分页状态:', pagination)
 }
 
 // 封禁/解封
@@ -403,9 +393,9 @@ const handleToggleStatus = (user) => {
     try {
       await axios.put(`/api/user/admin/${user.id}/status`, { status: newStatus })
       ElMessage.success(`${action}成功`)
-      fetchUserList()
+      await fetchUserList()
     } catch (err) {
-      ElMessage.error(`${action}失败`)
+      ElMessage.error(err.response?.data?.message || `${action}失败`)
     }
   }).catch(() => {})
 }
@@ -416,7 +406,7 @@ const handleChangeRole = (user) => {
   const newRole = currentRole === 'pet_owner' ? 'sitter' : 'pet_owner'
   
   ElMessageBox.confirm(
-    `确定要将用户 "${user.nickname}" 的角色从${roleMap[currentRole]}变更为${roleMap[newRole]}吗？`,
+    `确定要将用户 "${user.nickname}" 的角色从“${roleMap[currentRole]}”变更为“${roleMap[newRole]}”吗？`,
     '确认变更角色',
     {
       confirmButtonText: '确定',
@@ -427,15 +417,17 @@ const handleChangeRole = (user) => {
     try {
       await axios.put(`/api/user/admin/${user.id}/role`, { role: newRole })
       ElMessage.success('角色变更成功')
-      fetchUserList()
-    } catch (err) {
-      ElMessage.error('角色变更失败')
+      await fetchUserList()
+    } catch (err)
+ {
+      ElMessage.error(err.response?.data?.message || '角色变更失败')
     }
   }).catch(() => {})
 }
 
 // 导出数据
 const handleExport = async () => {
+  ElMessage.info('正在准备导出数据...');
   try {
     const params = {
       role: filters.role,
@@ -450,27 +442,30 @@ const handleExport = async () => {
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', `users_export_${new Date().toISOString().slice(0,10)}.csv`)
+    link.setAttribute('download', `users_export_${new Date().toISOString().slice(0,10)}.xlsx`)
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    window.URL.revokeObjectURL(url);
     
     ElMessage.success('导出成功')
   } catch (err) {
     console.error('导出失败:', err)
-    ElMessage.error('导出失败')
+    ElMessage.error(err.response?.data?.message || '导出失败')
   }
 }
 
 // 保存用户信息
 const handleSaveUserInfo = async () => {
+  if (!currentUser.value) return;
   try {
     await axios.put(`/api/user/admin/${currentUser.value.id}/info`, editForm.value)
     ElMessage.success('保存成功')
-    fetchUserList()
+    userDetailVisible.value = false;
+    await fetchUserList()
   } catch (err) {
     console.error('保存失败:', err)
-    ElMessage.error('保存失败')
+    ElMessage.error(err.response?.data?.message || '保存失败')
   }
 }
 
@@ -485,32 +480,27 @@ const handleSelectionChange = (val) => {
 // 查看用户详情
 const viewUserDetail = async (user) => {
   try {
-    // 先获取完整的用户信息
     const response = await axios.get(`/api/user/admin/${user.id}/detail`)
     if (response.data.success) {
       currentUser.value = response.data.data
-      userDetailVisible.value = true
       editForm.value = {
         nickname: response.data.data.nickname,
         avatar_url: response.data.data.avatar_url,
         gender: response.data.data.gender || 'unknown'
       }
-      console.log('用户详情:', currentUser.value) // 调试日志
+      userDetailVisible.value = true
     } else {
       throw new Error(response.data.message)
     }
   } catch (err) {
     console.error('查看用户详情失败:', err)
-    ElMessage.error('查看用户详情失败')
+    ElMessage.error(err.response?.data?.message || '获取用户详情失败')
   }
 }
 
 // 初始化
 onMounted(() => {
-  console.log('组件挂载完成，开始获取用户列表') // 调试日志
-  fetchUserList().catch(err => {
-    console.error('获取用户列表失败:', err) // 调试日志
-  })
+  fetchUserList()
 })
 </script>
 
@@ -522,9 +512,14 @@ onMounted(() => {
 }
 
 .el-table {
-  margin-top: 20px;
-  height: calc(100vh - 300px);
-  overflow-y: auto;
+  /* 移除固定高度，让其自适应内容，防止双滚动条 */
+}
+
+/* 新增：统一样式，设置表头背景色和字体 */
+.el-table :deep(.el-table__header th) {
+  background-color: #f8f8f9;
+  font-weight: 600;
+  color: #303133;
 }
 
 .empty-table {
@@ -568,10 +563,6 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: center;
-  background: white;
-  padding: 15px;
-  border-radius: 4px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .no-data {
@@ -588,33 +579,6 @@ onMounted(() => {
 }
 
 .detail-section {
-  margin-top: 20px;
-}
-
-.el-table {
-  margin-top: 20px;
-}
-
-.el-table :deep(.el-table__cell) {
-  padding: 12px 0;
-}
-
-.el-table :deep(.el-table__header th) {
-  background-color: #f8f8f9;
-  font-weight: 600;
-}
-
-.el-drawer__header {
-  margin-bottom: 0;
-  padding: 20px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.el-drawer__body {
-  padding: 20px;
-}
-
-.el-descriptions {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 </style>

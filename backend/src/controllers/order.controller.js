@@ -2,7 +2,7 @@ const Order = require('../models/order.model');
 const Pet = require('../models/pet.model');
 const SitterProfile = require('../models/sitter.profile.model');
 const SitterService = require('../models/sitter.service.model');
-
+const exceljs = require('exceljs');
 /**
  * 订单控制器 - 处理与订单相关的请求
  */
@@ -1357,74 +1357,83 @@ class OrderController {
     }
   }
 
-  /**
-   * 导出订单数据（管理员）
-   * @param {Object} req - Express请求对象
-   * @param {Object} res - Express响应对象
-   */
-  static async exportOrders(req, res) {
+/**
+ * 导出订单数据（管理员）- 使用 exceljs 生成 .xlsx 文件
+ * @param {Object} req - Express请求对象
+ * @param {Object} res - Express响应对象
+ */
+static async exportOrders(req, res) {
   try {
-    const {
-      orderId,
-      username,
-      serviceType,
-      status,
-      startDate,
-      endDate
-    } = req.query;
-
-    // 查询选项
-    const options = {
-      orderId,
-      username,
-      serviceType,
-      status,
-      startDate,
-      endDate
+    // 1. 定义中文映射字典 (确保覆盖所有可能的状态)
+    const serviceTypeMap = {
+      'walk': '遛狗',
+      'feed': '喂食',
+      'boarding': '寄养',
+    };
+    const statusMap = {
+      'pending': '待支付',
+      'paid': '已支付',
+      'in_progress': '服务中',
+      'completed': '已完成',
+      'cancelled': '已取消',
+      'refunded': '已退款',
+      'pending_confirm': '待确认',
+      'pending_review': '待评价'
+      // 补充其他所有可能的状态
     };
 
-    // 获取所有符合条件的订单
+    // 2. 获取查询参数
+    const { orderId, username, serviceType, status, startDate, endDate } = req.query;
+    const options = { orderId, username, serviceType, status, startDate, endDate };
+
+    // 3. 获取订单数据
     const orders = await Order.exportData(options);
 
-    // 创建CSV数据
-    const fields = [
-      '订单ID',
-      '用户名',
-      '宠物名',
-      '服务类型',
-      '服务日期',
-      '服务时间',
-      '服务地址',
-      '订单金额',
-      '订单状态',
-      '创建时间'
+    // 4. 创建 Excel 工作簿和工作表
+    const workbook = new exceljs.Workbook();
+    const worksheet = workbook.addWorksheet('订单列表');
+
+    // 5. 定义表头和列配置
+    worksheet.columns = [
+      { header: '订单ID', key: 'id', width: 10 },
+      { header: '用户名', key: 'userName', width: 20 },
+      { header: '宠物名', key: 'petName', width: 20 },
+      { header: '服务类型', key: 'serviceType', width: 15 },
+      { header: '服务日期', key: 'serviceDate', width: 15, style: { numFmt: 'yyyy-mm-dd' } },
+      { header: '服务时间', key: 'serviceTime', width: 20 },
+      { header: '服务地址', key: 'address', width: 40 },
+      { header: '订单金额', key: 'price', width: 15, style: { numFmt: '"¥"#,##0.00' } },
+      { header: '订单状态', key: 'status', width: 15 },
+      { header: '创建时间', key: 'createdAt', width: 22, style: { numFmt: 'yyyy-mm-dd hh:mm:ss' } }
     ];
 
-    const csv = [
-      fields.join(','), // 表头
-      ...orders.map(order => {
-        return [
-          order.id,
-          order.username,
-          order.petName,
-          order.serviceType,
-          order.serviceDate,
-          `${order.startTime}-${order.endTime}`,
-          `"${order.address.replace(/"/g, '""')}"`, // 处理地址中可能存在的逗号
-          order.price,
-          order.status,
-          order.createdAt
-        ].join(',');
-      })
-    ].join('\n');
+    // 6. 准备要导出的数据 (最关键的修改)
+    // 在这里，我们从原始 order 对象中取值时，使用数据库返回的真实字段名
+    const dataToExport = orders.map(order => ({
+      // 左边的 key 是我们在 worksheet.columns 中定义的
+      // 右边的 order.xxx 是从数据库返回的真实字段名
+      id: order.id,
+      userName: order.username || order.user_name || '未知用户', // 兼容 username 和 user_name
+      petName: order.petName || order.pet_name || '未知宠物',   // 兼容 petName 和 pet_name
+      serviceType: serviceTypeMap[order.serviceType || order.service_type] || order.serviceType || order.service_type,
+      serviceDate: order.serviceDate || order.service_date ? new Date(order.serviceDate || order.service_date) : null,
+      serviceTime: (order.startTime || order.start_time) && (order.endTime || order.end_time) ? `${order.startTime || order.start_time}-${order.endTime || order.end_time}` : '未知',
+      address: order.address || '',
+      price: order.price ? parseFloat(order.price) : 0,
+      status: statusMap[order.status] || order.status,
+      createdAt: order.createdAt || order.created_at ? new Date(order.createdAt || order.created_at) : null,
+    }));
+    
+    // 7. 添加数据并设置样式
+    worksheet.addRows(dataToExport);
+    worksheet.getRow(1).font = { bold: true };
 
-    // 设置响应头
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename=orders-${new Date().toISOString()}.csv`);
-    res.charset = 'utf-8'; // 明确设置字符集
+    // 8. 设置响应头并发送文件
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=' + `orders_export_${Date.now()}.xlsx`);
+    await workbook.xlsx.write(res);
+    res.end();
 
-    // 发送CSV数据
-    res.send(Buffer.from('\ufeff' + csv, 'utf-8')); // 使用Buffer确保编码正确
   } catch (error) {
     console.error('导出订单数据失败:', error);
     res.status(500).json({
