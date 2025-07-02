@@ -1,6 +1,5 @@
 // pages/my/pets/index.js
 const app = getApp();
-const api = require('../../../utils/api');
 
 Page({
   /**
@@ -41,20 +40,33 @@ Page({
 
     this.setData({ loading: true, error: null });
 
-    api.get('/api/pet')
-      .then((pets) => {
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/api/pet`,
+      method: 'GET',
+      header: {
+        'Authorization': `Bearer ${token}`
+      },
+      success: (res) => {
+        if (res.statusCode === 200) {
+          this.setData({
+            pets: res.data,
+            loading: false
+          });
+        } else {
+          this.setData({
+            error: res.data.message || '获取宠物列表失败',
+            loading: false
+          });
+        }
+      },
+      fail: (err) => {
         this.setData({
-          pets: pets,
-          loading: false
-        });
-      })
-      .catch((err) => {
-        this.setData({
-          error: err.message || '获取宠物列表失败',
+          error: '网络请求失败，请检查网络连接',
           loading: false
         });
         console.error('获取宠物列表失败:', err);
-      });
+      }
+    });
   },
 
   /**

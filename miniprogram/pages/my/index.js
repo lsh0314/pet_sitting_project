@@ -86,15 +86,23 @@ Page({
     const token = wx.getStorageSync('token');
     if (!token) return;
     
-    api.get('/api/pet')
-      .then((pets) => {
-        this.setData({
-          pets: pets
-        });
-      })
-      .catch((err) => {
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/api/pet`,
+      method: 'GET',
+      header: {
+        'Authorization': `Bearer ${token}`
+      },
+      success: (res) => {
+        if (res.statusCode === 200) {
+          this.setData({
+            pets: res.data
+          });
+        }
+      },
+      fail: (err) => {
         console.error('获取宠物列表失败:', err);
-      });
+      }
+    });
   },
 
   // 检查用户认证状态

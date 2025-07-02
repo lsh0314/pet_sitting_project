@@ -43,5 +43,7 @@ router.get('/admin/export', authMiddleware, adminMiddleware, OrderController.exp
 router.get('/admin/:id', authMiddleware, adminMiddleware, OrderController.getAdminOrderDetail);
 router.post('/admin/:id/status', authMiddleware, adminMiddleware, OrderController.updateOrderStatus);
 
+// 管理员查看订单报告
+router.get('/admin/:id/reports', authMiddleware, adminMiddleware, OrderController.getAdminOrderReports);
 
 module.exports = router;

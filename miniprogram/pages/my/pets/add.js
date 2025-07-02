@@ -165,7 +165,7 @@ Page({
     
     // 真实上传到后端
     wx.uploadFile({
-      url: `${api.getBaseUrl()}/api/upload/image`,
+      url: `${app.globalData.apiBaseUrl}/api/upload/image`,
       filePath: filePath,
       name: 'photo',
       header: {
@@ -268,28 +268,43 @@ Page({
     });
     
     // 调用API创建宠物
-    api.post('/api/pet', this.data.petData)
-      .then(() => {
-        // 创建成功
-        wx.showToast({
-          title: '添加成功',
-          icon: 'success',
-          duration: 2000,
-          success: () => {
-            // 返回上一页
-            setTimeout(() => {
-              wx.navigateBack();
-            }, 2000);
-          }
-        });
-      })
-      .catch((err) => {
-        // 创建失败
+    wx.request({
+      url: `${app.globalData.apiBaseUrl}/api/pet`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${wx.getStorageSync('token')}`
+      },
+      data: this.data.petData,
+      success: (res) => {
+        if (res.statusCode === 201) {
+          // 创建成功
+          wx.showToast({
+            title: '添加成功',
+            icon: 'success',
+            duration: 2000,
+            success: () => {
+              // 返回上一页
+              setTimeout(() => {
+                wx.navigateBack();
+              }, 2000);
+            }
+          });
+        } else {
+          // 创建失败
+          this.setData({
+            error: res.data.message || '添加失败，请重试',
+            isSubmitting: false
+          });
+        }
+      },
+      fail: (err) => {
         this.setData({
-          error: err.message || '添加失败，请重试',
+          error: '网络请求失败，请检查网络连接',
           isSubmitting: false
         });
         console.error('添加宠物失败:', err);
-      });
+      }
+    });
   }
 }); 

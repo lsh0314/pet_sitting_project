@@ -455,6 +455,7 @@ class Order {
     try {
       console.log(`获取订单 ${orderId} 的服务报告`);
       
+      // 先获取服务报告
       const [rows] = await db.execute(
         `SELECT 
           id, text, image_urls as imageUrls, video_url as videoUrl,
@@ -492,6 +493,37 @@ class Order {
         
         return report;
       });
+      
+      // 为每个报告单独查询对应的位置信息
+      for (const report of reports) {
+        try {
+          const [locationRows] = await db.execute(
+            `SELECT latitude, longitude, address, distance, type
+             FROM order_tracks 
+             WHERE order_id = ? 
+             AND ABS(TIMESTAMPDIFF(MINUTE, created_at, ?)) <= 2
+             ORDER BY ABS(TIMESTAMPDIFF(MINUTE, created_at, ?)) ASC
+             LIMIT 1`,
+            [orderId, report.timestamp, report.timestamp]
+          );
+          
+          if (locationRows.length > 0) {
+            const locationData = locationRows[0];
+            report.location = {
+              latitude: locationData.latitude,
+              longitude: locationData.longitude,
+              address: locationData.address,
+              distance: locationData.distance,
+              type: locationData.type
+            };
+          } else {
+            report.location = null;
+          }
+        } catch (error) {
+          console.error(`获取报告 ${report.id} 位置信息失败:`, error);
+          report.location = null;
+        }
+      }
       
       console.log('处理后的服务报告:', JSON.stringify(reports));
       return reports;
