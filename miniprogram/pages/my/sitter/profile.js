@@ -5,18 +5,8 @@ try {
   console.error('获取app实例失败:', e);
 }
 
-// 获取API基础URL
-const getApiBaseUrl = () => {
-  try {
-    if (!app) {
-      app = getApp();
-    }
-    return (app && app.globalData && app.globalData.apiBaseUrl) || 'http://localhost:3000';
-  } catch (e) {
-    console.error('获取apiBaseUrl失败，使用默认值:', e);
-    return 'http://localhost:3000';
-  }
-};
+// 引入API工具
+const api = require('../../../utils/api');
 
 Page({
   /**
@@ -71,100 +61,88 @@ Page({
 
     this.setData({ isLoading: true });
 
-    wx.request({
-      url: `${getApiBaseUrl()}/api/sitter/profile`,
-      method: 'GET',
-      header: {
-        'Authorization': `Bearer ${token}`
-      },
-      success: (res) => {
-        if (res.statusCode === 200) {
-          const { profile, services } = res.data;
-          
-          if (profile) {
-            // 处理日期数据
-            let availableDates = [];
-            if (profile.available_dates) {
-              try {
-                if (typeof profile.available_dates === 'string') {
-                  availableDates = JSON.parse(profile.available_dates);
-                } else {
-                  availableDates = profile.available_dates;
-                }
-              } catch (e) {
-                console.error('解析日期数据失败:', e);
+    api.get('/api/sitter/profile')
+      .then((data) => {
+        const { profile, services } = data;
+        
+        if (profile) {
+          // 处理日期数据
+          let availableDates = [];
+          if (profile.available_dates) {
+            try {
+              if (typeof profile.available_dates === 'string') {
+                availableDates = JSON.parse(profile.available_dates);
+              } else {
+                availableDates = profile.available_dates;
               }
+            } catch (e) {
+              console.error('解析日期数据失败:', e);
             }
-            
-            // 更新星期几选项的选中状态
-            const updatedWeekdayOptions = this.data.weekdayOptions.map(option => {
-              return {
-                ...option,
-                checked: availableDates.includes(option.value)
-              };
-            });
-            
-            // 如果有服务区域数据，尝试解析为省市区
-            let region = ['北京市', '北京市', '海淀区']; // 默认值
-            if (profile.service_area) {
-              try {
-                // 尝试从服务区域字符串中提取省市区
-                const areaMatch = profile.service_area.match(/^(.*?)[省市](.*?)[市区县](.*?)$/);
-                if (areaMatch && areaMatch.length >= 4) {
-                  region = [
-                    areaMatch[1] + (areaMatch[1].endsWith('省') ? '' : '市'),
-                    areaMatch[2] + (areaMatch[2].endsWith('市') ? '' : '市'),
-                    areaMatch[3]
-                  ];
-                } else {
-                  // 如果无法解析，则直接使用服务区域字符串
-                  region = [profile.service_area, '', ''];
-                }
-              } catch (e) {
-                console.error('解析服务区域失败:', e);
-              }
-            }
-            
-            this.setData({
-              'profileData.bio': profile.bio || '',
-              'profileData.service_area': profile.service_area || '',
-              region: region,
-              selectedDates: availableDates || [],
-              'profileData.available_dates': availableDates || [],
-              weekdayOptions: updatedWeekdayOptions
-            });
           }
           
-          // 处理服务数据
-          if (Array.isArray(services) && services.length > 0) {
-            const updatedServices = [...this.data.services];
-            
-            services.forEach(service => {
-              const index = updatedServices.findIndex(s => s.service_type === service.service_type);
-              if (index !== -1) {
-                updatedServices[index].price = service.price.toString();
-                updatedServices[index].checked = true;
+          // 更新星期几选项的选中状态
+          const updatedWeekdayOptions = this.data.weekdayOptions.map(option => {
+            return {
+              ...option,
+              checked: availableDates.includes(option.value)
+            };
+          });
+          
+          // 如果有服务区域数据，尝试解析为省市区
+          let region = ['北京市', '北京市', '海淀区']; // 默认值
+          if (profile.service_area) {
+            try {
+              // 尝试从服务区域字符串中提取省市区
+              const areaMatch = profile.service_area.match(/^(.*?)[省市](.*?)[市区县](.*?)$/);
+              if (areaMatch && areaMatch.length >= 4) {
+                region = [
+                  areaMatch[1] + (areaMatch[1].endsWith('省') ? '' : '市'),
+                  areaMatch[2] + (areaMatch[2].endsWith('市') ? '' : '市'),
+                  areaMatch[3]
+                ];
+              } else {
+                // 如果无法解析，则直接使用服务区域字符串
+                region = [profile.service_area, '', ''];
               }
-            });
-            
-            this.setData({ services: updatedServices });
+            } catch (e) {
+              console.error('解析服务区域失败:', e);
+            }
           }
-        } else {
+          
           this.setData({
-            error: res.data.message || '获取帮溜员资料失败'
+            'profileData.bio': profile.bio || '',
+            'profileData.service_area': profile.service_area || '',
+            region: region,
+            selectedDates: availableDates || [],
+            'profileData.available_dates': availableDates || [],
+            weekdayOptions: updatedWeekdayOptions
           });
         }
-      },
-      fail: (err) => {
+        
+        // 处理服务数据
+        if (Array.isArray(services) && services.length > 0) {
+          const updatedServices = [...this.data.services];
+          
+          services.forEach(service => {
+            const index = updatedServices.findIndex(s => s.service_type === service.service_type);
+            if (index !== -1) {
+              updatedServices[index].price = service.price.toString();
+              updatedServices[index].checked = true;
+            }
+          });
+          
+          this.setData({ services: updatedServices });
+        }
+      })
+      .catch((err) => {
         this.setData({
-          error: '网络请求失败，请检查网络连接'
+          error: err.message || '获取帮溜员资料失败'
         });
         console.error('获取帮溜员资料失败:', err);
-      },
-      complete: () => {
+      })
+      .finally(() => {
         this.setData({ isLoading: false });
-      }
-    });
+      });
   },
 
   /**
@@ -322,17 +300,9 @@ Page({
     console.log('提交数据:', submitData);
     
     // 调用API更新帮溜员资料
-    const token = wx.getStorageSync('token');
-    wx.request({
-      url: `${getApiBaseUrl()}/api/sitter/profile`,
-      method: 'PUT',
-      header: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      data: submitData,
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.success) {
+    api.put('/api/sitter/profile', submitData)
+      .then((res) => {
+        if (res.success) {
           // 更新成功
           wx.showToast({
             title: '资料更新成功',
@@ -348,18 +318,17 @@ Page({
         } else {
           // 更新失败
           this.setData({
-            error: res.data.message || '资料更新失败，请重试',
+            error: res.message || '资料更新失败，请重试',
             isSubmitting: false
           });
         }
-      },
-      fail: (err) => {
+      })
+      .catch((err) => {
         this.setData({
-          error: '网络请求失败，请检查网络连接',
+          error: err.message || '网络请求失败，请检查网络连接',
           isSubmitting: false
         });
         console.error('更新帮溜员资料失败:', err);
-      }
-    });
+      });
   }
 }); 
