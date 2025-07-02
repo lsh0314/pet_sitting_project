@@ -78,13 +78,20 @@ class PetController {
       // 获取宠物详情
       const pet = await Pet.findById(petId);
       
+      console.log('=== PetController.getPetById 调试信息 ===');
+      console.log('请求的宠物ID:', petId);
+      console.log('当前用户ID:', req.user.id);
+      
       if (!pet) {
+        console.log('未找到宠物数据');
         return res.status(404).json({
           success: false,
           errorCode: 'NOT_FOUND',
           message: '未找到对应宠物'
         });
       }
+      
+      console.log('从模型获取的宠物数据:', JSON.stringify(pet, null, 2));
       
       // 验证宠物是否属于当前用户
       if (pet.owner_user_id !== req.user.id) {
@@ -94,8 +101,44 @@ class PetController {
         });
       }
       
-      // 移除敏感字段
+      // 处理疫苗证明URL，添加完整URL前缀
+      console.log('处理前的vaccine_proof_urls:', pet.vaccine_proof_urls);
+      if (!pet.vaccine_proof_urls || !Array.isArray(pet.vaccine_proof_urls)) {
+        console.log('vaccine_proof_urls不是数组，设置为空数组');
+        pet.vaccine_proof_urls = [];
+      } else {
+        console.log('开始处理vaccine_proof_urls，原始数据:', pet.vaccine_proof_urls);
+        // 转换vaccine_proof_urls中的相对路径为完整URL
+        pet.vaccine_proof_urls = pet.vaccine_proof_urls.map(url => {
+          if (url && !url.startsWith('http')) {
+            const fullUrl = `${process.env.API_BASE_URL || 'http://localhost:3000'}/uploads/${url}`;
+            console.log(`转换URL: ${url} -> ${fullUrl}`);
+            return fullUrl;
+          }
+          return url;
+        });
+        console.log('处理后的vaccine_proof_urls:', pet.vaccine_proof_urls);
+      }
+      
+      // 确保characterTags字段存在
+      console.log('处理前的characterTags:', pet.characterTags);
+      if (!pet.characterTags || !Array.isArray(pet.characterTags)) {
+        console.log('characterTags不是数组，设置为空数组');
+        pet.characterTags = [];
+      }
+      console.log('处理后的characterTags:', pet.characterTags);
+      
+      // 将字段名映射为前端期望的格式
+      pet.vaccineProof = pet.vaccine_proof_urls;
+      console.log('映射后的vaccineProof:', pet.vaccineProof);
+      
+      // 移除敏感字段和不需要的字段
       delete pet.owner_user_id;
+      delete pet.vaccine_proof_urls;
+      
+      console.log('=== 最终返回给前端的数据 ===');
+      console.log(JSON.stringify(pet, null, 2));
+      console.log('=====================================');
       
       res.json(pet);
     } catch (error) {

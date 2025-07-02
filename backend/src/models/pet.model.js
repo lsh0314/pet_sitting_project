@@ -12,9 +12,9 @@ class Pet {
    */
   static async create(petData, ownerUserId) {
     try {
-      // 处理JSON字段
-      const characterTags = petData.characterTags ? JSON.stringify(petData.characterTags) : null;
-      const vaccineProofUrls = petData.vaccineProof ? JSON.stringify(petData.vaccineProof) : null;
+      // 处理JSON字段 - MySQL json类型可以直接接受JavaScript数组
+      const characterTags = petData.characterTags || null;
+      const vaccineProofUrls = petData.vaccineProof || null;
       
       const [result] = await db.execute(
         `INSERT INTO pets (
@@ -92,23 +92,66 @@ class Pet {
       
       const pet = rows[0];
       
-      // 处理JSON字段
+      // 调试：打印从数据库获取的原始数据
+      console.log('=== Pet.findById 调试信息 ===');
+      console.log('宠物ID:', petId);
+      console.log('原始character_tags:', pet.character_tags);
+      console.log('原始vaccine_proof_urls:', pet.vaccine_proof_urls);
+      console.log('character_tags类型:', typeof pet.character_tags);
+      console.log('vaccine_proof_urls类型:', typeof pet.vaccine_proof_urls);
+      
+      // 处理JSON字段 - MySQL的json类型会自动反序列化
       if (pet.character_tags) {
-        try {
-          pet.characterTags = JSON.parse(pet.character_tags);
-        } catch (e) {
+        console.log('character_tags存在，类型:', typeof pet.character_tags);
+        if (Array.isArray(pet.character_tags)) {
+          console.log('character_tags已经是数组，直接使用:', pet.character_tags);
+          pet.characterTags = pet.character_tags;
+        } else if (typeof pet.character_tags === 'string') {
+          try {
+            console.log('character_tags是字符串，尝试解析...');
+            pet.characterTags = JSON.parse(pet.character_tags);
+            console.log('解析后的characterTags:', pet.characterTags);
+          } catch (e) {
+            console.log('解析character_tags失败:', e.message);
+            pet.characterTags = [];
+          }
+        } else {
+          console.log('character_tags类型未知，设置为空数组');
           pet.characterTags = [];
         }
         delete pet.character_tags;
+      } else {
+        console.log('character_tags为空，设置默认值[]');
+        pet.characterTags = [];
       }
       
       if (pet.vaccine_proof_urls) {
-        try {
-          pet.vaccine_proof_urls = JSON.parse(pet.vaccine_proof_urls);
-        } catch (e) {
+        console.log('vaccine_proof_urls存在，类型:', typeof pet.vaccine_proof_urls);
+        if (Array.isArray(pet.vaccine_proof_urls)) {
+          console.log('vaccine_proof_urls已经是数组，直接使用:', pet.vaccine_proof_urls);
+          // 已经是数组，直接使用
+        } else if (typeof pet.vaccine_proof_urls === 'string') {
+          try {
+            console.log('vaccine_proof_urls是字符串，尝试解析...');
+            pet.vaccine_proof_urls = JSON.parse(pet.vaccine_proof_urls);
+            console.log('解析后的vaccine_proof_urls:', pet.vaccine_proof_urls);
+          } catch (e) {
+            console.log('解析vaccine_proof_urls失败:', e.message);
+            pet.vaccine_proof_urls = [];
+          }
+        } else {
+          console.log('vaccine_proof_urls类型未知，设置为空数组');
           pet.vaccine_proof_urls = [];
         }
+      } else {
+        console.log('vaccine_proof_urls为空，设置默认值[]');
+        pet.vaccine_proof_urls = [];
       }
+      
+      console.log('=== 处理后的宠物数据 ===');
+      console.log('最终characterTags:', pet.characterTags);
+      console.log('最终vaccine_proof_urls:', pet.vaccine_proof_urls);
+      console.log('===============================');
       
       return pet;
     } catch (error) {
@@ -171,7 +214,7 @@ class Pet {
       
       if (petData.characterTags !== undefined) {
         updateFields.push('character_tags = ?');
-        values.push(JSON.stringify(petData.characterTags));
+        values.push(petData.characterTags);
       }
       
       if (petData.specialNotes !== undefined) {
@@ -186,7 +229,7 @@ class Pet {
       
       if (petData.vaccineProof !== undefined) {
         updateFields.push('vaccine_proof_urls = ?');
-        values.push(JSON.stringify(petData.vaccineProof));
+        values.push(petData.vaccineProof);
       }
       
       if (updateFields.length === 0) {
@@ -342,14 +385,22 @@ class Pet {
         params
       );
       
-      // 处理JSON字段
+      // 处理JSON字段 - MySQL的json类型会自动反序列化
       const processedRows = rows.map(row => {
         if (row.tags) {
-          try {
-            row.tags = JSON.parse(row.tags);
-          } catch (e) {
+          if (Array.isArray(row.tags)) {
+            // 已经是数组，直接使用
+          } else if (typeof row.tags === 'string') {
+            try {
+              row.tags = JSON.parse(row.tags);
+            } catch (e) {
+              row.tags = [];
+            }
+          } else {
             row.tags = [];
           }
+        } else {
+          row.tags = [];
         }
         return row;
       });
@@ -389,17 +440,40 @@ class Pet {
       
       const pet = rows[0];
       
-      // 处理JSON字段
-      if (pet.tags) {
-        try {
-          pet.tags = JSON.parse(pet.tags);
-        } catch (e) {
-          pet.tags = [];
+      // 处理JSON字段 - MySQL的json类型会自动反序列化
+      if (pet.character_tags) {
+        if (Array.isArray(pet.character_tags)) {
+          // 已经是数组，直接使用
+        } else if (typeof pet.character_tags === 'string') {
+          try {
+            pet.character_tags = JSON.parse(pet.character_tags);
+          } catch (e) {
+            pet.character_tags = [];
+          }
+        } else {
+          pet.character_tags = [];
         }
+      } else {
+        pet.character_tags = [];
       }
       
       // 处理疫苗证明URL - 直接使用数据库中的JSON字段
-      pet.vaccine_proof_urls = pet.vaccine_proof_urls || [];
+      if (pet.vaccine_proof_urls) {
+        if (Array.isArray(pet.vaccine_proof_urls)) {
+          // 已经是数组，直接使用
+        } else if (typeof pet.vaccine_proof_urls === 'string') {
+          try {
+            pet.vaccine_proof_urls = JSON.parse(pet.vaccine_proof_urls);
+          } catch (e) {
+            pet.vaccine_proof_urls = [];
+          }
+        } else {
+          pet.vaccine_proof_urls = [];
+        }
+      } else {
+        pet.vaccine_proof_urls = [];
+      }
+      
       // 确保是数组类型
       if (!Array.isArray(pet.vaccine_proof_urls)) {
         pet.vaccine_proof_urls = [];
