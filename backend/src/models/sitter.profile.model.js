@@ -27,6 +27,16 @@ class SitterProfile {
       
       const profile = rows[0];
       
+      // 确保 cancel_count 是数字类型
+      if (profile.cancel_count === null || profile.cancel_count === undefined) {
+        profile.cancel_count = 0;
+      } else {
+        profile.cancel_count = parseInt(profile.cancel_count);
+        if (isNaN(profile.cancel_count)) profile.cancel_count = 0;
+      }
+      
+      console.log('帮溜员资料中的取消次数:', profile.cancel_count, '类型:', typeof profile.cancel_count);
+      
       // 处理证书信息
       if (profile.verification_type === 'certificate' && profile.verification_data) {
         try {

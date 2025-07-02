@@ -68,7 +68,7 @@
               value="{{item.price}}"
               bindinput="onServicePriceChange"
               data-index="{{index}}"
-              disabled="{{!item.checked}}"
+              confirm-type="done"
             />
             <text class="price-unit">元/次</text>
           </view>

@@ -13,6 +13,22 @@ class SitterController {
       // 从认证中间件获取用户ID
       const userId = req.user.id;
       
+      // 检查用户状态
+      const db = require('../config/database');
+      const [userRows] = await db.query(
+        'SELECT status FROM users WHERE id = ?',
+        [userId]
+      );
+      
+      // 如果用户被封禁，返回特定错误码
+      if (userRows.length > 0 && userRows[0].status === 'banned') {
+        return res.status(403).json({
+          success: false,
+          message: '您的账号已被封禁，无法接单',
+          code: 'ACCOUNT_BANNED'
+        });
+      }
+      
       // 获取帮溜员基本资料
       const profile = await SitterProfile.findByUserId(userId);
       

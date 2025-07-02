@@ -45,8 +45,8 @@ Page({
     console.log('页面加载 onLoad');
     // 页面加载时执行
     this.checkUserRoles();
-    // 检查用户是否是伴宠专员
-    this.checkSitterStatus();
+    // 不再在页面加载时检查用户是否是伴宠专员
+    // this.checkSitterStatus();
     
     // 设置初始标签页和状态映射
     const role = this.data.currentRole;
@@ -68,7 +68,7 @@ Page({
       });
     }
     
-    // 检查用户是否是伴宠专员（每次页面显示时都检查）
+    // 检查用户是否是伴宠专员
     this.checkSitterStatus();
     
     // 检查是否需要刷新订单列表
@@ -95,12 +95,12 @@ Page({
   },
 
   // 检查用户是否是伴宠专员
-  checkSitterStatus: function() {
+  checkSitterStatus: function(showBannedAlert = false) {
     console.log('开始检查用户是否是伴宠专员...');
     this.setData({ checkingSitterStatus: true });
     
     // 调用API检查用户是否是伴宠专员
-    api.get('/api/sitter/profile')
+    api.get('/api/sitter/profile', {}, true, !showBannedAlert) // 根据showBannedAlert参数决定是否显示封禁提示
       .then(res => {
         console.log('获取伴宠专员资料结果:', res);
         // 如果返回的profile不为null，说明用户是伴宠专员
@@ -164,22 +164,11 @@ Page({
     
     // 如果要切换到伴宠专员角色
     if (role === 'sitter') {
-      // 检查是否已被封禁（取消订单达到3次）
-      const cancelCount = wx.getStorageSync('sitter_cancel_count') || 0;
-      if (cancelCount >= 3) {
-        wx.showModal({
-          title: '账号已封禁',
-          content: '您的伴宠专员账号已被封禁，无法接单。请联系客服申诉。',
-          showCancel: false,
-          confirmText: '我知道了'
-        });
-        return;
-      }
-      
-      // 检查用户是否是伴宠专员
-      api.get('/api/sitter/profile')
+      // 检查用户是否是伴宠专员，并显示封禁提示（如果已被封禁）
+      api.get('/api/sitter/profile', {}, true, false) // 不抑制封禁提示
         .then(res => {
           console.log('获取伴宠专员资料结果:', res);
+          
           // 如果返回的profile为null，说明用户不是伴宠专员
           const isSitter = res && res.profile !== null;
           
@@ -223,10 +212,17 @@ Page({
         })
         .catch(err => {
           console.error('检查伴宠专员状态失败:', err);
-          wx.showToast({
-            title: '网络错误，请重试',
-            icon: 'none'
-          });
+          
+          // 如果是因为账号被封禁，不需要额外处理，api.js已经显示了提示
+          if (err.code === 'ACCOUNT_BANNED') {
+            console.log('账号已被封禁，无法切换到帮溜员角色');
+          } else {
+            // 其他错误
+            wx.showToast({
+              title: '网络错误，请重试',
+              icon: 'none'
+            });
+          }
         });
     } else {
       // 切换到宠物主角色，直接允许
@@ -506,59 +502,89 @@ Page({
       title = '⚠️ 警告：取消订单';
       content = '作为伴宠专员取消订单到达三次将永久封禁接单功能。\n\n确定要取消这个订单吗？';
       
-      // 获取已取消订单次数（这里模拟，实际应该从服务器获取）
-      // 在实际项目中，应该从用户资料或后端API获取取消次数
-      const cancelCount = wx.getStorageSync('sitter_cancel_count') || 0;
-      
-      // 添加已取消次数到提示内容
-      content = `您已取消${cancelCount}次订单，作为伴宠专员取消订单到达三次将永久封禁接单功能。\n\n确定要取消这个订单吗？`;
+      // 从API获取取消次数，而不是本地存储
+      api.get('/api/sitter/profile', {}, true, false) // 不抑制封禁提示
+        .then(res => {
+          // 添加日志，打印完整的API返回数据
+          console.log('获取帮溜员资料完整返回数据:', JSON.stringify(res));
+          
+          // 确保profile对象存在
+          if (!res.profile) {
+            console.error('API返回数据中没有profile字段');
+            this.showCancelConfirm(orderId, title, content);
+            return;
+          }
+          
+          // 获取取消次数，确保是数字类型
+          let cancelCount = 0;
+          if (res.profile.cancel_count !== undefined && res.profile.cancel_count !== null) {
+            cancelCount = parseInt(res.profile.cancel_count);
+            if (isNaN(cancelCount)) cancelCount = 0;
+          }
+          
+          console.log('解析出的取消次数:', cancelCount, '原始值:', res.profile.cancel_count, '类型:', typeof res.profile.cancel_count);
+          
+          // 添加已取消次数到提示内容
+          content = `您已取消${cancelCount}次订单，作为伴宠专员取消订单到达三次将永久封禁接单功能。\n\n确定要取消这个订单吗？`;
+          
+          this.showCancelConfirm(orderId, title, content);
+        })
+        .catch(err => {
+          console.error('获取帮溜员资料失败:', err);
+          
+          // 如果是因为账号被封禁，不需要额外处理，api.js已经显示了提示
+          if (err.code === 'ACCOUNT_BANNED') {
+            console.log('账号已被封禁，无法取消订单');
+          } else {
+            // 如果获取失败，使用默认提示
+            this.showCancelConfirm(orderId, title, content);
+          }
+        });
+    } else {
+      this.showCancelConfirm(orderId, title, content);
     }
-    
+  },
+  
+  // 显示取消确认对话框
+  showCancelConfirm: function(orderId, title, content) {
     wx.showModal({
       title: title,
       content: content,
       confirmColor: this.data.currentRole === 'sitter' ? '#ff5722' : '#07c160', // 帮溜员取消按钮显示为红色
       success: (res) => {
         if (res.confirm) {
+          // 显示加载中
+          wx.showLoading({
+            title: '处理中...',
+            mask: true
+          });
+          
           // 调用取消订单API
           api.post(`/api/order/${orderId}/cancel`, { reason: '用户主动取消' })
             .then(() => {
-              // 如果是帮溜员角色，更新取消次数
-              if (this.data.currentRole === 'sitter') {
-                const cancelCount = wx.getStorageSync('sitter_cancel_count') || 0;
-                const newCancelCount = cancelCount + 1;
-                wx.setStorageSync('sitter_cancel_count', newCancelCount);
-                
-                // 如果达到3次，显示封禁警告
-                if (newCancelCount >= 3) {
-                  wx.showModal({
-                    title: '账号警告',
-                    content: '您已取消3次订单，接单功能已被封禁。请联系客服申诉。',
-                    showCancel: false,
-                    confirmText: '我知道了'
-                  });
-                } else {
-                  wx.showToast({
-                    title: '订单已取消',
-                    icon: 'success'
-                  });
-                }
-              } else {
-                wx.showToast({
-                  title: '订单已取消',
-                  icon: 'success'
-                });
-              }
+              wx.hideLoading();
+              wx.showToast({
+                title: '订单已取消',
+                icon: 'success'
+              });
               
               // 刷新订单列表
               this.getOrderList();
             })
             .catch(err => {
+              wx.hideLoading();
               console.error('取消订单失败:', err);
-              wx.showToast({
-                title: '取消失败',
-                icon: 'none'
-              });
+              
+              // 如果是因为账号被封禁而失败
+              if (err.code === 'ACCOUNT_BANNED') {
+                // api.js中已经显示了封禁提示，这里不需要重复显示
+                console.log('账号已被封禁，无法取消订单');
+              } else {
+                wx.showToast({
+                  title: '取消失败',
+                  icon: 'none'
+                });
+              }
             });
         }
       }
