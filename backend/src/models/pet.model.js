@@ -104,11 +104,10 @@ class Pet {
       
       if (pet.vaccine_proof_urls) {
         try {
-          pet.vaccineProof = JSON.parse(pet.vaccine_proof_urls);
+          pet.vaccine_proof_urls = JSON.parse(pet.vaccine_proof_urls);
         } catch (e) {
-          pet.vaccineProof = [];
+          pet.vaccine_proof_urls = [];
         }
-        delete pet.vaccine_proof_urls;
       }
       
       return pet;
@@ -375,9 +374,9 @@ class Pet {
       const [rows] = await db.execute(
         `SELECT 
           id, owner_user_id, name, photo_url as photo, breed, age, gender, 
-          weight, is_sterilized as isSterilized, health_desc as healthStatus, 
-          character_tags as tags, special_notes as likes, 
-          allergy_info as dislikes, vaccine_proof_urls as vaccineProof,
+          weight, is_sterilized as isSterilized, health_desc as healthDesc, 
+          character_tags, special_notes, 
+          allergy_info, vaccine_proof_urls,
           created_at, updated_at
          FROM pets 
          WHERE id = ?`,
@@ -399,12 +398,11 @@ class Pet {
         }
       }
       
-      if (pet.vaccineProof) {
-        try {
-          pet.vaccineProof = JSON.parse(pet.vaccineProof);
-        } catch (e) {
-          pet.vaccineProof = [];
-        }
+      // 处理疫苗证明URL - 直接使用数据库中的JSON字段
+      pet.vaccine_proof_urls = pet.vaccine_proof_urls || [];
+      // 确保是数组类型
+      if (!Array.isArray(pet.vaccine_proof_urls)) {
+        pet.vaccine_proof_urls = [];
       }
       
       return pet;

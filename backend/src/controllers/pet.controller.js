@@ -269,6 +269,22 @@ class PetController {
         });
       }
       
+      // 确保vaccine_proof_urls字段存在且包含正确的图片路径
+      if (!pet.vaccine_proof_urls || !Array.isArray(pet.vaccine_proof_urls)) {
+        pet.vaccine_proof_urls = [];
+      } else {
+        // 转换vaccine_proof_urls中的相对路径为完整URL
+        pet.vaccine_proof_urls = pet.vaccine_proof_urls.map(url => {
+          if (url && !url.startsWith('http')) {
+            return `${process.env.API_BASE_URL}/uploads/${url}`;
+          }
+          return url;
+        });
+      }
+      
+      // 调试日志 - 查看处理后的vaccine_proof_urls
+      console.log('Processed vaccine_proof_urls:', pet.vaccine_proof_urls);
+      
       res.json({
         success: true,
         data: pet

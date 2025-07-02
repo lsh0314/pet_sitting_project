@@ -161,23 +161,24 @@
             </div>
             
             <el-descriptions :column="1" border>
-              <el-descriptions-item label="宠物ID">{{ currentPet.id }}</el-descriptions-item>
               <el-descriptions-item label="品种">{{ currentPet.breed || '未知' }}</el-descriptions-item>
+              <el-descriptions-item label="年龄">{{ currentPet.age || '未知' }}</el-descriptions-item>
               <el-descriptions-item label="性别">{{ currentPet.gender === 'male' ? '公' : '母' }}</el-descriptions-item>
-              <el-descriptions-item label="体重">{{ currentPet.weight }} kg</el-descriptions-item>
-              <el-descriptions-item label="健康状况">{{ currentPet.health_status || '未知' }}</el-descriptions-item>
+              <el-descriptions-item label="体重">{{ currentPet.weight || '未知' }} kg</el-descriptions-item>
+              <el-descriptions-item label="是否绝育">{{ currentPet.is_sterilized ? '是' : '否' }}</el-descriptions-item>
+              <el-descriptions-item label="健康状况">{{ currentPet.healthDesc || '未知' }}</el-descriptions-item>
               <el-descriptions-item label="创建时间">{{ formatDate(currentPet.created_at) }}</el-descriptions-item>
-            <el-descriptions-item label="最后更新">{{ formatDate(currentPet.updated_at) }}</el-descriptions-item>
+              <el-descriptions-item label="最后更新">{{ formatDate(currentPet.updated_at) }}</el-descriptions-item>
             </el-descriptions>
 
             <div class="detail-section">
               <h4>疫苗记录</h4>
               <div class="vaccine-images">
                 <el-image
-                  v-for="(img, index) in currentPet.vaccine_images"
+                  v-for="(img, index) in currentPet.vaccine_proof_urls"
                   :key="index"
                   :src="img"
-                  :preview-src-list="currentPet.vaccine_images"
+                  :preview-src-list="currentPet.vaccine_proof_urls"
                   fit="cover"
                   style="width: 120px; height: 160px; margin-right: 10px; border-radius: 4px;"
                 >
@@ -188,7 +189,7 @@
                     </div>
                   </template>
                 </el-image>
-                <div v-if="!currentPet.vaccine_images || currentPet.vaccine_images.length === 0" class="no-vaccine">
+                <div v-if="!currentPet.vaccine_proof_urls || currentPet.vaccine_proof_urls.length === 0" class="no-vaccine">
                   暂无疫苗记录
                 </div>
               </div>
@@ -198,23 +199,25 @@
               <h4>宠物特点</h4>
               <div class="tags-container">
                 <el-tag
-                  v-for="(tag, index) in currentPet.tags"
+                  v-for="(tag, index) in currentPet.character_tags"
                   :key="index"
-                  type="info"
+                  :type="['success','warning','danger','info'][index % 4]"
+                  effect="dark"
                   style="margin-right: 8px; margin-bottom: 8px"
                 >
                   {{ tag }}
                 </el-tag>
+                <el-empty v-if="!currentPet.character_tags || currentPet.character_tags.length === 0" description="无记录" :image-size="60" />
               </div>
             </div>
             
             <div class="detail-section">
-              <h4>喜好</h4>
+              <h4>特殊注意事项</h4>
               <div class="preference-card">
-                <el-card shadow="hover" v-if="currentPet.likes">
+                <el-card shadow="hover" v-if="currentPet.special_notes">
                   <div class="preference-content">
                     <el-icon size="20" color="#67C23A"><SuccessFilled /></el-icon>
-                    <div class="preference-text">{{ currentPet.likes }}</div>
+                    <div class="preference-text">{{ currentPet.special_notes }}</div>
                   </div>
                 </el-card>
                 <el-empty v-else description="无记录" :image-size="60" />
@@ -222,12 +225,12 @@
             </div>
             
             <div class="detail-section">
-              <h4>注意事项</h4>
+              <h4>过敏源信息</h4>
               <div class="notice-card">
-                <el-card shadow="hover" v-if="currentPet.dislikes">
+                <el-card shadow="hover" v-if="currentPet.allergy_info">
                   <div class="notice-content">
                     <el-icon size="20" color="#F56C6C"><WarningFilled /></el-icon>
-                    <div class="notice-text">{{ currentPet.dislikes }}</div>
+                    <div class="notice-text">{{ currentPet.allergy_info }}</div>
                   </div>
                 </el-card>
                 <el-empty v-else description="无记录" :image-size="60" />
