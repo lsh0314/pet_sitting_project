@@ -179,13 +179,24 @@
                   :key="index"
                   :src="img"
                   :preview-src-list="currentPet.vaccine_proof_urls"
+                  :initial-index="index"
+                  :zoom-rate="1.2"
+                  :max-scale="7"
+                  :min-scale="0.2"
                   fit="cover"
-                  style="width: 120px; height: 160px; margin-right: 10px; border-radius: 4px;"
+                  preview-teleported
+                  style="width: 120px; height: 160px; margin-right: 10px; border-radius: 4px; cursor: pointer;"
+                  class="vaccine-image"
                 >
                   <template #error>
                     <div class="image-error">
                       <el-icon><Picture /></el-icon>
                       <span>加载失败</span>
+                    </div>
+                  </template>
+                  <template #placeholder>
+                    <div class="image-loading">
+                      <el-icon><Loading /></el-icon>
                     </div>
                   </template>
                 </el-image>
@@ -471,14 +482,31 @@ onMounted(() => {
   margin-top: 10px;
 }
 
-.vaccine-images .el-image {
+.vaccine-image {
   border: 1px solid #ebeef5;
   transition: all 0.3s;
 }
 
-.vaccine-images .el-image:hover {
+.vaccine-image:hover {
   transform: scale(1.05);
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.image-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #409eff;
+}
+
+.image-error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: #f56c6c;
 }
 
 .no-vaccine {

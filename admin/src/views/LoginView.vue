@@ -54,10 +54,6 @@
         </el-form-item>
       </el-form>
     </div>
-    
-    <div class="login-footer">
-      <p>© {{ currentYear }} 宠物派 版权所有</p>
-    </div>
   </div>
 </template>
 

@@ -102,12 +102,6 @@
           </router-view>
         </el-main>
         
-        <!-- 页脚 -->
-        <el-footer>
-          <div class="footer-content">
-            <p>© {{ currentYear }} 宠物派 版权所有</p>
-          </div>
-        </el-footer>
       </el-container>
     </el-container>
   </div>
