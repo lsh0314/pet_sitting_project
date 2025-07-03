@@ -177,6 +177,11 @@ Page({
    */
   onTapSitter: function (e) {
     const sitterId = e.currentTarget.dataset.id;
+    const app = getApp();
+    
+    // 从首页推荐进入帮溜员详情页时，清空全局服务类型选择
+    // 这样用户可以选择该帮溜员提供的任何服务，而不受之前选择的服务类型限制
+    app.globalData.selectedServiceType = null;
     
     // 跳转到帮溜员详情页
     wx.navigateTo({
@@ -229,40 +234,7 @@ Page({
     }
   },
 
-  /**
-   * 导航到功能页面
-   */
-  navigateToFeature: function (e) {
-    const feature = e.currentTarget.dataset.feature;
-    
-    switch (feature) {
-      case 'subscribe':
-        // 关注公众号
-        wx.showToast({
-          title: '请扫描公众号二维码',
-          icon: 'none'
-        });
-        break;
-      case 'coupon':
-        // 储值优惠
-        if (app.globalData.isLoggedIn) {
-          wx.navigateTo({
-            url: '/pages/wallet/index'
-          });
-        } else {
-          wx.navigateTo({
-            url: '/pages/auth/index'
-          });
-        }
-        break;
-      case 'adoption':
-        // 宠物领养
-        wx.navigateTo({
-          url: '/pages/adoption/index'
-        });
-        break;
-    }
-  },
+
 
   /**
    * 打开位置选择器

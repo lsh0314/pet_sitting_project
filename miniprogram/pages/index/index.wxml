@@ -106,24 +106,5 @@
     </view>
   </view>
   
-  <!-- 功能区域 -->
-  <view class="features-container">
-    <view class="feature-item" bindtap="navigateToFeature" data-feature="subscribe">
-      <image class="feature-icon" src="/static/images/subscribe.png" mode="aspectFit"></image>
-      <view class="feature-title">关注公众号</view>
-      <view class="feature-desc">订阅最新活动</view>
-    </view>
-    
-    <view class="feature-item" bindtap="navigateToFeature" data-feature="coupon">
-      <image class="feature-icon" src="/static/images/coupon.png" mode="aspectFit"></image>
-      <view class="feature-title">储值优惠</view>
-      <view class="feature-desc">最高赠¥500</view>
-    </view>
-    
-    <view class="feature-item" bindtap="navigateToFeature" data-feature="adoption">
-      <image class="feature-icon" src="/static/images/adoption.png" mode="aspectFit"></image>
-      <view class="feature-title">宠物领养</view>
-      <view class="feature-desc">领养代替购买</view>
-    </view>
-  </view>
+
 </view> 

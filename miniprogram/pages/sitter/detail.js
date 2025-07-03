@@ -201,14 +201,23 @@ Page({
   onTapOrder: function () {
     if (!this.data.sitterInfo) return;
     
+    // 首先检查帮溜员是否提供任何服务
+    if (!this.data.sitterInfo.services || !Array.isArray(this.data.sitterInfo.services) || this.data.sitterInfo.services.length === 0) {
+      wx.showToast({
+        title: '该帮溜员暂未提供任何服务',
+        icon: 'none'
+      });
+      return;
+    }
+    
     // 从全局变量获取服务类型
     const app = getApp();
     const selectedServiceType = app.globalData.selectedServiceType;
     
     console.log('下单按钮点击，全局服务类型:', selectedServiceType);
     
-    // 检查帮溜员是否提供该服务类型
-    if (selectedServiceType && this.data.sitterInfo.services) {
+    // 只有当有指定服务类型时才检查该帮溜员是否提供该服务
+    if (selectedServiceType) {
       const hasService = this.data.sitterInfo.services.some(service => {
         const serviceType = service.type || service.service_type;
         return serviceType === selectedServiceType;
@@ -223,7 +232,7 @@ Page({
       }
     }
     
-    // 跳转到下单页面，传递帮溜员ID和服务类型
+    // 跳转到下单页面，传递帮溜员ID和服务类型（如果有）
     wx.navigateTo({
       url: `/pages/order/create?sitterId=${this.data.sitterId}${selectedServiceType ? '&serviceType=' + selectedServiceType : ''}`
     });
